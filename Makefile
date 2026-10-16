@@ -52,7 +52,7 @@ SRC = src/rg_alloc.c src/rg_graph.c src/rg_queue.c src/rg_stack.c \
       src/rg_traverse.c src/rg_analysis.c src/rg_fixture.c src/rg_svg.c
 
 TEST_SRC = tests/test_main.c tests/test_graph.c tests/test_traverse.c \
-           tests/test_analysis.c tests/test_fixture_ref.c
+           tests/test_analysis.c tests/test_fixture_ref.c tests/test_random.c
 
 OBJ = $(patsubst src/%.c,obj/%.o,$(SRC))
 TEST_OBJ = $(patsubst tests/%.c,obj/%.o,$(TEST_SRC))

@@ -81,9 +81,9 @@ void test_rg_fail_03(void) {
     rg_fixture_f1_campus(&g);
     int src = 0, dst = 10;
 
-    /* Disable e9, re-enable, then reset */
+    /* Disable e9 and e2 without manually re-enabling them, then call reset */
     rg_disable_edge_by_id(g, 9);
-    rg_enable_edge_by_id(g, 9);
+    rg_disable_edge_by_id(g, 2);
     rg_graph_reset(g);
 
     RgNetworkState baseline;

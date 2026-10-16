@@ -38,6 +38,7 @@ void test_rg_x_07(void);
 /* Metrics & Fixture Reference Tests */
 void test_rg_met_01(void);
 void test_rg_x_03(void);
+void test_rg_x_10_differential(void);
 
 int main(void) {
     printf("========================================================\n");
@@ -78,6 +79,9 @@ int main(void) {
     /* Metrics & Reference Counters */
     test_rg_met_01();
     test_rg_x_03();
+
+    /* Differential Testing against Independent Oracle */
+    test_rg_x_10_differential();
 
     printf("\n========================================================\n");
     printf("TEST RESULTS: %d Total | %d Passed | %d Failed\n",

@@ -1,0 +1,40 @@
+bin\rg_tests.exe
+========================================================
+RouteGuard Automated Test Suite (SRS v0.2 Traceable)
+ISO C11 Scope - CSC2101 Lecture 37 Academic Boundary
+========================================================
+
+Running RG-GR-01             ... [ PASS ]
+Running RG-GR-02             ... [ PASS ]
+Running RG-ERR-01            ... [ PASS ]
+Running RG-MEM-01            ... [ PASS ]
+Running RG-X-04              ... [ PASS ]
+Running RG-X-05              ... [ PASS ]
+Running RG-X-06              ... [ PASS ]
+Running RG-BFS-01            ... [ PASS ]
+Running RG-BFS-02            ... [ PASS ]
+Running RG-BFS-03            ... [ PASS ]
+Running RG-BFS-04            ... [ PASS ]
+Running RG-DFS-01            ... [ PASS ]
+Running RG-DFS-02            ... [ PASS ]
+Running RG-REP-01            ... [ PASS ]
+Running RG-REP-02            ... [ PASS ]
+Running RG-X-08              ... [ PASS ]
+Running RG-X-09              ... [ PASS ]
+Running RG-COMP-01           ... [ PASS ]
+Running RG-FAIL-01           ... [ PASS ]
+Running RG-FAIL-02           ... [ PASS ]
+Running RG-FAIL-03           ... [ PASS ]
+Running RG-X-01              ... [ PASS ]
+Running RG-X-02              ... [ PASS ]
+Running RG-X-07              ... [ PASS ]
+Running RG-MET-01            ... [ PASS ]
+Running RG-X-03              ... [ PASS ]
+Running RG-X-10              ... 
+  [Differential Oracle] Fixed LCG Seed = 20261017 | Target Graphs = 300
+  [Differential Oracle] Completed 300 graphs | 67574 total comparisons | 0 mismatches
+[ PASS ]
+
+========================================================
+TEST RESULTS: 27 Total | 27 Passed | 0 Failed
+========================================================

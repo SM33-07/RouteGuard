@@ -87,7 +87,8 @@ $testFiles = @(
     'tests/test_graph.c',
     'tests/test_traverse.c',
     'tests/test_analysis.c',
-    'tests/test_fixture_ref.c'
+    'tests/test_fixture_ref.c',
+    'tests/test_random.c'
 )
 
 Write-Host "Using compiler: $resolvedGcc" -ForegroundColor DarkGray

@@ -1,0 +1,1785 @@
+================================================================================
+RouteGuard CLI Robustness Test under AddressSanitizer & UndefinedBehaviorSanitizer
+Label: Linux container, NOT the Windows build
+Compiler: gcc (GCC) 14.4.0
+Flags: -std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
+Input Size: 10159 bytes
+================================================================================
+Welcome to RouteGuard (ISO C11 Network Connectivity Simulator)
+Educational Disclaimer: Synthetic campus network topology only.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Option not recognized. Please choose between 0 and 14.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Option not recognized. Please choose between 0 and 14.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Option not recognized. Please choose between 0 and 14.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Option not recognized. Please choose between 0 and 14.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Option not recognized. Please choose between 0 and 14.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Enter source vertex ID (0-11): Invalid source ID.
+Enter destination vertex ID (0-11): Invalid destination ID.
+Source set to 0 (Main Gate), Destination set to 10 (Medical Annex)
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Invalid input. Please enter a valid number.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Option not recognized. Please choose between 0 and 14.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Enter source vertex ID (0-11): Invalid source ID.
+Enter destination vertex ID (0-11): Invalid destination ID.
+Source set to 0 (Main Gate), Destination set to 10 (Medical Annex)
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Enter source vertex ID (0-11): Enter destination vertex ID (0-11): Source set to 0 (Main Gate), Destination set to 10 (Medical Annex)
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Enter edge ID to disable (0-12): Invalid edge ID.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Enter edge ID to disable (0-12): Invalid edge ID.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Enter edge ID to disable (0-12): Invalid edge ID.
+
+================ RouteGuard CLI ================
+Active Representation: Adjacency LIST [O(V+E)]
+1.  Display Graph Summary & Active Edges
+2.  Set Source and Destination Vertices
+3.  Run BFS Traversal
+4.  Run DFS Traversal
+5.  Find Shortest-Hop Route (BFS)
+6.  Check Reachability (DFS)
+7.  Count Connected Components
+8.  Disable an Edge (by ID)
+9.  Enable an Edge (by ID)
+10. Reset All Edges (Restore Baseline)
+11. Switch Representation (Matrix <-> List)
+12. Generate Single-Edge Failure Table
+13. Export Topology to SVG
+14. Display Complexity Analysis Notes
+0.  Quit
+Select an option [0-14]: Exiting RouteGuard. Goodbye!
+
+================================================================================
+CLI_EXIT_CODE=0
+ROBUSTNESS SUMMARY: Process completed without memory errors, undefined behaviour, or crashes.
+================================================================================

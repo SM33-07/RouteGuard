@@ -1,0 +1,46 @@
+================================================================================
+RouteGuard Mutation Analysis Results (10 Mutants Evaluated in Temp Copy)
+================================================================================
+Total Mutants: 10 | Killed: 3 | Survived: 7
+Kill Rate: 30.0%
+
+Mutant  1: BFS marks visited on dequeue instead of enqueue
+  Status: ERROR: Pattern not found
+  Killing Tests: Compile/Runtime error
+
+Mutant  2: Adjacency list built with head insertion (reverses neighbor order)
+  Status: ERROR: Pattern not found
+  Killing Tests: Compile/Runtime error
+
+Mutant  3: Route reconstruction omits the source vertex
+  Status: KILLED
+  Killing Tests: RG-BFS-04
+
+Mutant  4: disable_edge stops honoring active in list traversal
+  Status: ERROR: Pattern not found
+  Killing Tests: Compile/Runtime error
+
+Mutant  5: DFS marks visited on push instead of on pop
+  Status: ERROR: Pattern not found
+  Killing Tests: Compile/Runtime error
+
+Mutant  6: Component counting skips isolated vertices
+  Status: KILLED
+  Killing Tests: RG-X-07
+
+Mutant  7: rg_graph_reset fails to re-activate edges
+  Status: SURVIVED
+  Killing Tests: Compile/Runtime error
+
+Mutant  8: Duplicate-edge check removed
+  Status: SURVIVED
+  Killing Tests: Compile/Runtime error
+
+Mutant  9: Self-loop check removed
+  Status: KILLED
+  Killing Tests: RG-X-04
+
+Mutant 10: Matrix scan loop runs to n-1 instead of n (off-by-one)
+  Status: ERROR: Pattern not found
+  Killing Tests: Compile/Runtime error
+

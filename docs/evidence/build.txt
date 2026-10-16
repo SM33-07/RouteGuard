@@ -1,0 +1,23 @@
+C:/msys64/ucrt64/bin/mingw32-make.exe clean
+mingw32-make[1]: Entering directory 'C:/Soham/Coding/GitHub/RouteGuard'
+mingw32-make[1]: Leaving directory 'C:/Soham/Coding/GitHub/RouteGuard'
+C:/msys64/ucrt64/bin/mingw32-make.exe all CFLAGS="-std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude"
+mingw32-make[1]: Entering directory 'C:/Soham/Coding/GitHub/RouteGuard'
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_alloc.c -o obj/rg_alloc.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_graph.c -o obj/rg_graph.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_queue.c -o obj/rg_queue.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_stack.c -o obj/rg_stack.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_traverse.c -o obj/rg_traverse.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_analysis.c -o obj/rg_analysis.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_fixture.c -o obj/rg_fixture.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_svg.c -o obj/rg_svg.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/main.c -o obj/main.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/routeguard.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/main.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_main.c -o obj/test_main.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_graph.c -o obj/test_graph.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_traverse.c -o obj/test_traverse.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_analysis.c -o obj/test_analysis.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_fixture_ref.c -o obj/test_fixture_ref.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_random.c -o obj/test_random.o
+C:/msys64/ucrt64/bin/gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/rg_tests.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/test_main.o obj/test_graph.o obj/test_traverse.o obj/test_analysis.o obj/test_fixture_ref.o obj/test_random.o
+mingw32-make[1]: Leaving directory 'C:/Soham/Coding/GitHub/RouteGuard'
