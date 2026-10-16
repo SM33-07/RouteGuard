@@ -1,0 +1,27 @@
+ROUTEGUARD — REPOSITORY SETUP
+
+Repository name: RouteGuard
+
+Suggested description (under 350 characters):
+C11 graph-based route discovery and network connectivity simulator. Uses adjacency matrices/lists, BFS for minimum-hop paths in an unweighted graph, DFS reachability, and simulated edge closures, aligned to CSC2101 DSA topics through Lecture 37.
+
+Recommended initial GitHub settings:
+- Owner: choose the correct personal/organization owner.
+- Visibility: Public if you want faculty and portfolio reviewers to open the repository; otherwise Private and ensure evaluator access is granted.
+- Add README: ON.
+- .gitignore: C template is a good starting point; add editor/temp artifacts if needed. If a React frontend is added, also exclude node_modules/, .next/, out/, and local environment files.
+- License: MIT only if you are comfortable permitting reuse and modification under its terms; otherwise leave the license unset until confirmed.
+
+Project constraints:
+- The graph algorithm engine is written in ISO C11, not C++.
+- Keep graph topics within the CSC2101 Lecture 37 boundary.
+- Core graph scope: graph representations, BFS, DFS, reachability, BFS minimum-hop route in an unweighted graph, connected components derived from traversal, and edge-failure simulation through repeated traversal.
+- Do not include Dijkstra, A*, greedy shortest-path, heap-based path finding, low-link bridge/articulation algorithms, or other out-of-bound algorithms unless the course instructor explicitly approves an expansion.
+- The graph data and labels are synthetic. No real emergency/navigation use is claimed.
+
+After creating the repository:
+1. Confirm the local target folder is empty or preserve any existing work.
+2. Add the corrected SRS and project docs.
+3. Implement and test the C11 graph engine before building the UI.
+4. Document only the build/run commands that were actually tested.
+5. Review git status/diff, then commit and push to the intended remote.
