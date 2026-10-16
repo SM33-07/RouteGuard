@@ -1,11 +1,16 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('all', 'strict', 'test', 'demo', 'demo-check', 'clean')]
+    [ValidateSet('all', 'strict', 'test', 'demo', 'demo-check', 'clean', 'wasm')]
     [string]$Target = 'all',
     [string]$OptLevel = ''
 )
 
 $ErrorActionPreference = 'Stop'
+
+if ($Target -eq 'wasm') {
+    & "$PSScriptRoot\build_wasm.ps1"
+    exit $LASTEXITCODE
+}
 
 # Precedence for compiler discovery:
 # 1. RG_GCC_DIR, if explicitly set and valid. Prepend to PATH for this process and child processes.
@@ -69,6 +74,11 @@ if ($Target -eq 'clean') {
     exit 0
 }
 
+if ($Target -eq 'wasm') {
+    & "$PSScriptRoot\build_wasm.ps1"
+    exit $LASTEXITCODE
+}
+
 Ensure-Dirs
 
 $srcFiles = @(
@@ -79,7 +89,8 @@ $srcFiles = @(
     'src/rg_traverse.c',
     'src/rg_analysis.c',
     'src/rg_fixture.c',
-    'src/rg_svg.c'
+    'src/rg_svg.c',
+    'src/rg_wasm_bridge.c'
 )
 
 $testFiles = @(
@@ -88,7 +99,8 @@ $testFiles = @(
     'tests/test_traverse.c',
     'tests/test_analysis.c',
     'tests/test_fixture_ref.c',
-    'tests/test_random.c'
+    'tests/test_random.c',
+    'tests/test_bridge.c'
 )
 
 Write-Host "Using compiler: $resolvedGcc" -ForegroundColor DarkGray

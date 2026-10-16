@@ -39,6 +39,7 @@ void test_rg_x_07(void);
 void test_rg_met_01(void);
 void test_rg_x_03(void);
 void test_rg_x_10_differential(void);
+void test_rg_x_11_wasm_bridge(void);
 
 int main(void) {
     printf("========================================================\n");
@@ -82,6 +83,9 @@ int main(void) {
 
     /* Differential Testing against Independent Oracle */
     test_rg_x_10_differential();
+
+    /* WebAssembly Bridge Contract Test */
+    test_rg_x_11_wasm_bridge();
 
     printf("\n========================================================\n");
     printf("TEST RESULTS: %d Total | %d Passed | %d Failed\n",
