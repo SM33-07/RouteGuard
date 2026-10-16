@@ -146,10 +146,13 @@ function DFS(graph, src):
 ### Decisions
 1. **Sorted Adjacency List Insertion**: Insert new neighbors into `adj_list[u]` in strictly ascending order of neighbor ID via sorted pointer traversal. This ensures matrix and list traversals discover neighbors in identical order without sorting at traversal time.
 2. **Canonical Active Flag**: Active state resides exclusively in `edges[id].active`. Matrix and list structures only store `edge_id`.
-3. **Dual Build Driver Architecture**: Native Windows PowerShell script (`build.ps1`) and standard `Makefile` for `mingw32-make`, both observing `RG_GCC_DIR` precedence.
+3. **Cross-Platform OS-Aware Build System**: The `Makefile` dynamically branches on `ifeq ($(OS),Windows_NT)` to select Windows native shell commands (`cmd.exe /c`, `del /q`, `rmdir /s /q`, `fc /b`) or POSIX commands (`mkdir -p`, `rm -rf`, `cmp -s`), verified on both Windows MinGW and Linux `gcc:14`.
+4. **Independent Differential Testing Oracle**: Rather than testing against another student's codebase or an out-of-scope third-party library, an independent oracle based on the Bellman-Ford/FIFO unweighted relaxation principle and multi-pass label propagation was implemented in `tests/test_random.c` (evaluating 300 random graphs with fixed seed `20261017`).
 
 ### Conflicts & Discrepancies
 - **Prompt vs SRS Test-ID Meaning**: Prompt A originally listed test IDs with different assignments (e.g. `RG-FAIL-01` as generic toggle idempotency). In accordance with the project instructions, **SRS v0.2 Section 10 is authoritative**. `RG-FAIL-01` strictly tests disabling critical connecting edge `e9`, `RG-FAIL-02` tests redundant edge `e5`, and `RG-FAIL-03` tests re-enable and reset. Generic toggle tests are assigned to `RG-X-01` and `RG-X-02`.
+- **Web Interface Scope (`FR-029` — `FR-033`, `AC-010`)**: SRS v0.2 Section 3.5 specifies web-based presentation conditionally: *"If a web interface is delivered..."* (FR-029). In alignment with the academic boundary (pure ISO C11 terminal program for CSC2101/CSC2130), `FR-029` through `FR-033` and `AC-010` are classified as **Deferred**. Core user interaction and visualization are delivered natively via the terminal CLI (`src/main.c`) and pure C11 SVG export (`src/rg_svg.c`).
+- **Post-Failure Requirements (`FR-034` — `FR-040`)**: Unlike the web-specific clauses, `FR-034` (robust errors without crashing), `FR-035` (synthetic disclosure), `FR-036` (deterministic fixtures), `FR-037` (unit tests), `FR-038` (cross-representation parity), `FR-039` (regression harness), and `FR-040` (accurate README) apply directly to the C engine and are fully implemented and verified.
 
 ---
 
@@ -165,22 +168,19 @@ function DFS(graph, src):
   - `.\build.ps1 -OptLevel -O0 -Target test`
   - `$env:RG_OPT = "-O0"; .\build.ps1 -Target test`
 
-### Shell Robustness
-- In `Makefile`, `SHELL := $(COMSPEC)` (or `cmd.exe`) is enforced on Windows NT. This ensures `mingw32-make` recipes execute correctly even if MSYS2 `usr\bin` (containing `sh.exe`) is on `PATH`.
-
-### Explicit List of UNTESTED Items & Portable Sanitizer Verification
+### Explicit List of UNTESTED Items & Verification Status
 In strict compliance with academic and verification honesty standards:
-1. **Dynamic Memory Sanitizers (AddressSanitizer & UndefinedBehaviorSanitizer)**:
-   - **Native Windows MinGW Host**: **UNTESTED** on native Windows MinGW GCC host due to missing `libasan` and `libubsan` static/shared runtime libraries (exit code 1 on linking; raw diagnostics in `docs/evidence/env.txt`). Internal allocation tracking wrapper (`rg_alloc.c`) asserts active allocation balance `rg_alloc_active_count() == 0` across all test suites, and dynamic fault injection validates out-of-memory graceful recovery.
-   - **Linux Container Verification (Official GCC 14.4.0)**: Executed under `-std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all` inside an official Docker Linux container (`gcc:14`, digest `sha256:6f37e44a9b41181de5dd97366ec732652f5d895a72b5549c64694efed50a97e8`). Verified deliberate-fault detection (heap overflow, signed overflow, and memory leak) and executed the full test suite (26/26 pass) and demo cleanly with zero sanitizer errors and zero leaks. **Note: This checks the portable ISO C11 logic, NOT Windows-specific runtime behaviour.** Full raw log is recorded in `docs/evidence/sanitizer_linux_container.txt`.
-2. **XML Schema / Well-Formedness Validation via `xmllint`**:
+1. **Dynamic Memory Sanitizers on Native Windows MinGW Host**:
+   - **Status**: **UNTESTED** on native Windows MinGW GCC host due to missing `libasan` and `libubsan` static/shared runtime libraries (exit code 1 on linking; raw diagnostics in `docs/evidence/env.txt`). Internal allocation tracking wrapper (`rg_alloc.c`) asserts active allocation balance `rg_alloc_active_count() == 0` across all test suites, and dynamic fault injection validates out-of-memory graceful recovery.
+   - **Linux Container Verification (Official GCC 14.4.0)**: Executed under `-std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all` inside an official Docker Linux container (`gcc:14`, digest `sha256:6f37e44a9b41181de5dd97366ec732652f5d895a72b5549c64694efed50a97e8`). Verified deliberate-fault detection (heap overflow, signed overflow, and memory leak) and executed the full test suite (27/27 pass) and demo cleanly with zero sanitizer errors and zero leaks. Raw log is recorded in `docs/evidence/sanitizer_linux_container.txt`.
+2. **Interactive CLI Robustness under Sanitizer**:
+   - **Status**: **VERIFIED** in Linux container under `-fsanitize=address,undefined`. Input stream fed 5,000-character lines, non-numeric strings, negative numbers, empty lines, EOF, integer overflow (`99999999999999999999`), and invalid menu choices. The CLI handled every malformed input gracefully with readable error messages and exited cleanly with returncode 0 (`docs/evidence/cli_malformed_input.txt`).
+3. **XML Schema / Well-Formedness Validation via `xmllint`**:
    - **Status**: **UNTESTED** via `xmllint`.
    - **Reason**: The `xmllint` executable is not installed on the host environment.
    - **Mitigation**: SVG generation uses deterministic, strict `fprintf` format strings matching the exact SVG 1.1 XML specification.
-3. **Browser Visual Rendering of SVG Outputs**:
+4. **Browser Visual Rendering of SVG Outputs**:
    - **Status**: **UNTESTED** programmatically.
    - **Reason**: RouteGuard is a purely terminal-based ISO C11 educational application; headless browser automation is outside the C11 academic scope.
-4. **Web Presentation / WebAssembly**:
-   - **Status**: **UNTESTED** (scope deferred per Section 0 rules).
-
-
+5. **Web Presentation / WebAssembly (`FR-029` — `FR-033`, `AC-010`)**:
+   - **Status**: **UNTESTED** / **Deferred** (optional web UI outside C11 scope).

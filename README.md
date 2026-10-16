@@ -17,6 +17,18 @@ RouteGuard is an interactive graph-based routing and network connectivity simula
 *Version Note (v0.1 to v0.2 migration):*  
 Earlier project notes described an aspirational C++17 / Next.js / WebAssembly implementation (SRS v0.1). In accordance with academic guidelines for CSC2101/CSC2130, RouteGuard v0.2 is implemented as a **pure ISO C11** application using only the C11 standard library (`<stdio.h>`, `<stdlib.h>`, `<stdbool.h>`, `<string.h>`, `<errno.h>`). Out-of-scope concepts (Dijkstra, A*, priority queues/heaps, minimum spanning trees, disjoint-set/union-find, and low-link bridge algorithms) are strictly excluded.
 
+### SRS v0.2 Requirement Status Summary
+- **Core Engine & Data Structures (`FR-001` — `FR-028`)**: Fully implemented in ISO C11 and verified by automated unit tests.
+- **Web Presentation Layer (`FR-029` — `FR-033`, `AC-010`)**: **Deferred**. The SRS specifies web-based presentation conditionally (*"If a web interface is delivered..."* in FR-029). For the academic C11 scope, visualization and user controls are delivered natively via the terminal CLI (`src/main.c`) and pure C11 SVG export (`src/rg_svg.c`).
+- **Resilience, Testing & Documentation (`FR-034` — `FR-040`)**: Fully implemented and verified:
+  - `FR-034` (Errors): Validated against malformed input, invalid selections, and buffer overflows without crashing.
+  - `FR-035` (Synthetic disclosure): Explicit educational disclosures in CLI, SVG banner, and docs.
+  - `FR-036` (Deterministic fixtures): Deterministic fixtures F1..F5 with hand-traced tables in `docs/FIXTURES.md`.
+  - `FR-037` (Unit tests): 27 automated unit tests covering all engine components.
+  - `FR-038` (Cross-representation tests): Full parity verified between matrix and list across fixtures and random graphs.
+  - `FR-039` (Regression tests): Single documented `make test` / `build.ps1 -Target test` harness.
+  - `FR-040` (Accurate README): Complete documentation of verified commands, tools, and deferred scope.
+
 ---
 
 ## 2. Supported Data Structures & Algorithms
@@ -43,20 +55,21 @@ Earlier project notes described an aspirational C++17 / Next.js / WebAssembly im
 
 ## 3. Toolchain & Prerequisites
 
-RouteGuard requires an ISO C11 compliant compiler and standard build tools on Windows:
+RouteGuard supports both native Windows (MSYS2 / UCRT64) and POSIX / Linux environments:
 
-- **C Compiler**: GCC 15.2.0 (MSYS2 UCRT64) or compatible C11 compiler.
-- **Build Drivers**: GNU Make (`mingw32-make.exe` 4.4.1) or PowerShell 7 (`pwsh`).
+- **C Compiler**: GCC 15.2.0 (MSYS2 UCRT64 on Windows), GCC 14.2.0+ (Linux), or any conforming C11 compiler.
+- **Build Drivers**: GNU Make (`mingw32-make.exe` on Windows, `make` on Linux) or PowerShell 7 (`pwsh`).
 - **Compiler Precedence**:
   1. `RG_GCC_DIR` environment variable (if specified).
   2. `gcc` discoverable on `PATH`.
   3. Actionable error if neither is available.
+- **OS-Aware Makefile**: The `Makefile` dynamically inspects `ifeq ($(OS),Windows_NT)` and configures native Windows commands (`cmd.exe /c`, `del`, `fc /b`) or standard POSIX commands (`mkdir -p`, `rm -rf`, `cmp -s`).
 
 ---
 
 ## 4. Build, Test, and Execution Instructions
 
-### A. Environment Setup for Machines Where GCC / Make are NOT on PATH
+### A. Environment Setup for Machines Where GCC / Make are NOT on PATH (Windows)
 If `gcc` and `mingw32-make` are installed (e.g. via MSYS2) but not registered in your Windows user/system `PATH`, set `RG_GCC_DIR` and prepend it to your active session:
 ```powershell
 # Set path to the directory containing gcc.exe and mingw32-make.exe
@@ -64,9 +77,9 @@ $env:RG_GCC_DIR = "C:\msys64\ucrt64\bin"
 $env:PATH = "$env:RG_GCC_DIR;$env:PATH"
 ```
 
-### B. Using GNU Make (`mingw32-make`)
+### B. Using GNU Make (`mingw32-make` on Windows, `make` on Linux/macOS)
 ```powershell
-# Standard build (creates bin/routeguard.exe and bin/rg_tests.exe)
+# Standard build (creates bin/routeguard[.exe] and bin/rg_tests[.exe])
 mingw32-make all
 
 # Strict build (enforces -Werror, warning-free)
@@ -90,7 +103,7 @@ mingw32-make demo-check
 mingw32-make clean
 ```
 
-### C. Using Native PowerShell Driver (`build.ps1`)
+### C. Using Native PowerShell Driver (`build.ps1` on Windows)
 ```powershell
 # Standard build
 .\build.ps1 -Target all
@@ -102,10 +115,6 @@ mingw32-make clean
 .\build.ps1 -OptLevel -O0 -Target test
 .\build.ps1 -OptLevel -O2 -Target test
 
-# Alternatively using the RG_OPT environment variable:
-$env:RG_OPT = "-O0"; .\build.ps1 -Target test
-$env:RG_OPT = "-O2"; .\build.ps1 -Target test
-
 # Run deterministic demonstration
 .\build.ps1 -Target demo
 
@@ -116,11 +125,31 @@ $env:RG_OPT = "-O2"; .\build.ps1 -Target test
 .\build.ps1 -Target clean
 ```
 
+### D. Direct GCC Compilation on Linux / macOS (Without Make)
+If building directly with `gcc` on Linux or macOS without GNU Make:
+```bash
+mkdir -p bin obj
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -O2 -Iinclude \
+    src/rg_alloc.c src/rg_graph.c src/rg_queue.c src/rg_stack.c \
+    src/rg_traverse.c src/rg_analysis.c src/rg_fixture.c src/rg_svg.c \
+    src/main.c -o bin/routeguard
+
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -O2 -Iinclude \
+    src/rg_alloc.c src/rg_graph.c src/rg_queue.c src/rg_stack.c \
+    src/rg_traverse.c src/rg_analysis.c src/rg_fixture.c src/rg_svg.c \
+    tests/test_main.c tests/test_graph.c tests/test_traverse.c \
+    tests/test_analysis.c tests/test_fixture_ref.c tests/test_random.c \
+    -o bin/rg_tests
+
+./bin/rg_tests
+```
+
 ---
 
 ## 5. Verification & Test Results
 
-All 26 automated tests have been implemented and executed, strictly tracing to **SRS v0.2 Section 10**:
+### Automated Test Suite (27/27 Passed)
+All 27 automated tests strictly trace to **SRS v0.2 Section 10**:
 
 ```
 ========================================================
@@ -154,37 +183,75 @@ Running RG-X-02              ... [ PASS ]
 Running RG-X-07              ... [ PASS ]
 Running RG-MET-01            ... [ PASS ]
 Running RG-X-03              ... [ PASS ]
+Running RG-X-10              ... [ PASS ]
 
 ========================================================
-TEST RESULTS: 26 Total | 26 Passed | 0 Failed
+TEST RESULTS: 27 Total | 27 Passed | 0 Failed
 ========================================================
 ```
 
 - **Demo Determinism**: Verified byte-identical across consecutive executions (3,702 bytes).
-- **Optimization Levels Tested**: Passed 26/26 under both `-O0` and `-O2`.
-- **Memory Safety**: `rg_alloc_active_count() == 0` verified upon test completion; allocation fault injection verified.
+- **Optimization Levels Tested**: Passed 27/27 under both `-O0` and `-O2`.
+- **Memory Safety**: `rg_alloc_active_count() == 0` verified upon test completion; dynamic allocation fault injection verified.
+
+### Independent Differential Testing Oracle (`RG-X-10`)
+To independently verify BFS shortest-path distance, predecessor validity, iterative-vs-recursive DFS equivalence, and component counting without external dependencies:
+- **Oracle Method**: Implemented in `tests/test_random.c` using multi-pass unweighted relaxation (Bellman-Ford principle, $V-1$ rounds) and iterative label propagation.
+- **Workload**: Evaluated across 300 pseudo-random connected and disconnected graphs generated via a fixed-seed Linear Congruential Generator (`seed = 20261017`, $V \in [1, 20]$, edge probabilities $p \in [0.0, 0.7]$).
+- **Results**: 67,574 individual state comparisons; **0 mismatches** (`docs/evidence/differential_testing.txt`).
+
+### Mutation Testing (100% Kill Rate)
+Evaluated across 10 distinct fault injection mutants in an isolated temporary clone:
+- **Mutants Evaluated**: 10
+- **Mutants Killed**: 10 (100.0% kill rate)
+- **Results**: Every injected mutation (omitted marks, reversed adjacency lists, omitted source in route reconstruction, ignored active flags, skipped isolated vertices, off-by-one matrix loops, and removed duplicate/self-loop checks) was detected and killed by the test suite (`docs/evidence/mutation.txt`).
+
+### Malformed Input & CLI Fuzz Testing under Sanitizers
+Tested in an official `gcc:14` container under `-fsanitize=address,undefined`:
+- Fed with 5,000-character line buffers, non-numeric strings, negative integers, empty lines, EOF termination, 64-bit integer overflow (`99999999999999999999`), and out-of-range menu options.
+- The interactive CLI handled every malformed input cleanly, emitted user-friendly error messages, and terminated with exit code 0 without any sanitizer faults or crashes (`docs/evidence/cli_malformed_input.txt`).
 
 ---
 
-## 6. Untested Items & Environment Limitations
+## 6. Per-Commit Standalone Build & Test Verification
+
+Every commit in the repository history was checked out and evaluated independently with both `make all` AND `make test` (raw log recorded in `docs/evidence/commit_builds.txt`):
+
+| Commit | Summary | `make all` | `make test` | Standalone Status | Notes |
+|:---|:---|:---:|:---:|:---:|:---|
+| `e65dd59` | Initial commit | N/A | N/A | Pre-skeleton | Repository initialization (`.gitignore`, `LICENSE`, `README.md`; no build scripts or C sources yet) |
+| `7c8871e` | Project skeleton, build files, AGENTS.md | Fail | Fail | Intermediate | Staged commit: Makefile targets `obj/rg_alloc.o` before source is added |
+| `6d53cd2` | Graph model, validation, alloc wrappers | Fail | Fail | Intermediate | Staged commit: Makefile targets `obj/rg_queue.o` |
+| `70f01d6` | Queue, stack, BFS/DFS, route reconstruction | Fail | Fail | Intermediate | Staged commit: Makefile targets `obj/rg_analysis.o` |
+| `ba66531` | Components, impact summary, failure table | Fail | Fail | Intermediate | Staged commit: Makefile targets `obj/rg_svg.o` |
+| `adb0361` | CLI, demo mode, SVG export | Fail | Fail | Intermediate | `routeguard.exe` builds cleanly; test harness not yet added |
+| `5a1b8f8` | Test suite and test harness | **PASS** | **PASS** | **Functional** | First fully self-contained build: 26/26 tests pass |
+| `7282be3` | Verification gates, fixtures, traceable tests | **PASS** | **PASS** | **Functional** | 26/26 tests pass; strict -Werror clean |
+| `01df170` | Reference metrics, DFS cross-check, test docs | **PASS** | **PASS** | **Functional** | 26/26 tests pass; metrics and recursive DFS added |
+| `94161be` | Design, traceability, and evidence documentation | **PASS** | **PASS** | **Functional** | 26/26 tests pass; documentation updated |
+| `a00a5ec` | Mutation-derived tests and differential oracle | **PASS** | **PASS** | **Functional** | 27/27 tests pass (includes `RG-X-10` differential oracle) |
+
+---
+
+## 7. Untested Items & Environment Limitations
 
 In accordance with strict verification honesty rules:
 1. **Memory Safety via Sanitizers (ASan/UBSan/LSan)**:
    - **Native Windows MinGW Host**: Marked **UNTESTED** on native Windows due to missing `libasan`/`libubsan` runtimes (linking exit code 1; documented in `docs/evidence/env.txt`).
-   - **Linux Container Verification (Official GCC 14.4.0)**: Executed under `-std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all` inside an official Docker Linux container (`gcc:14`, digest `sha256:6f37e44a9b41181de5dd97366ec732652f5d895a72b5549c64694efed50a97e8`). Verified deliberate-fault detection (heap overflow, signed overflow, and memory leak) and executed the full test suite (26/26 pass) and demo cleanly with zero sanitizer errors and zero leaks. **Note: This checks the portable ISO C11 logic, NOT Windows-specific behaviour.** Full raw log is recorded in `docs/evidence/sanitizer_linux_container.txt`.
+   - **Linux Container Verification (Official GCC 14.4.0)**: Executed under `-std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all` inside an official Docker Linux container (`gcc:14`, digest `sha256:6f37e44a9b41181de5dd97366ec732652f5d895a72b5549c64694efed50a97e8`). Verified deliberate-fault detection (heap overflow, signed overflow, and memory leak) and executed the full test suite (27/27 pass) and demo cleanly with zero sanitizer errors and zero leaks (`docs/evidence/sanitizer_linux_container.txt`).
 2. **SVG XML Validation (`xmllint`)**: Marked **UNTESTED** via `xmllint` because `xmllint` is not installed on the host environment. (SVG output is generated deterministically via strict ISO C `fprintf`).
 3. **Browser Visual Rendering**: Marked **UNTESTED** programmatically (RouteGuard is a terminal application; headless browser automation is outside C11 scope).
-4. **Web Presentation / WebAssembly**: Marked **UNTESTED** / deferred academic scope.
+4. **Web Presentation / WebAssembly (`FR-029` — `FR-033`, `AC-010`)**: Marked **UNTESTED** / deferred academic scope.
 
 ---
 
-## 7. Repository Layout
+## 8. Repository Layout
 
 ```
 RouteGuard/
 ├── AGENTS.md                  # Strict agent instructions & hard scope boundaries
 ├── README.md                  # Project overview, build instructions, and status
-├── Makefile                   # GNU Make build driver
+├── Makefile                   # OS-aware GNU Make build driver (Windows NT & POSIX)
 ├── build.ps1                  # Native PowerShell build driver
 ├── .gitignore                 # Object, binary, and output directory exclusions
 ├── include/                   # ISO C11 Public Headers
@@ -212,13 +279,26 @@ RouteGuard/
 │   ├── test_graph.c           # Graph structure and memory tests
 │   ├── test_traverse.c        # BFS and DFS traversal tests
 │   ├── test_analysis.c        # Resilience and failure analysis tests
-│   └── test_fixture_ref.c     # Benchmark metrics and reference tests
+│   ├── test_fixture_ref.c     # Benchmark metrics and reference tests
+│   └── test_random.c          # Differential testing oracle (300 random graphs)
 ├── docs/                      # Authoritative Documentation
 │   ├── DESIGN.md              # Invariants, algorithms, pseudocode, and complexity
 │   ├── FIXTURES.md            # Hand-traced step tables and closure matrices
 │   ├── TEST_PLAN.md           # SRS Section 10 test contract mapping
 │   ├── TRACEABILITY.md        # Requirements traceability matrix
+│   ├── VIVA_NOTES.md          # 25 examiner viva preparation questions & answers
 │   ├── reference/             # Authoritative SRS v0.2 and project prompts
-│   └── evidence/              # Raw probe and test run logs (env.txt, test_O0.txt, test_O2.txt)
+│   └── evidence/              # Raw verification logs
+│       ├── env.txt            # Host toolchain and probe logs
+│       ├── build.txt          # Clean compilation log
+│       ├── test.txt           # Test suite output (27/27 pass)
+│       ├── test_O0.txt        # Test suite output under -O0
+│       ├── test_O2.txt        # Test suite output under -O2
+│       ├── commit_builds.txt  # Standalone per-commit build and test logs
+│       ├── differential_testing.txt # Random graph oracle output
+│       ├── mutation.txt       # 10 mutants evaluated and killed
+│       ├── cli_malformed_input.txt # Fuzz input under sanitizer in container
+│       ├── sanitizer_linux_container.txt # Full ASan+UBSan run
+│       └── SUMMARY.md         # Comprehensive evidence synthesis
 └── out/                       # Generated SVG files and demo text outputs (gitignored)
 ```

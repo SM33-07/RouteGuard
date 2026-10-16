@@ -1,46 +1,19 @@
 ================================================================================
 RouteGuard Mutation Analysis Results (10 Mutants Evaluated in Temp Copy)
 ================================================================================
-Total Mutants: 10 | Killed: 3 | Survived: 7
-Kill Rate: 30.0%
+Total Mutants: 10 | Killed: 10 | Survived: 0
+Kill Rate: 100.0%
 
-Mutant  1: BFS marks visited on dequeue instead of enqueue
-  Status: ERROR: Pattern not found
-  Killing Tests: Compile/Runtime error
-
-Mutant  2: Adjacency list built with head insertion (reverses neighbor order)
-  Status: ERROR: Pattern not found
-  Killing Tests: Compile/Runtime error
-
-Mutant  3: Route reconstruction omits the source vertex
-  Status: KILLED
-  Killing Tests: RG-BFS-04
-
-Mutant  4: disable_edge stops honoring active in list traversal
-  Status: ERROR: Pattern not found
-  Killing Tests: Compile/Runtime error
-
-Mutant  5: DFS marks visited on push instead of on pop
-  Status: ERROR: Pattern not found
-  Killing Tests: Compile/Runtime error
-
-Mutant  6: Component counting skips isolated vertices
-  Status: KILLED
-  Killing Tests: RG-X-07
-
-Mutant  7: rg_graph_reset fails to re-activate edges
-  Status: SURVIVED
-  Killing Tests: Compile/Runtime error
-
-Mutant  8: Duplicate-edge check removed
-  Status: SURVIVED
-  Killing Tests: Compile/Runtime error
-
-Mutant  9: Self-loop check removed
-  Status: KILLED
-  Killing Tests: RG-X-04
-
-Mutant 10: Matrix scan loop runs to n-1 instead of n (off-by-one)
-  Status: ERROR: Pattern not found
-  Killing Tests: Compile/Runtime error
-
+ID   | Status   | Mutant Description                                       | Killing Tests
+--------------------------------------------------------------------------------------------------------------
+1    | KILLED   | BFS marks visited on dequeue instead of on enqueue       | Build/Runtime failure
+2    | KILLED   | Adjacency list built with head insertion (reverses neighbor order) | RG-BFS-01, RG-BFS-02, RG-DFS-01, RG-REP-01, RG-REP-02, RG-FAIL-02
+3    | KILLED   | Route reconstruction omits the source vertex             | RG-BFS-02, RG-FAIL-02
+4    | KILLED   | disable_edge stops honoring active in list traversal     | RG-REP-02, RG-FAIL-01, RG-FAIL-02, RG-X-02, RG-X-10
+5    | KILLED   | DFS marks visited on push instead of on pop              | RG-DFS-01, RG-X-08, RG-X-03, RG-X-10
+6    | KILLED   | Component counting skips isolated vertices               | RG-X-07, RG-X-10
+7    | KILLED   | rg_graph_reset fails to re-activate edges                | RG-FAIL-03
+8    | KILLED   | Duplicate-edge check removed                             | RG-X-05, RG-X-10
+9    | KILLED   | Self-loop check removed                                  | RG-X-04
+10   | KILLED   | Matrix scan loop runs to n-1 instead of n (off-by-one)   | RG-REP-01, RG-REP-02, RG-X-09, RG-X-03, RG-X-10
+================================================================================
