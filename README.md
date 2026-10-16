@@ -75,9 +75,10 @@ mingw32-make strict
 # Run automated test suite (default optimization: -O2)
 mingw32-make test
 
-# Configurable optimization level via RG_OPT (e.g. -O0 or -O2)
+# Configurable optimization level via RG_OPT (e.g. -O0 or -O2; OPT is supported as an alias)
 mingw32-make test RG_OPT=-O0
 mingw32-make test RG_OPT=-O2
+mingw32-make test OPT=-O2
 
 # Run interactive CLI
 mingw32-make demo
@@ -165,12 +166,13 @@ TEST RESULTS: 26 Total | 26 Passed | 0 Failed
 
 ---
 
-## 6. Environment Limitations & Raw Evidence
+## 6. Untested Items & Environment Limitations
 
 In accordance with strict verification honesty rules:
-1. **AddressSanitizer / UndefinedBehaviorSanitizer**: Marked **UNAVAILABLE / UNTESTED** on native Windows MinGW GCC due to missing `libasan`/`libubsan` runtimes. Raw diagnostics recorded in `docs/evidence/env.txt`.
-2. **SVG XML Validation**: `xmllint` is not installed on the host system; SVG files are generated via pure standard C `fprintf` and marked **UNCHECKED via xmllint**.
-3. **Browser Rendering**: Browser rendering is outside the C11 testing scope and is not verified programmatically.
+1. **Memory Safety via Sanitizers (ASan/UBSan)**: Marked **UNTESTED** on native Windows MinGW GCC host due to missing `libasan`/`libubsan` runtimes. (Internal allocation tracking in `rg_alloc.c` verified 0 leaks; fault injection verified).
+2. **SVG XML Validation (`xmllint`)**: Marked **UNTESTED** via `xmllint` because `xmllint` is not installed on the host environment. (SVG output is generated deterministically via strict ISO C `fprintf`).
+3. **Browser Visual Rendering**: Marked **UNTESTED** programmatically (RouteGuard is a terminal application; headless browser automation is outside C11 scope).
+4. **Web Presentation / WebAssembly**: Marked **UNTESTED** / deferred academic scope. Raw diagnostics and logs are recorded in `docs/evidence/env.txt`.
 
 ---
 

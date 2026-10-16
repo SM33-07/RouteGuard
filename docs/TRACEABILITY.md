@@ -35,3 +35,13 @@ This matrix traces every functional and non-functional requirement from **SRS v0
 | `NFR-004` | Deterministic Output | Strict tie-breaking (ascending neighbor discovery); byte-identical demo runs | `demo-check` (3702 bytes) | **Tested** |
 | `NFR-005` | Synthetic Data Integrity | Explicit educational disclaimers in CLI, demo header, and SVG banner | `main.c`, `rg_svg.c` | **Tested** |
 | `NFR-006` | Portable Toolchain | Compiler selection precedence (`RG_GCC_DIR` -> `PATH`); no hard-coded machine paths | `Makefile`, `build.ps1` | **Tested** |
+
+---
+
+## 3. Untested Items & Explicit Exclusions
+
+1. **ASan & UBSan Dynamic Sanitizers**: **UNTESTED** on native Windows MinGW GCC host due to missing toolchain runtime libraries `libasan`/`libubsan`.
+2. **SVG XML Validation via `xmllint`**: **UNTESTED** due to tool absence.
+3. **Browser Visual Rendering of SVGs**: **UNTESTED** programmatically (RouteGuard is an ISO C11 terminal application).
+4. **Web Presentation / WebAssembly (`FR-035` - `FR-040`)**: **UNTESTED** (scope deferred).
+

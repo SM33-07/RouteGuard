@@ -150,3 +150,37 @@ function DFS(graph, src):
 
 ### Conflicts & Discrepancies
 - **Prompt vs SRS Test-ID Meaning**: Prompt A originally listed test IDs with different assignments (e.g. `RG-FAIL-01` as generic toggle idempotency). In accordance with the project instructions, **SRS v0.2 Section 10 is authoritative**. `RG-FAIL-01` strictly tests disabling critical connecting edge `e9`, `RG-FAIL-02` tests redundant edge `e5`, and `RG-FAIL-03` tests re-enable and reset. Generic toggle tests are assigned to `RG-X-01` and `RG-X-02`.
+
+---
+
+## 8. Build Configuration & Untested Items
+
+### Optimization Knob (`RG_OPT` / `OPT`)
+- **Authoritative Variable**: `RG_OPT` controls the C compiler optimization flag (e.g., `-O0`, `-O2`).
+- **Backward-Compatible Alias**: `OPT` is supported in both `Makefile` and `build.ps1` as a direct alias for `RG_OPT`.
+- **Precedence**: `RG_OPT` > `OPT` > Default (`-O2`).
+- **Usage**:
+  - `mingw32-make test RG_OPT=-O0`
+  - `mingw32-make test OPT=-O2`
+  - `.\build.ps1 -OptLevel -O0 -Target test`
+  - `$env:RG_OPT = "-O0"; .\build.ps1 -Target test`
+
+### Shell Robustness
+- In `Makefile`, `SHELL := $(COMSPEC)` (or `cmd.exe`) is enforced on Windows NT. This ensures `mingw32-make` recipes execute correctly even if MSYS2 `usr\bin` (containing `sh.exe`) is on `PATH`.
+
+### Explicit List of UNTESTED Items
+In strict compliance with academic and verification honesty standards:
+1. **Dynamic Memory Sanitizers (AddressSanitizer & UndefinedBehaviorSanitizer)**:
+   - **Status**: **UNTESTED** on native Windows MinGW GCC host.
+   - **Reason**: Toolchain lacks `libasan` and `libubsan` static/shared runtime libraries (exit code 1 on linking).
+   - **Mitigation**: Internal allocation tracking wrapper (`rg_alloc.c`) asserts active allocation balance `rg_alloc_active_count() == 0` across all test suites, and dynamic fault injection validates out-of-memory graceful recovery.
+2. **XML Schema / Well-Formedness Validation via `xmllint`**:
+   - **Status**: **UNTESTED** via `xmllint`.
+   - **Reason**: The `xmllint` executable is not installed on the host environment.
+   - **Mitigation**: SVG generation uses deterministic, strict `fprintf` format strings matching the exact SVG 1.1 XML specification.
+3. **Browser Visual Rendering of SVG Outputs**:
+   - **Status**: **UNTESTED** programmatically.
+   - **Reason**: RouteGuard is a purely terminal-based ISO C11 educational application; headless browser automation is outside the C11 academic scope.
+4. **Web Presentation / WebAssembly**:
+   - **Status**: **UNTESTED** (scope deferred per Section 0 rules).
+
