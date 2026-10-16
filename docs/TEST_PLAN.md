@@ -42,6 +42,7 @@ This test plan defines the formal test-ID contract strictly aligned with **SRS v
 | `RG-X-08` | `test_rg_x_08` | `tests/test_traverse.c` | Iterative DFS preorder vs Recursive DFS preorder | F1, F2, F4, F5 | Exact preorder agreement across all benchmark topologies |
 | `RG-X-09` | `test_rg_x_09` | `tests/test_traverse.c` | Slot-count complexity check (matrix vs list) | F1 | Matrix scans 144 slots ($V^2$) vs List scans 26 slots ($2E$) |
 | `RG-X-10` | `test_rg_x_10_differential_oracle` | `tests/test_random.c` | Independent differential testing oracle (300 random graphs) | Random G(V,p) | 67,574 assertions; 0 mismatches against relaxation and label propagation oracles |
+| `RG-X-11` | `test_rg_x_11_wasm_bridge` | `tests/test_bridge.c` | WebAssembly C11 bridge contract & JSON serialization | F1 | Full validation of init, reset, BFS/DFS metrics, edge toggles, failure table, and SVG |
 
 ---
 
@@ -50,6 +51,5 @@ This test plan defines the formal test-ID contract strictly aligned with **SRS v
 In accordance with verification honesty requirements, the following items are explicitly not verified through automated testing on this host:
 1. **Dynamic Sanitizer Testing (ASan / UBSan) on Native Windows**: **UNTESTED** on Windows MinGW host due to missing toolchain runtime libraries `libasan`/`libubsan`. (Verified portably in official `gcc:14` Linux container).
 2. **SVG XML Schema Conformance (`xmllint`)**: **UNTESTED** via `xmllint` due to tool absence.
-3. **Browser Graphical Rendering**: **UNTESTED** programmatically (RouteGuard is an ISO C11 terminal application).
-4. **Web UI / WebAssembly (`FR-029` — `FR-033`, `AC-010`)**: **UNTESTED** / **Deferred** (scope outside C11 core).
+3. **Browser Graphical Rendering of Native File-Exported SVGs**: **UNTESTED** programmatically via automated headless tools (RouteGuard native engine is an ISO C11 terminal program). Interactive SVG rendering in the WebAssembly frontend was fully verified in a live browser session (`docs/evidence/frontend_verification.txt`).
 

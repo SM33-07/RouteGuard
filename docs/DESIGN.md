@@ -148,10 +148,11 @@ function DFS(graph, src):
 2. **Canonical Active Flag**: Active state resides exclusively in `edges[id].active`. Matrix and list structures only store `edge_id`.
 3. **Cross-Platform OS-Aware Build System**: The `Makefile` dynamically branches on `ifeq ($(OS),Windows_NT)` to select Windows native shell commands (`cmd.exe /c`, `del /q`, `rmdir /s /q`, `fc /b`) or POSIX commands (`mkdir -p`, `rm -rf`, `cmp -s`), verified on both Windows MinGW and Linux `gcc:14`.
 4. **Independent Differential Testing Oracle**: Rather than testing against another student's codebase or an out-of-scope third-party library, an independent oracle based on the Bellman-Ford/FIFO unweighted relaxation principle and multi-pass label propagation was implemented in `tests/test_random.c` (evaluating 300 random graphs with fixed seed `20261017`).
+5. **WebAssembly Bridge Architecture (`include/rg_wasm_bridge.h`, `src/rg_wasm_bridge.c`)**: A zero-external-dependency C11 bridge provides a stateful, encapsulated API for the browser interface. It exposes functions for fixture loading, edge toggling, BFS/DFS traversals, shortest-route reconstruction, connected components, single-edge failure simulation table, and SVG export. To safely cross the C-WASM ABI boundary without leaking allocations, the bridge uses bounded static string buffers and standard JSON formatting. Emscripten compiles the bridge and C engine with `-s SINGLE_FILE=1 -s MODULARIZE=1 -s EXPORT_ES6=1` into an ES6 module with embedded base64 WASM, preventing Vite MIME-type and asynchronous asset-loading issues. The native CLI entry point `src/main.c` is excluded from WASM builds, and the bridge API contract is natively verified via `tests/test_bridge.c` (`RG-X-11`).
 
 ### Conflicts & Discrepancies
 - **Prompt vs SRS Test-ID Meaning**: Prompt A originally listed test IDs with different assignments (e.g. `RG-FAIL-01` as generic toggle idempotency). In accordance with the project instructions, **SRS v0.2 Section 10 is authoritative**. `RG-FAIL-01` strictly tests disabling critical connecting edge `e9`, `RG-FAIL-02` tests redundant edge `e5`, and `RG-FAIL-03` tests re-enable and reset. Generic toggle tests are assigned to `RG-X-01` and `RG-X-02`.
-- **Web Interface Scope (`FR-029` — `FR-033`, `AC-010`)**: SRS v0.2 Section 3.5 specifies web-based presentation conditionally: *"If a web interface is delivered..."* (FR-029). In alignment with the academic boundary (pure ISO C11 terminal program for CSC2101/CSC2130), `FR-029` through `FR-033` and `AC-010` are classified as **Deferred**. Core user interaction and visualization are delivered natively via the terminal CLI (`src/main.c`) and pure C11 SVG export (`src/rg_svg.c`).
+- **Web Interface Scope (`FR-029` — `FR-033`, `AC-010`)**: SRS v0.2 Section 3.5 specifies web-based presentation conditionally: *"If a web interface is delivered..."* (FR-029). Initially deferred during native-only implementation, `FR-029` through `FR-033` and `AC-010` are now fully implemented and verified on the `frontend-wasm` branch. The presentation layer consists of a React 19 + TypeScript frontend (`frontend/`) communicating exclusively with the compiled ISO C11 WebAssembly engine. Zero graph algorithms or metrics are implemented in TypeScript.
 - **Post-Failure Requirements (`FR-034` — `FR-040`)**: Unlike the web-specific clauses, `FR-034` (robust errors without crashing), `FR-035` (synthetic disclosure), `FR-036` (deterministic fixtures), `FR-037` (unit tests), `FR-038` (cross-representation parity), `FR-039` (regression harness), and `FR-040` (accurate README) apply directly to the C engine and are fully implemented and verified.
 
 ---
@@ -179,8 +180,8 @@ In strict compliance with academic and verification honesty standards:
    - **Status**: **UNTESTED** via `xmllint`.
    - **Reason**: The `xmllint` executable is not installed on the host environment.
    - **Mitigation**: SVG generation uses deterministic, strict `fprintf` format strings matching the exact SVG 1.1 XML specification.
-4. **Browser Visual Rendering of SVG Outputs**:
-   - **Status**: **UNTESTED** programmatically.
-   - **Reason**: RouteGuard is a purely terminal-based ISO C11 educational application; headless browser automation is outside the C11 academic scope.
-5. **Web Presentation / WebAssembly (`FR-029` — `FR-033`, `AC-010`)**:
-   - **Status**: **UNTESTED** / **Deferred** (optional web UI outside C11 scope).
+4. **Browser Visual Rendering and WebAssembly Integration**:
+   - **Status**: **VERIFIED** end-to-end in browser on `http://localhost:5173/`.
+   - **Verification Details**: Subagent browser session recorded video artifact `routeguard_frontend_test_1792194315768.webp` and 11 screenshots. Verified baseline F1 8-hop route (`0 -> 1 -> 3 -> 4 -> 6 -> 7 -> 8 -> 9 -> 10`), Adjacency List (26 slots) vs Adjacency Matrix (144 slots), `e9` cut (unreachable, 2 components, 8 reachable vertices, "CLOSED" badge), `e9` recovery (8 hops restored), `e5` cut (alternate 8-hop route via Block B `3 -> 5 -> 6`), graph reset, DFS stale pops count (2), 13-row single-edge failure impact table, SVG export, and zero browser console errors.
+5. **Web Presentation / WebAssembly Requirements (`FR-029` — `FR-033`, `AC-010`)**:
+   - **Status**: **VERIFIED** (100% complete and tested; documented in `docs/evidence/frontend_verification.txt`).

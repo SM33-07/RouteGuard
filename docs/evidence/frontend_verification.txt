@@ -1,0 +1,131 @@
+================================================================================
+RouteGuard WebAssembly & Interactive Frontend Verification Evidence
+Timestamp: 2026-10-17 05:17:50 +05:30
+Branch: frontend-wasm
+================================================================================
+
+--- 1. Toolchain & Environment Probe ---
+Node.js Version:
+v24.16.0
+npm Version:
+11.13.0
+Emscripten (emcc) Version:
+emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.12 (5488e0871d46d19a3209988190fa6a653126256f)
+Copyright (C) 2026 the Emscripten authors (see AUTHORS.txt)
+This is free and open source software under the MIT license.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+--- 2. Native Strict Build & Test Suite (28/28 Passed) ---
+C:/msys64/ucrt64/bin/mingw32-make.exe clean
+mingw32-make[1]: Entering directory 'C:/Soham/Coding/GitHub/RouteGuard'
+mingw32-make[1]: Leaving directory 'C:/Soham/Coding/GitHub/RouteGuard'
+C:/msys64/ucrt64/bin/mingw32-make.exe all CFLAGS="-std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude"
+mingw32-make[1]: Entering directory 'C:/Soham/Coding/GitHub/RouteGuard'
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_alloc.c -o obj/rg_alloc.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_graph.c -o obj/rg_graph.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_queue.c -o obj/rg_queue.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_stack.c -o obj/rg_stack.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_traverse.c -o obj/rg_traverse.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_analysis.c -o obj/rg_analysis.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_fixture.c -o obj/rg_fixture.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_svg.c -o obj/rg_svg.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_wasm_bridge.c -o obj/rg_wasm_bridge.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/main.c -o obj/main.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/routeguard.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/rg_wasm_bridge.o obj/main.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_main.c -o obj/test_main.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_graph.c -o obj/test_graph.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_traverse.c -o obj/test_traverse.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_analysis.c -o obj/test_analysis.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_fixture_ref.c -o obj/test_fixture_ref.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_random.c -o obj/test_random.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_bridge.c -o obj/test_bridge.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/rg_tests.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/rg_wasm_bridge.o obj/test_main.o obj/test_graph.o obj/test_traverse.o obj/test_analysis.o obj/test_fixture_ref.o obj/test_random.o obj/test_bridge.o
+mingw32-make[1]: Leaving directory 'C:/Soham/Coding/GitHub/RouteGuard'
+bin\rg_tests.exe
+========================================================
+RouteGuard Automated Test Suite (SRS v0.2 Traceable)
+ISO C11 Scope - CSC2101 Lecture 37 Academic Boundary
+========================================================
+
+Running RG-GR-01             ... [ PASS ]
+Running RG-GR-02             ... [ PASS ]
+Running RG-ERR-01            ... [ PASS ]
+Running RG-MEM-01            ... [ PASS ]
+Running RG-X-04              ... [ PASS ]
+Running RG-X-05              ... [ PASS ]
+Running RG-X-06              ... [ PASS ]
+Running RG-BFS-01            ... [ PASS ]
+Running RG-BFS-02            ... [ PASS ]
+Running RG-BFS-03            ... [ PASS ]
+Running RG-BFS-04            ... [ PASS ]
+Running RG-DFS-01            ... [ PASS ]
+Running RG-DFS-02            ... [ PASS ]
+Running RG-REP-01            ... [ PASS ]
+Running RG-REP-02            ... [ PASS ]
+Running RG-X-08              ... [ PASS ]
+Running RG-X-09              ... [ PASS ]
+Running RG-COMP-01           ... [ PASS ]
+Running RG-FAIL-01           ... [ PASS ]
+Running RG-FAIL-02           ... [ PASS ]
+Running RG-FAIL-03           ... [ PASS ]
+Running RG-X-01              ... [ PASS ]
+Running RG-X-02              ... [ PASS ]
+Running RG-X-07              ... [ PASS ]
+Running RG-MET-01            ... [ PASS ]
+Running RG-X-03              ... [ PASS ]
+Running RG-X-10              ... 
+  [Differential Oracle] Fixed LCG Seed = 20261017 | Target Graphs = 300
+  [Differential Oracle] Completed 300 graphs | 67574 total comparisons | 0 mismatches
+[ PASS ]
+Running RG-X-11              ... [ PASS ]
+
+========================================================
+TEST RESULTS: 28 Total | 28 Passed | 0 Failed
+========================================================
+bin\routeguard.exe --demo > out\demo_run1.txt
+bin\routeguard.exe --demo > out\demo_run2.txt
+fc /B out\demo_run1.txt out\demo_run2.txt > nul
+DEMO DETERMINISM VERIFIED: Both runs are byte-identical.
+
+--- 3. WebAssembly Module Compilation (build_wasm.ps1) ---
+
+Name          Length LastWriteTime
+----          ------ -------------
+routeguard.js  99960 17-10-2026 05:18:00
+
+
+--- 4. Frontend Production Build (npm run build) ---
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+[plugin rolldown:vite-resolve] Module "node:module" has been externalized for browser compatibility, imported by "C:/Soham/Coding/GitHub/RouteGuard/frontend/src/wasm/routeguard.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ 20 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                    0.97 kB │ gzip:   0.54 kB
+dist/assets/index-DxgDJ90O.css                     8.56 kB │ gzip:   2.33 kB
+dist/assets/__vite-browser-external-_fHEXcIl.js    0.09 kB │ gzip:   0.10 kB
+dist/assets/index-DzOluDKH.js                    331.69 kB │ gzip: 107.84 kB
+
+[32m✓ built in 149ms[39m
+
+--- 5. Browser Subagent End-to-End Verification Results ---
+Browser Test Session Recording: routeguard_frontend_test_1792194315768.webp
+Verified Test Steps in Chromium Browser Session (http://localhost:5173/):
+1. Header & Synthetic Network Banner: VERIFIED ('RouteGuard', 'WASM / C11', educational disclaimer)
+2. Baseline F1 Route Discovery: VERIFIED (8 hops: 0 -> 1 -> 3 -> 4 -> 6 -> 7 -> 8 -> 9 -> 10)
+3. Adjacency List Complexity Counters: VERIFIED (Slots Examined = 26)
+4. Adjacency Matrix Complexity Counters: VERIFIED (Slots Examined = 144, Route = 8 hops)
+5. Critical Bridge Cut Scenario (e9): VERIFIED (Route = NO ROUTE/Unreachable, Components = 2, Reachable from SRC = 8)
+6. Bridge Restoration (e9): VERIFIED (Route restored = 8 hops, Components = 1)
+7. Redundant Cut Scenario (e5): VERIFIED (Route found via Block B: 0 -> 1 -> 3 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10, 8 hops)
+8. Global Reset: VERIFIED (Baseline F1 restored byte-compatibly)
+9. DFS Traversal & Stale Pops: VERIFIED (Stale Pops = 2)
+10. Failure Table Resilience Matrix: VERIFIED (13 rows rendered, e9 shows 'NO (CUT)' with 2 components)
+11. Browser Console Cleanliness: VERIFIED (0 runtime errors, 0 uncaught exceptions)
+
+================================================================================
