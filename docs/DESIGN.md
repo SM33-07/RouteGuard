@@ -168,12 +168,11 @@ function DFS(graph, src):
 ### Shell Robustness
 - In `Makefile`, `SHELL := $(COMSPEC)` (or `cmd.exe`) is enforced on Windows NT. This ensures `mingw32-make` recipes execute correctly even if MSYS2 `usr\bin` (containing `sh.exe`) is on `PATH`.
 
-### Explicit List of UNTESTED Items
+### Explicit List of UNTESTED Items & Portable Sanitizer Verification
 In strict compliance with academic and verification honesty standards:
 1. **Dynamic Memory Sanitizers (AddressSanitizer & UndefinedBehaviorSanitizer)**:
-   - **Status**: **UNTESTED** on native Windows MinGW GCC host.
-   - **Reason**: Toolchain lacks `libasan` and `libubsan` static/shared runtime libraries (exit code 1 on linking).
-   - **Mitigation**: Internal allocation tracking wrapper (`rg_alloc.c`) asserts active allocation balance `rg_alloc_active_count() == 0` across all test suites, and dynamic fault injection validates out-of-memory graceful recovery.
+   - **Native Windows MinGW Host**: **UNTESTED** on native Windows MinGW GCC host due to missing `libasan` and `libubsan` static/shared runtime libraries (exit code 1 on linking; raw diagnostics in `docs/evidence/env.txt`). Internal allocation tracking wrapper (`rg_alloc.c`) asserts active allocation balance `rg_alloc_active_count() == 0` across all test suites, and dynamic fault injection validates out-of-memory graceful recovery.
+   - **Linux Container Verification (Official GCC 14.4.0)**: Executed under `-std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all` inside an official Docker Linux container (`gcc:14`, digest `sha256:6f37e44a9b41181de5dd97366ec732652f5d895a72b5549c64694efed50a97e8`). Verified deliberate-fault detection (heap overflow, signed overflow, and memory leak) and executed the full test suite (26/26 pass) and demo cleanly with zero sanitizer errors and zero leaks. **Note: This checks the portable ISO C11 logic, NOT Windows-specific runtime behaviour.** Full raw log is recorded in `docs/evidence/sanitizer_linux_container.txt`.
 2. **XML Schema / Well-Formedness Validation via `xmllint`**:
    - **Status**: **UNTESTED** via `xmllint`.
    - **Reason**: The `xmllint` executable is not installed on the host environment.
@@ -183,4 +182,5 @@ In strict compliance with academic and verification honesty standards:
    - **Reason**: RouteGuard is a purely terminal-based ISO C11 educational application; headless browser automation is outside the C11 academic scope.
 4. **Web Presentation / WebAssembly**:
    - **Status**: **UNTESTED** (scope deferred per Section 0 rules).
+
 

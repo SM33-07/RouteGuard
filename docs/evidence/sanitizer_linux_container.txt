@@ -1,0 +1,211 @@
+================================================================================
+RouteGuard Linux Container Sanitizer Verification Evidence
+Label: Linux container, NOT the Windows build
+================================================================================
+Environment Context:
+Image Tag: gcc:14
+Image Digest: sha256:6f37e44a9b41181de5dd97366ec732652f5d895a72b5549c64694efed50a97e8
+Compiler: gcc (GCC) 14.4.0 (Debian GNU/Linux)
+Compiler Flags: -std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all -Iinclude
+Execution Policy: Mount host repository read-only (:ro), copy to container /work, build and test cleanly inside container.
+
+=== GCC Compiler Probe in Container ===
+Command: gcc --version
+Output:
+gcc (GCC) 14.4.0
+Copyright (C) 2024 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=== Deliberate Fault Probe 1: AddressSanitizer Heap Buffer Overflow ===
+Source:
+#include <stdlib.h>
+int main(void) {
+    int *arr = (int *)malloc(5 * sizeof(int));
+    if (!arr) return 1;
+    arr[5] = 42;
+    volatile int val = arr[5];
+    (void)val;
+    free(arr);
+    return 0;
+}
+Command: gcc -std=c11 -g -fsanitize=address -o /tmp/probe_asan /tmp/probe_asan.c && /tmp/probe_asan
+ExitCode: 1
+Output:
+=================================================================
+==18==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000054 at pc 0x000000401252 bp 0x7ffc17b29520 sp 0x7ffc17b29518
+WRITE of size 4 at 0x503000000054 thread T0
+    #0 0x401251 in main /tmp/probe_asan.c:5
+    #1 0x78f77fa88ca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: 5e5b51f4c39af9ac589408c1dc432ba390a273cc)
+    #2 0x78f77fa88d64 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x29d64) (BuildId: 5e5b51f4c39af9ac589408c1dc432ba390a273cc)
+    #3 0x4010c0 in _start (/tmp/probe_asan+0x4010c0)
+
+0x503000000054 is located 0 bytes after 20-byte region [0x503000000040,0x503000000054)
+allocated by thread T0 here:
+    #0 0x78f77fd47a97 in malloc (/usr/local/lib64/libasan.so.8+0xf4a97)
+    #1 0x4011fd in main /tmp/probe_asan.c:3
+    #2 0x78f77fa88ca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: 5e5b51f4c39af9ac589408c1dc432ba390a273cc)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/probe_asan.c:5 in main
+==18==ABORTING
+ASAN_FAULT_EXIT=1 (DETECTED)
+
+=== Deliberate Fault Probe 2: UndefinedBehaviorSanitizer Signed Integer Overflow ===
+Source:
+#include <limits.h>
+int main(void) {
+    volatile int x = INT_MAX;
+    volatile int y = x + 1;
+    (void)y;
+    return 0;
+}
+Command: gcc -std=c11 -g -fsanitize=undefined -fno-sanitize-recover=undefined -o /tmp/probe_ubsan /tmp/probe_ubsan.c && /tmp/probe_ubsan
+ExitCode: 1
+Output:
+/tmp/probe_ubsan.c:4:24: runtime error: signed integer overflow: 2147483647 + 1 cannot be represented in type 'int'
+UBSAN_FAULT_EXIT=1 (DETECTED)
+
+=== Deliberate Fault Probe 3: LeakSanitizer Direct Memory Leak ===
+Source:
+#include <stdlib.h>
+int main(void) {
+    int *p = malloc(100);
+    (void)p;
+    return 0;
+}
+Command: gcc -std=c11 -g -fsanitize=address -o /tmp/probe_leak /tmp/probe_leak.c && /tmp/probe_leak
+ExitCode: 1
+Output:
+=================================================================
+==32==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 100 byte(s) in 1 object(s) allocated from:
+    #0 0x7ab7bb825a97 in malloc (/usr/local/lib64/libasan.so.8+0xf4a97)
+    #1 0x401157 in main /tmp/probe_leak.c:3
+    #2 0x7ab7bb566ca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: 5e5b51f4c39af9ac589408c1dc432ba390a273cc)
+
+SUMMARY: AddressSanitizer: 100 byte(s) leaked in 1 allocation(s).
+LEAK_FAULT_EXIT=1 (DETECTED)
+
+=== RouteGuard Full Test Suite Execution (rg_tests) under Sanitizers ===
+Command: ./bin/rg_tests
+Flags: -std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
+ExitCode: 0
+Output:
+========================================================
+RouteGuard Automated Test Suite (SRS v0.2 Traceable)
+ISO C11 Scope - CSC2101 Lecture 37 Academic Boundary
+========================================================
+
+Running RG-GR-01             ... [ PASS ]
+Running RG-GR-02             ... [ PASS ]
+Running RG-ERR-01            ... [ PASS ]
+Running RG-MEM-01            ... [ PASS ]
+Running RG-X-04              ... [ PASS ]
+Running RG-X-05              ... [ PASS ]
+Running RG-X-06              ... [ PASS ]
+Running RG-BFS-01            ... [ PASS ]
+Running RG-BFS-02            ... [ PASS ]
+Running RG-BFS-03            ... [ PASS ]
+Running RG-BFS-04            ... [ PASS ]
+Running RG-DFS-01            ... [ PASS ]
+Running RG-DFS-02            ... [ PASS ]
+Running RG-REP-01            ... [ PASS ]
+Running RG-REP-02            ... [ PASS ]
+Running RG-X-08              ... [ PASS ]
+Running RG-X-09              ... [ PASS ]
+Running RG-COMP-01           ... [ PASS ]
+Running RG-FAIL-01           ... [ PASS ]
+Running RG-FAIL-02           ... [ PASS ]
+Running RG-FAIL-03           ... [ PASS ]
+Running RG-X-01              ... [ PASS ]
+Running RG-X-02              ... [ PASS ]
+Running RG-X-07              ... [ PASS ]
+Running RG-MET-01            ... [ PASS ]
+Running RG-X-03              ... [ PASS ]
+
+========================================================
+TEST RESULTS: 26 Total | 26 Passed | 0 Failed
+========================================================
+RG_TESTS_EXIT=0
+
+=== RouteGuard Deterministic Demo Execution under Sanitizers ===
+Command: ./bin/routeguard --demo
+ExitCode: 0
+Output:
+======================================================================
+RouteGuard Deterministic Demonstration (Syllabus Scope: ISO C11)
+Educational Disclaimer: Synthetic campus network topology only.
+======================================================================
+
+[Step 1] Baseline Route Evaluation: Source 0 (Main Gate) -> Destination 10 (Medical Annex)
+Route (8 hops): 0 -> 1 -> 3 -> 4 -> 6 -> 7 -> 8 -> 9 -> 10
+
+[Step 2] Simulated Failure: Disabling critical walkway e9 (6, 7) [Hostel Junction - Sports Complex]
+
+--- Impact Summary (Source: 0, Destination: 10) ---
+Reachable vertices from 0 : 12 -> 8
+Total connected components : 1 -> 2
+Shortest route hops        : 8 -> NO ROUTE (disconnected)
+----------------------------------------------------
+Route: NO ROUTE (destination unreachable)
+
+[Step 3] Restoring walkway e9 (6, 7)
+
+--- Impact Summary (Source: 0, Destination: 10) ---
+Reachable vertices from 0 : 8 -> 12
+Total connected components : 2 -> 1
+Shortest route hops        : NO ROUTE -> 8
+----------------------------------------------------
+
+[Step 4] Simulated Failure: Disabling redundant walkway e5 (3, 4) [Central Plaza - Block A]
+
+--- Impact Summary (Source: 0, Destination: 10) ---
+Reachable vertices from 0 : 12 -> 12
+Total connected components : 1 -> 1
+Shortest route hops        : 8 -> 8
+----------------------------------------------------
+Route (8 hops): 0 -> 1 -> 3 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
+
+[Step 5] Resetting graph to baseline state
+
+[Step 6] Traversal Performance & Representation Comparison (F1 Campus Baseline)
+-------------------------------------------------------------------------------
+Algorithm | Representation | Processed | Slots Examined | Skips | Enq/Push | Deq/Pop
+-------------------------------------------------------------------------------
+BFS       | Matrix (O(V^2))|    12     |      144       |   0   |    12    |   12
+BFS       | List   (O(V+E))|    12     |       26       |   0   |    12    |   12
+DFS       | Matrix (O(V^2))|    12     |      144       |   0   |    14    |   14 (stale: 2)
+DFS       | List   (O(V+E))|    12     |       26       |   0   |    14    |   14 (stale: 2)
+-------------------------------------------------------------------------------
+
+=== Single-Edge Failure Impact Table (Source: 0, Destination: 10) ===
+Method: Brute-force repeated BFS, O(E*(V+E)) on adjacency lists
+--------------------------------------------------------------------------------
+Edge ID | Endpoints | Reachable? | Hops | Reachable from 0 | Components
+--------------------------------------------------------------------------------
+  e0    | ( 0,  1)  |    YES     |   8  |        12         |      1
+  e1    | ( 0,  2)  |    YES     |   8  |        12         |      1
+  e2    | ( 0, 11)  |    YES     |   8  |        11         |      2
+  e3    | ( 1,  3)  |    YES     |   8  |        12         |      1
+  e4    | ( 2,  3)  |    YES     |   8  |        12         |      1
+  e5    | ( 3,  4)  |    YES     |   8  |        12         |      1
+  e6    | ( 3,  5)  |    YES     |   8  |        12         |      1
+  e7    | ( 4,  6)  |    YES     |   8  |        12         |      1
+  e8    | ( 5,  6)  |    YES     |   8  |        12         |      1
+  e9    | ( 6,  7)  |     NO     |  --  |         8         |      2
+  e10   | ( 7,  8)  |     NO     |  --  |         9         |      2
+  e11   | ( 8,  9)  |     NO     |  --  |        10         |      2
+  e12   | ( 9, 10)  |     NO     |  --  |        11         |      2
+--------------------------------------------------------------------------------
+
+Demo completed successfully. SVG figures generated in out/.
+RG_DEMO_EXIT=0
+
+=== Verification Summary ===
+1. AddressSanitizer Heap Buffer Overflow Probe: DETECTED (ExitCode 1).
+2. UndefinedBehaviorSanitizer Signed Overflow Probe: DETECTED (ExitCode 1).
+3. LeakSanitizer Direct Leak Probe: DETECTED (ExitCode 1, no ptrace restriction).
+4. Full Test Suite (26 tests): 26/26 PASSED with 0 sanitizer errors and 0 leaks (ExitCode 0).
+5. Full Demo Execution: PASSED with 0 sanitizer errors and 0 leaks (ExitCode 0).
+6. Scope: Verifies the portable ISO C11 logic in a Linux container; does NOT represent native Windows MinGW runtime behaviour.

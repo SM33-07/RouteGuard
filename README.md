@@ -169,10 +169,12 @@ TEST RESULTS: 26 Total | 26 Passed | 0 Failed
 ## 6. Untested Items & Environment Limitations
 
 In accordance with strict verification honesty rules:
-1. **Memory Safety via Sanitizers (ASan/UBSan)**: Marked **UNTESTED** on native Windows MinGW GCC host due to missing `libasan`/`libubsan` runtimes. (Internal allocation tracking in `rg_alloc.c` verified 0 leaks; fault injection verified).
+1. **Memory Safety via Sanitizers (ASan/UBSan/LSan)**:
+   - **Native Windows MinGW Host**: Marked **UNTESTED** on native Windows due to missing `libasan`/`libubsan` runtimes (linking exit code 1; documented in `docs/evidence/env.txt`).
+   - **Linux Container Verification (Official GCC 14.4.0)**: Executed under `-std=c11 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all` inside an official Docker Linux container (`gcc:14`, digest `sha256:6f37e44a9b41181de5dd97366ec732652f5d895a72b5549c64694efed50a97e8`). Verified deliberate-fault detection (heap overflow, signed overflow, and memory leak) and executed the full test suite (26/26 pass) and demo cleanly with zero sanitizer errors and zero leaks. **Note: This checks the portable ISO C11 logic, NOT Windows-specific behaviour.** Full raw log is recorded in `docs/evidence/sanitizer_linux_container.txt`.
 2. **SVG XML Validation (`xmllint`)**: Marked **UNTESTED** via `xmllint` because `xmllint` is not installed on the host environment. (SVG output is generated deterministically via strict ISO C `fprintf`).
 3. **Browser Visual Rendering**: Marked **UNTESTED** programmatically (RouteGuard is a terminal application; headless browser automation is outside C11 scope).
-4. **Web Presentation / WebAssembly**: Marked **UNTESTED** / deferred academic scope. Raw diagnostics and logs are recorded in `docs/evidence/env.txt`.
+4. **Web Presentation / WebAssembly**: Marked **UNTESTED** / deferred academic scope.
 
 ---
 
