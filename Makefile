@@ -1,6 +1,18 @@
 # RouteGuard Makefile - ISO C11 Graph-Based Route Discovery Simulator
 # Portable across Windows environments with mingw32-make or GNU Make
 
+# Shell detection and configuration:
+# When running on Windows, force cmd.exe unless specifically overridden.
+# This prevents mingw32-make from breaking when msys2 usr\bin (containing sh.exe) is on PATH.
+ifeq ($(OS),Windows_NT)
+  ifdef COMSPEC
+    SHELL := $(COMSPEC)
+  else
+    SHELL := cmd.exe
+  endif
+  .SHELLFLAGS := /c
+endif
+
 # Compiler discovery precedence:
 # 1. RG_GCC_DIR if defined (directory containing gcc)
 # 2. gcc discoverable on PATH
@@ -12,14 +24,17 @@ else
   CC := gcc
 endif
 
-# Optimisation level configurable via RG_OPT (default: -O2)
+# Optimisation knob: RG_OPT is authoritative, OPT is supported as an alias (default: -O2)
 ifdef RG_OPT
-  OPT := $(RG_OPT)
+  OPT_LEVEL := $(RG_OPT)
+else ifdef OPT
+  OPT_LEVEL := $(OPT)
 else
-  OPT ?= -O2
+  OPT_LEVEL := -O2
 endif
-CFLAGS = -std=c11 -Wall -Wextra -pedantic -Wshadow $(OPT) -Iinclude
-STRICT_CFLAGS = -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror $(OPT) -Iinclude
+
+CFLAGS = -std=c11 -Wall -Wextra -pedantic -Wshadow $(OPT_LEVEL) -Iinclude
+STRICT_CFLAGS = -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror $(OPT_LEVEL) -Iinclude
 
 SRC = src/rg_alloc.c src/rg_graph.c src/rg_queue.c src/rg_stack.c \
       src/rg_traverse.c src/rg_analysis.c src/rg_fixture.c src/rg_svg.c
@@ -47,16 +62,19 @@ dirs:
 	@if not exist obj mkdir obj
 	@if not exist out mkdir out
 
-$(TARGET): $(OBJ) obj/main.o
-	$(CC) $(CFLAGS) -o $@ $^
+$(TARGET): $(OBJ) obj/main.o | dirs
+	$(CC) $(CFLAGS) -o $@ $(OBJ) obj/main.o
 
-$(TEST_TARGET): $(OBJ) $(TEST_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+$(TEST_TARGET): $(OBJ) $(TEST_OBJ) | dirs
+	$(CC) $(CFLAGS) -o $@ $(OBJ) $(TEST_OBJ)
 
-obj/%.o: src/%.c
+obj/main.o: src/main.c | dirs
 	$(CC) $(CFLAGS) -c $< -o $@
 
-obj/%.o: tests/%.c
+obj/%.o: src/%.c | dirs
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj/%.o: tests/%.c | dirs
 	$(CC) $(CFLAGS) -c $< -o $@
 
 strict:

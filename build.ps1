@@ -33,10 +33,12 @@ if ($env:RG_GCC_DIR) {
     }
 }
 
-# Determine optimization level: explicit -OptLevel parameter, or RG_OPT environment variable, or -O2
+# Determine optimization level: explicit -OptLevel parameter, or RG_OPT environment variable, or OPT alias, or -O2
 if (-not $OptLevel) {
     if ($env:RG_OPT) {
         $OptLevel = $env:RG_OPT.Trim()
+    } elseif ($env:OPT) {
+        $OptLevel = $env:OPT.Trim()
     } else {
         $OptLevel = '-O2'
     }
