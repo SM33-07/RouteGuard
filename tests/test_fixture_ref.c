@@ -92,8 +92,8 @@ void test_rg_x_12_campus(void) {
     RgStatus st = rg_fixture_campus_muj(&g);
     RG_ASSERT_INT_EQ(st, RG_OK);
     RG_ASSERT(g != NULL);
-    RG_ASSERT_INT_EQ(g->n_vertices, 12);
-    RG_ASSERT_INT_EQ(g->n_edges, 15);
+    RG_ASSERT_INT_EQ(g->n_vertices, 13);
+    RG_ASSERT_INT_EQ(g->n_edges, 17);
 
     /* 1. Labels and descriptions verification */
     RG_ASSERT_STR_EQ(g->labels[0], "Main Gate");
@@ -101,6 +101,7 @@ void test_rg_x_12_campus(void) {
     RG_ASSERT_STR_EQ(g->labels[6], "Academic Block 3");
     RG_ASSERT_STR_EQ(g->labels[7], "Lecture Hall Complex");
     RG_ASSERT_STR_EQ(g->labels[9], "Football Ground");
+    RG_ASSERT_STR_EQ(g->labels[12], "Knowledge Centre");
     RG_ASSERT_STR_EQ(rg_fixture_campus_venue_description(0),
                      "Main Gate — Primary campus arrival & visitor entry");
     RG_ASSERT_STR_EQ(rg_fixture_campus_venue_description(1),
@@ -111,9 +112,11 @@ void test_rg_x_12_campus(void) {
                      "Lecture Hall Complex — Large teaching halls (Landmark 5)");
     RG_ASSERT_STR_EQ(rg_fixture_campus_venue_description(9),
                      "Football Ground — Sports grounds (Landmark 7)");
+    RG_ASSERT_STR_EQ(rg_fixture_campus_venue_description(12),
+                     "Knowledge Centre — Digital library & resource centre (approx. placement)");
 
     /* 2. Connected components in baseline */
-    int comp_map[12];
+    int comp_map[13];
     int c_count = rg_connected_components_list(g, comp_map);
     RG_ASSERT_INT_EQ(c_count, 1);
 
@@ -125,17 +128,17 @@ void test_rg_x_12_campus(void) {
     bfs_list(g, 0, bfs_l);
     bfs_matrix(g, 0, bfs_m);
 
-    RG_ASSERT_INT_EQ(bfs_l->metrics.vertices_processed, 12);
-    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 30);
-    RG_ASSERT_INT_EQ(bfs_l->metrics.queue_enqueues, 12);
-    RG_ASSERT_INT_EQ(bfs_l->metrics.queue_dequeues, 12);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.vertices_processed, 13);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 34);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.queue_enqueues, 13);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.queue_dequeues, 13);
     RG_ASSERT_INT_EQ(bfs_l->metrics.edges_skipped_inactive, 0);
 
-    RG_ASSERT_INT_EQ(bfs_m->metrics.vertices_processed, 12);
-    RG_ASSERT_INT_EQ(bfs_m->metrics.neighbor_slots_examined, 144);
+    RG_ASSERT_INT_EQ(bfs_m->metrics.vertices_processed, 13);
+    RG_ASSERT_INT_EQ(bfs_m->metrics.neighbor_slots_examined, 169);
 
-    int expected_bfs_order[12] = {0, 1, 2, 3, 4, 5, 6, 8, 7, 11, 9, 10};
-    for (int i = 0; i < 12; i++) {
+    int expected_bfs_order[13] = {0, 1, 2, 12, 3, 4, 5, 6, 8, 7, 11, 9, 10};
+    for (int i = 0; i < 13; i++) {
         RG_ASSERT_INT_EQ(bfs_l->order[i], expected_bfs_order[i]);
         RG_ASSERT_INT_EQ(bfs_m->order[i], expected_bfs_order[i]);
     }
@@ -162,6 +165,16 @@ void test_rg_x_12_campus(void) {
     int expected_route_0_9[6] = {0, 1, 2, 5, 7, 9};
     for (int i = 0; i <= 5; i++) {
         RG_ASSERT_INT_EQ(route->path[i], expected_route_0_9[i]);
+    }
+
+    /* Route 0 -> 12 (Knowledge Centre): 2 hops */
+    st = rg_find_route(g, 0, 12, false, route, NULL);
+    RG_ASSERT_INT_EQ(st, RG_OK);
+    RG_ASSERT(route->found);
+    RG_ASSERT_INT_EQ(route->hop_count, 2);
+    int expected_route_0_12[3] = {0, 1, 12};
+    for (int i = 0; i <= 2; i++) {
+        RG_ASSERT_INT_EQ(route->path[i], expected_route_0_12[i]);
     }
 
     /* 5. Alternative Route Demonstration: Disable redundant edge e6 (3 <-> 6) */
@@ -196,19 +209,19 @@ void test_rg_x_12_campus(void) {
     c_count = rg_connected_components_list(g, comp_map);
     RG_ASSERT_INT_EQ(c_count, 2);
 
-    /* Reachability from 0: exactly 10 vertices */
+    /* Reachability from 0: exactly 11 vertices */
     rg_traverse_result_free(bfs_l);
     rg_traverse_result_create(g->n_vertices, &bfs_l);
     bfs_list(g, 0, bfs_l);
-    RG_ASSERT_INT_EQ(bfs_l->metrics.vertices_processed, 10);
-    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 27);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.vertices_processed, 11);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 31);
     RG_ASSERT_INT_EQ(bfs_l->metrics.edges_skipped_inactive, 1);
 
     rg_traverse_result_free(bfs_m);
     rg_traverse_result_create(g->n_vertices, &bfs_m);
     bfs_matrix(g, 0, bfs_m);
-    RG_ASSERT_INT_EQ(bfs_m->metrics.vertices_processed, 10);
-    RG_ASSERT_INT_EQ(bfs_m->metrics.neighbor_slots_examined, 120);
+    RG_ASSERT_INT_EQ(bfs_m->metrics.vertices_processed, 11);
+    RG_ASSERT_INT_EQ(bfs_m->metrics.neighbor_slots_examined, 143);
 
     /* 7. Reset restores baseline */
     st = rg_graph_reset(g);

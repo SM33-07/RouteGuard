@@ -97,25 +97,26 @@ void test_rg_x_11_wasm_bridge(void) {
     RG_ASSERT(camp_json != NULL);
     RG_ASSERT(strstr(camp_json, "\"fixture_id\":1") != NULL);
     RG_ASSERT(strstr(camp_json, "\"fixture_name\":\"MUJ Campus Demo\"") != NULL);
-    RG_ASSERT(strstr(camp_json, "\"n_vertices\":12") != NULL);
-    RG_ASSERT(strstr(camp_json, "\"n_edges\":15") != NULL);
+    RG_ASSERT(strstr(camp_json, "\"n_vertices\":13") != NULL);
+    RG_ASSERT(strstr(camp_json, "\"n_edges\":17") != NULL);
     RG_ASSERT(strstr(camp_json, "\"Main Gate\"") != NULL);
     RG_ASSERT(strstr(camp_json, "\"Academic Block 3\"") != NULL);
-    RG_ASSERT(strstr(camp_json, "Academic Block 3 — Arts, media and specialist spaces (Landmark 6)") != NULL);
+    RG_ASSERT(strstr(camp_json, "\"Knowledge Centre\"") != NULL);
+    RG_ASSERT(strstr(camp_json, "Knowledge Centre — Digital library & resource centre (approx. placement)") != NULL);
 
     /* Campus BFS Baseline List: 0 to 6 (Academic Block 3) */
     const char *camp_bfs_list = rg_wasm_run_bfs(0, 6, 0);
     RG_ASSERT(camp_bfs_list != NULL);
     RG_ASSERT(strstr(camp_bfs_list, "\"found\":true") != NULL);
     RG_ASSERT(strstr(camp_bfs_list, "\"hop_count\":4") != NULL);
-    RG_ASSERT(strstr(camp_bfs_list, "\"neighbor_slots_examined\":30") != NULL);
+    RG_ASSERT(strstr(camp_bfs_list, "\"neighbor_slots_examined\":34") != NULL);
 
     /* Campus BFS Baseline Matrix: 0 to 6 */
     const char *camp_bfs_mat = rg_wasm_run_bfs(0, 6, 1);
     RG_ASSERT(camp_bfs_mat != NULL);
     RG_ASSERT(strstr(camp_bfs_mat, "\"found\":true") != NULL);
     RG_ASSERT(strstr(camp_bfs_mat, "\"hop_count\":4") != NULL);
-    RG_ASSERT(strstr(camp_bfs_mat, "\"neighbor_slots_examined\":144") != NULL);
+    RG_ASSERT(strstr(camp_bfs_mat, "\"neighbor_slots_examined\":169") != NULL);
 
     /* Campus edge e12 cut (critical link between LHC and Football Ground) */
     int camp_cut_e12 = rg_wasm_set_edge_active(12, 0);
@@ -140,7 +141,7 @@ void test_rg_x_11_wasm_bridge(void) {
     /* Campus failure table */
     const char *camp_fail_tbl = rg_wasm_get_failure_table(0, 9);
     RG_ASSERT(camp_fail_tbl != NULL);
-    RG_ASSERT(strstr(camp_fail_tbl, "\"n_rows\":15") != NULL);
+    RG_ASSERT(strstr(camp_fail_tbl, "\"n_rows\":17") != NULL);
 
     /* 13. Switch back to F1 Reference Graph */
     int f1_reinit = rg_wasm_init_fixture(0);

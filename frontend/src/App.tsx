@@ -9,6 +9,8 @@ import {
   type NetworkState,
   type FailureTableResult,
 } from './wasm/bridge';
+import { CampusMap } from './components/CampusMap';
+import { CAMPUS_VENUES } from './campus_venues';
 
 export const App: React.FC = () => {
   const [bridge, setBridge] = useState<RouteGuardBridge | null>(null);
@@ -19,16 +21,30 @@ export const App: React.FC = () => {
   // Graph Mode: 'campus' (MUJ Campus Demo) | 'f1' (F1 Reference Graph)
   const [graphMode, setGraphMode] = useState<'campus' | 'f1'>('campus');
 
-  // Controls
+  // Controls & Selection
   const [srcVertex, setSrcVertex] = useState<number>(0);
   const [dstVertex, setDstVertex] = useState<number>(6); // Academic Block 3 in campus mode
   const [selectedVertexId, setSelectedVertexId] = useState<number | null>(0);
   const [useMatrix, setUseMatrix] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'routing' | 'metrics' | 'failureTable'>('routing');
-  const [showGallery, setShowGallery] = useState<boolean>(false);
-  const [galleryTab, setGalleryTab] = useState<'masterplan' | 'ab1_mess' | 'lhc_aic' | 'sports'>('masterplan');
 
-  // Operation Results from C engine
+  // Panel Collapsible States (for Map-Centric Operations Console)
+  const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState<boolean>(true);
+
+  // Inspector Tab: 'venue' | 'route' | 'network' | 'venueIndex' | 'schematic'
+  const [inspectorTab, setInspectorTab] = useState<'venue' | 'route' | 'network' | 'venueIndex' | 'schematic'>('venue');
+
+  // Venue Index Search filter
+  const [venueSearchQuery, setVenueSearchQuery] = useState<string>('');
+
+  // Dismissible Educational Header Banner
+  const [bannerDismissed, setBannerDismissed] = useState<boolean>(false);
+
+  // Reference Gallery Modal
+  const [showGallery, setShowGallery] = useState<boolean>(false);
+  const [galleryTab, setGalleryTab] = useState<'schematic' | 'masterplan' | 'ab1_mess' | 'lhc_aic' | 'sports'>('schematic');
+
+  // Operation Results strictly from C engine
   const [traversalResult, setTraversalResult] = useState<TraversalResult | null>(null);
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [componentsResult, setComponentsResult] = useState<ComponentsResult | null>(null);
@@ -42,7 +58,7 @@ export const App: React.FC = () => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Tooltip & Hover state
+  // Hover state for F1 SVG
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<number | null>(null);
 
@@ -107,7 +123,7 @@ export const App: React.FC = () => {
     recomputeAll(bridge, newSrc, newDst, useMatrix);
   };
 
-  // Handlers
+  // Walkway Edge Toggle Handler
   const handleToggleEdge = (edgeId: number) => {
     if (!bridge || !graph) return;
     const currentEdge = graph.edges.find((e) => e.id === edgeId);
@@ -117,6 +133,7 @@ export const App: React.FC = () => {
     recomputeAll(bridge, srcVertex, dstVertex, useMatrix);
   };
 
+  // Reset Graph to default authoritative state
   const handleReset = () => {
     if (!bridge) return;
     bridge.reset();
@@ -127,34 +144,35 @@ export const App: React.FC = () => {
     recomputeAll(bridge, 0, defaultDst, useMatrix);
   };
 
+  // Traversal & Algorithm Handlers
   const handleRunBFS = () => {
     if (!bridge) return;
     const res = bridge.runBFS(srcVertex, dstVertex, useMatrix);
     setTraversalResult(res);
     const r = bridge.findRoute(srcVertex, dstVertex, useMatrix);
     setRouteResult(r);
-    setActiveTab('routing');
+    setInspectorTab('route');
   };
 
   const handleRunDFS = () => {
     if (!bridge) return;
     const res = bridge.runDFS(srcVertex, dstVertex, useMatrix);
     setTraversalResult(res);
-    setActiveTab('routing');
+    setInspectorTab('route');
   };
 
   const handleFindRoute = () => {
     if (!bridge) return;
     const r = bridge.findRoute(srcVertex, dstVertex, useMatrix);
     setRouteResult(r);
-    setActiveTab('routing');
+    setInspectorTab('route');
   };
 
   const handleShowComponents = () => {
     if (!bridge) return;
     const comp = bridge.getComponents(useMatrix);
     setComponentsResult(comp);
-    setActiveTab('routing');
+    setInspectorTab('network');
   };
 
   const handleRepresentationChange = (matrix: boolean) => {
@@ -164,6 +182,7 @@ export const App: React.FC = () => {
     }
   };
 
+  // Export SVG directly from authoritative C engine
   const handleExportSVG = () => {
     if (!bridge) return;
     const svgStr = bridge.exportSVG(srcVertex, dstVertex, useMatrix);
@@ -178,7 +197,7 @@ export const App: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Set of route edges for highlighting
+  // Route Edge Map for Highlighting
   const routeEdgeMap = useMemo(() => {
     const map = new Map<string, number>();
     if (!routeResult || !routeResult.found || routeResult.path.length < 2) return map;
@@ -186,10 +205,8 @@ export const App: React.FC = () => {
     for (let i = 0; i < routeResult.path.length - 1; i++) {
       const u = routeResult.path[i];
       const v = routeResult.path[i + 1];
-      const key1 = `${u}-${v}`;
-      const key2 = `${v}-${u}`;
-      map.set(key1, i + 1);
-      map.set(key2, i + 1);
+      map.set(`${u}-${v}`, i + 1);
+      map.set(`${v}-${u}`, i + 1);
     }
     return map;
   }, [routeResult]);
@@ -199,15 +216,13 @@ export const App: React.FC = () => {
     const set = new Set<number>();
     if (traversalResult && traversalResult.order) {
       traversalResult.order.forEach((v) => set.add(v));
-    } else {
-      if (graph) {
-        for (let i = 0; i < graph.n_vertices; i++) set.add(i);
-      }
+    } else if (graph) {
+      for (let i = 0; i < graph.n_vertices; i++) set.add(i);
     }
     return set;
   }, [traversalResult, graph]);
 
-  // Selected vertex metadata
+  // Selected vertex details
   const selectedVertex = useMemo(() => {
     if (selectedVertexId === null || !graph) return null;
     return graph.vertices.find((v) => v.id === selectedVertexId) ?? null;
@@ -218,12 +233,38 @@ export const App: React.FC = () => {
     return graph.edges.filter((e) => e.u === selectedVertexId || e.v === selectedVertexId);
   }, [selectedVertexId, graph]);
 
+  // Geo metadata for selected venue (if campus mode)
+  const selectedVenueGeo = useMemo(() => {
+    if (graphMode !== 'campus' || selectedVertexId === null) return null;
+    return CAMPUS_VENUES.find((v) => v.id === selectedVertexId) ?? null;
+  }, [graphMode, selectedVertexId]);
+
+  // Filtered venue index for searchable right-tab
+  const filteredVenues = useMemo(() => {
+    if (!graph) return [];
+    const q = venueSearchQuery.trim().toLowerCase();
+    return graph.vertices.filter((v) => {
+      if (!q) return true;
+      const geo = CAMPUS_VENUES.find((cg) => cg.id === v.id);
+      return (
+        v.label.toLowerCase().includes(q) ||
+        (v.full_name && v.full_name.toLowerCase().includes(q)) ||
+        (geo && geo.category.toLowerCase().includes(q)) ||
+        `node ${v.id}`.includes(q)
+      );
+    });
+  }, [graph, venueSearchQuery]);
+
   if (loading) {
     return (
       <div className="app-container" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--cyan)' }}>RouteGuard</div>
-          <div style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>Initializing ISO C11 WebAssembly Core Engine...</div>
+          <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--cyan)', letterSpacing: '-0.5px' }}>
+            RouteGuard
+          </div>
+          <div style={{ color: 'var(--text-secondary)', marginTop: '8px', fontSize: '14px' }}>
+            Initializing ISO C11 WebAssembly Engine &amp; MUJ Campus Topology...
+          </div>
         </div>
       </div>
     );
@@ -232,7 +273,7 @@ export const App: React.FC = () => {
   if (errorMsg) {
     return (
       <div className="app-container" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--rose)', padding: '24px', borderRadius: '8px', maxWidth: '500px' }}>
+        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--rose)', padding: '24px', borderRadius: '8px', maxWidth: '520px' }}>
           <div style={{ color: 'var(--rose)', fontWeight: 700, fontSize: '18px' }}>Engine Error</div>
           <div style={{ marginTop: '8px', color: '#fca5a5' }}>{errorMsg}</div>
         </div>
@@ -245,1088 +286,1402 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      {/* 1. Header */}
+      {/* 1. Compact Modern Header */}
       <header className="app-header">
-        <div className="brand-section">
-          <div className="brand-icon">RG</div>
-          <div>
-            <div className="brand-title">
-              RouteGuard
-              <span className="brand-badge">WASM / C11</span>
+        <div className="header-left">
+          {/* Left panel collapse toggle */}
+          <button
+            type="button"
+            className={`btn-panel-toggle ${leftPanelOpen ? 'active' : ''}`}
+            onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+            title={leftPanelOpen ? 'Collapse Left Control Panel' : 'Expand Left Control Panel'}
+            aria-label="Toggle Controls Panel"
+          >
+            ☰
+          </button>
+
+          <div className="brand-section">
+            <div className="brand-icon">RG</div>
+            <div className="brand-text">
+              <div className="brand-title">
+                RouteGuard
+                <span className="brand-badge">WASM / C11</span>
+              </div>
+              <div className="brand-subtitle">
+                {graphMode === 'campus' ? 'MUJ Campus Network Resilience Simulator' : 'F1 Reference Graph Console'}
+              </div>
             </div>
-            <div className="brand-subtitle">Network Resilience &amp; Route Discovery Console</div>
           </div>
         </div>
 
-        <div className="disclaimer-banner">
-          <span style={{ fontSize: '16px' }}>⚠️</span>
-          <span>
-            <strong>SYNTHETIC EDUCATIONAL NETWORK:</strong> Pedagogical model for CSC2101/CSC2130. Route length = hops.
-            Not for real-world navigation or municipal transit.
-          </span>
+        {/* Center: Mode Selector + Compact Educational Badge */}
+        <div className="header-center">
+          <div className="mode-switch-group" role="group" aria-label="Graph Environment Mode">
+            <button
+              type="button"
+              className={`mode-btn ${graphMode === 'campus' ? 'active' : ''}`}
+              onClick={() => handleSwitchMode('campus')}
+              id="mode-campus-btn"
+            >
+              🏛️ MUJ Campus Demo
+            </button>
+            <button
+              type="button"
+              className={`mode-btn ${graphMode === 'f1' ? 'active' : ''}`}
+              onClick={() => handleSwitchMode('f1')}
+              id="mode-f1-btn"
+            >
+              📐 F1 Reference Graph
+            </button>
+          </div>
+
+          {!bannerDismissed && (
+            <div className="compact-educational-pill" id="educational-banner">
+              <span className="pill-icon">⚠️</span>
+              <span className="pill-text">Educational simulation · hop-count routing · not real navigation</span>
+              <button
+                type="button"
+                className="pill-close-btn"
+                onClick={() => setBannerDismissed(true)}
+                title="Dismiss banner"
+                aria-label="Dismiss educational disclaimer"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="header-actions">
+        {/* Right: Network Status, Theme, Quick Actions, Right Panel Toggle */}
+        <div className="header-right">
+          <span className={`status-pill ${routeResult?.found ? 'success' : 'error'}`}>
+            <span className={`status-indicator-dot ${routeResult?.found ? 'online' : 'offline'}`}></span>
+            {routeResult?.found ? `${routeResult.hop_count} Hops` : 'Blocked'}
+          </span>
+
           <div className="theme-toggle-group" role="group" aria-label="Theme selection">
             <button
               type="button"
               className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
               onClick={() => setTheme('dark')}
               id="theme-dark-btn"
-              title="Graphite/Navy Dark Mode"
+              title="Dark Mode"
             >
-              🌙 Dark
+              🌙
             </button>
             <button
               type="button"
               className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
               onClick={() => setTheme('light')}
               id="theme-light-btn"
-              title="Clean Slate Light Mode"
+              title="Light Mode"
             >
-              ☀️ Light
+              ☀️
             </button>
             <button
               type="button"
               className={`theme-btn ${theme === 'high-contrast' ? 'active' : ''}`}
               onClick={() => setTheme('high-contrast')}
               id="theme-hc-btn"
-              title="High-Contrast Mode (WCAG AAA)"
+              title="High Contrast"
             >
-              👁️ High Contrast
+              👁️
             </button>
           </div>
-          <button className="btn btn-secondary btn-sm" onClick={handleReset} id="btn-header-reset">
-            ↺ Reset Graph
+
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={handleReset}
+            id="btn-header-reset"
+            title="Reset network to initial default state"
+          >
+            ↺ Reset
           </button>
-          <button className="btn btn-primary btn-sm" onClick={handleExportSVG} id="btn-export-svg">
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={handleExportSVG}
+            id="btn-export-svg"
+            title="Export authoritative SVG graphic from C engine"
+          >
             ↓ Export SVG
+          </button>
+
+          {/* Right panel collapse toggle */}
+          <button
+            type="button"
+            className={`btn-panel-toggle ${rightPanelOpen ? 'active' : ''}`}
+            onClick={() => setRightPanelOpen(!rightPanelOpen)}
+            title={rightPanelOpen ? 'Collapse Right Inspector' : 'Expand Right Inspector'}
+            aria-label="Toggle Inspector Panel"
+          >
+            📊
           </button>
         </div>
       </header>
 
-      {/* 2. Main Content Grid */}
-      <main className="main-content">
-        {/* Panel A: Left Control Panel */}
-        <section className="panel-card control-panel" aria-label="Control Panel">
-          <div className="card-title">
-            <span>Network Controls</span>
-            <span className={`status-pill ${routeResult?.found ? 'success' : 'error'}`}>
-              {routeResult?.found ? 'Connected' : 'Route Blocked'}
-            </span>
-          </div>
+      {/* 2. Main Geospatial Content Area */}
+      <main className="main-content-layout">
+        {/* Panel A: Left Collapsible Control Panel */}
+        <aside
+          className={`sidebar-panel left-panel ${leftPanelOpen ? 'open' : 'collapsed'}`}
+          aria-label="Network Controls"
+        >
+          <div className="sidebar-inner">
+            <div className="sidebar-header">
+              <span className="sidebar-title">Network Controls</span>
+              <span className="sidebar-tag">{graphMode === 'campus' ? '13 Venues' : '12 Nodes'}</span>
+            </div>
 
-          {/* Mode Selector Switch */}
-          <div className="mode-selector-container">
-            <label className="mode-selector-label" htmlFor="mode-campus-btn">Graph Environment Mode</label>
-            <div className="mode-switch-group" role="group" aria-label="Graph Environment Mode">
+            {/* Section 1: Route Planner */}
+            <div className="control-section">
+              <div className="section-title">
+                <span>📍 Route Planner</span>
+              </div>
+
+              <div className="control-group">
+                <label className="control-label" htmlFor="src-select">
+                  <span>Source Venue</span>
+                  <span className="badge-src">[SRC]</span>
+                </label>
+                <select
+                  id="src-select"
+                  className="form-select"
+                  value={srcVertex}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setSrcVertex(val);
+                    setSelectedVertexId(val);
+                    if (bridge) recomputeAll(bridge, val, dstVertex, useMatrix);
+                  }}
+                >
+                  {graph?.vertices.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.id}: {v.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="control-group">
+                <label className="control-label" htmlFor="dst-select">
+                  <span>Destination Venue</span>
+                  <span className="badge-dst">[DST]</span>
+                </label>
+                <select
+                  id="dst-select"
+                  className="form-select"
+                  value={dstVertex}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setDstVertex(val);
+                    setSelectedVertexId(val);
+                    if (bridge) recomputeAll(bridge, srcVertex, val, useMatrix);
+                  }}
+                >
+                  {graph?.vertices.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.id}: {v.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button
                 type="button"
-                className={`mode-btn ${graphMode === 'campus' ? 'active' : ''}`}
-                onClick={() => handleSwitchMode('campus')}
-                id="mode-campus-btn"
+                className="btn btn-primary btn-block"
+                onClick={handleFindRoute}
+                id="btn-find-route"
               >
-                🏛️ MUJ Campus Demo
-              </button>
-              <button
-                type="button"
-                className={`mode-btn ${graphMode === 'f1' ? 'active' : ''}`}
-                onClick={() => handleSwitchMode('f1')}
-                id="mode-f1-btn"
-              >
-                📐 F1 Reference Graph
+                🔍 Find Minimum-Hop Route
               </button>
             </div>
-          </div>
 
-          {/* Source / Destination Selectors */}
-          <div className="control-group">
-            <label className="control-label" htmlFor="src-select">
-              <span>Source Vertex</span>
-              <span style={{ color: 'var(--emerald)' }}>[SRC]</span>
-            </label>
-            <select
-              id="src-select"
-              className="form-select"
-              value={srcVertex}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setSrcVertex(val);
-                setSelectedVertexId(val);
-                if (bridge) recomputeAll(bridge, val, dstVertex, useMatrix);
-              }}
-            >
-              {graph?.vertices.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.id}: {v.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label" htmlFor="dst-select">
-              <span>Destination Vertex</span>
-              <span style={{ color: 'var(--cyan)' }}>[DST]</span>
-            </label>
-            <select
-              id="dst-select"
-              className="form-select"
-              value={dstVertex}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setDstVertex(val);
-                setSelectedVertexId(val);
-                if (bridge) recomputeAll(bridge, srcVertex, val, useMatrix);
-              }}
-            >
-              {graph?.vertices.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.id}: {v.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Selected Location / Venue Details */}
-          {selectedVertex && (
-            <div className="venue-detail-card" id="venue-detail-card">
-              <div className="venue-detail-title">
-                <span>Node #{selectedVertex.id}: {selectedVertex.label}</span>
-                {selectedVertex.id === srcVertex && <span className="status-pill success">SRC</span>}
-                {selectedVertex.id === dstVertex && <span className="status-pill info">DST</span>}
+            {/* Section 2: Graph Algorithms */}
+            <div className="control-section">
+              <div className="section-title">
+                <span>⚡ Graph Algorithms</span>
               </div>
-              <div className="venue-detail-desc">
-                {selectedVertex.full_name || selectedVertex.label}
-              </div>
-              <div className="venue-detail-meta">
-                <span>Coords: ({selectedVertex.x}, {selectedVertex.y})</span>
-                <span>Degree: {selectedVertexIncidentEdges.length}</span>
-              </div>
-              <div className="venue-detail-actions">
+              <div className="button-stack">
                 <button
                   type="button"
-                  className="btn btn-sm btn-secondary"
-                  onClick={() => {
-                    setSrcVertex(selectedVertex.id);
-                    if (bridge) recomputeAll(bridge, selectedVertex.id, dstVertex, useMatrix);
-                  }}
-                  id="btn-set-src"
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleRunBFS}
+                  id="btn-run-bfs"
                 >
-                  Set as SRC
+                  Run BFS Traversal
                 </button>
                 <button
                   type="button"
-                  className="btn btn-sm btn-secondary"
-                  onClick={() => {
-                    setDstVertex(selectedVertex.id);
-                    if (bridge) recomputeAll(bridge, srcVertex, selectedVertex.id, useMatrix);
-                  }}
-                  id="btn-set-dst"
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleRunDFS}
+                  id="btn-run-dfs"
                 >
-                  Set as DST
+                  Run DFS Traversal
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleShowComponents}
+                  id="btn-show-components"
+                >
+                  Analyze Connected Components
                 </button>
               </div>
             </div>
-          )}
 
-          {/* Representation Switch */}
-          <div className="control-group">
-            <label className="control-label">
-              <span>Graph Representation</span>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                {useMatrix ? 'O(V²) Scans' : 'O(V+E) Lists'}
-              </span>
-            </label>
-            <div className="seg-switch">
-              <button
-                className={`seg-btn ${!useMatrix ? 'active' : ''}`}
-                onClick={() => handleRepresentationChange(false)}
-                id="btn-rep-list"
-              >
-                Adjacency List
-              </button>
-              <button
-                className={`seg-btn ${useMatrix ? 'active' : ''}`}
-                onClick={() => handleRepresentationChange(true)}
-                id="btn-rep-matrix"
-              >
-                Adjacency Matrix
-              </button>
-            </div>
-          </div>
+            {/* Section 3: Failure Simulation */}
+            <div className="control-section">
+              <div className="section-title">
+                <span>🚧 Failure Simulation</span>
+                <span style={{ fontSize: '11px', color: 'var(--amber)' }}>
+                  {closedEdgeCount > 0 ? `${closedEdgeCount} Severed` : 'All Active'}
+                </span>
+              </div>
 
-          {/* Primary Traversal Actions */}
-          <div className="control-group" style={{ gap: '8px' }}>
-            <button className="btn btn-primary" onClick={handleRunBFS} id="btn-run-bfs">
-              Run BFS Traversal
-            </button>
-            <button className="btn btn-secondary" onClick={handleRunDFS} id="btn-run-dfs">
-              Run DFS Traversal
-            </button>
-            <button className="btn btn-secondary" onClick={handleFindRoute} id="btn-find-route">
-              Find Minimum-Hop Route
-            </button>
-            <button className="btn btn-secondary" onClick={handleShowComponents} id="btn-show-components">
-              Analyze Connected Components
-            </button>
-          </div>
+              {/* Quick toggle dropdown */}
+              <div className="control-group">
+                <label className="control-label" htmlFor="select-toggle-edge">
+                  <span>Toggle Walkway</span>
+                </label>
+                <select
+                  className="form-select"
+                  value=""
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    if (!isNaN(id)) handleToggleEdge(id);
+                  }}
+                  id="select-toggle-edge"
+                >
+                  <option value="" disabled>
+                    Select walkway to toggle...
+                  </option>
+                  {graph?.edges.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      e{e.id}: {graph.vertices[e.u]?.label} ↔ {graph.vertices[e.v]?.label} ({e.active ? 'ACTIVE' : 'CLOSED'})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Quick Scenario Buttons - Tailored per mode */}
-          <div className="control-group">
-            <label className="control-label">
-              <span>Failure Scenarios ({graphMode === 'campus' ? 'Campus Demo' : 'F1 Reference'})</span>
-            </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {graphMode === 'campus' ? (
-                <>
-                  <button
-                    className={`btn btn-sm ${graph?.edges[6]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                    onClick={() => handleToggleEdge(6)}
-                    id="btn-scenario-campus-e6"
-                  >
-                    {graph?.edges[6]?.active
-                      ? 'Sever e6 (AB1↔AB3 Cut → Reroute via LHC)'
-                      : 'Restore e6 (Reconnect AB1↔AB3)'}
-                  </button>
-                  <button
-                    className={`btn btn-sm ${graph?.edges[12]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                    onClick={() => {
-                      handleToggleEdge(12);
-                      setDstVertex(9);
-                      if (bridge) recomputeAll(bridge, srcVertex, 9, useMatrix);
-                    }}
-                    id="btn-scenario-campus-e12"
-                  >
-                    {graph?.edges[12]?.active
-                      ? 'Sever e12 (LHC↔Football Cut → Disconnect Sports)'
-                      : 'Restore e12 (Reconnect Sports Zone)'}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    className={`btn btn-sm ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                    onClick={() => handleToggleEdge(9)}
-                    id="btn-scenario-f1-e9"
-                  >
-                    {graph?.edges[9]?.active ? 'Sever e9 (Cut Critical Link 6↔7)' : 'Restore e9 (Reconnect 6↔7)'}
-                  </button>
-                  <button
-                    className={`btn btn-sm ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                    onClick={() => handleToggleEdge(5)}
-                    id="btn-scenario-f1-e5"
-                  >
-                    {graph?.edges[5]?.active ? 'Sever e5 (Simulate Block A Cut)' : 'Restore e5 (Direct Route)'}
-                  </button>
-                </>
-              )}
-              <button className="btn btn-secondary btn-sm" onClick={handleReset} id="btn-restore-all">
-                Restore All Walkways (Reset)
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Edge Mutation Dropdown */}
-          <div className="control-group">
-            <label className="control-label" htmlFor="select-toggle-edge">
-              <span>Toggle Specific Walkway</span>
-            </label>
-            <select
-              className="form-select"
-              value=""
-              onChange={(e) => {
-                const id = Number(e.target.value);
-                if (!isNaN(id)) handleToggleEdge(id);
-              }}
-              id="select-toggle-edge"
-            >
-              <option value="" disabled>
-                Select a walkway to toggle...
-              </option>
-              {graph?.edges.map((e) => (
-                <option key={e.id} value={e.id}>
-                  e{e.id}: {graph.vertices[e.u]?.label} ↔ {graph.vertices[e.v]?.label} ({e.active ? 'ACTIVE' : 'CLOSED'})
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-
-        {/* Panel B: Central Graph Canvas */}
-        <section className="canvas-card" aria-label="Interactive Network Canvas">
-          <div className="canvas-toolbar">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {graphMode === 'campus' ? 'MUJ Campus Wayfinding Topology' : 'F1 Benchmark Graph Topology'}
-              </span>
-              <span className="status-pill success">
-                {graphMode === 'campus' ? 'MUJ Campus (12 Venues)' : 'F1 Fixture (12 Nodes)'}
-              </span>
+              {/* Mode-specific quick scenarios */}
+              <div className="scenario-stack">
+                {graphMode === 'campus' ? (
+                  <>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${graph?.edges[6]?.active ? 'btn-danger' : 'btn-success'}`}
+                      onClick={() => handleToggleEdge(6)}
+                      id="btn-scenario-campus-e6"
+                    >
+                      {graph?.edges[6]?.active
+                        ? 'Sever e6 (AB1↔AB3 Cut → Reroute via LHC)'
+                        : 'Restore e6 (Reconnect AB1↔AB3)'}
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${graph?.edges[12]?.active ? 'btn-danger' : 'btn-success'}`}
+                      onClick={() => {
+                        handleToggleEdge(12);
+                        setDstVertex(9);
+                        if (bridge) recomputeAll(bridge, srcVertex, 9, useMatrix);
+                      }}
+                      id="btn-scenario-campus-e12"
+                    >
+                      {graph?.edges[12]?.active
+                        ? 'Sever e12 (LHC↔Football Cut → Disconnect Sports)'
+                        : 'Restore e12 (Reconnect Sports Zone)'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-success'}`}
+                      onClick={() => handleToggleEdge(9)}
+                      id="btn-scenario-f1-e9"
+                    >
+                      {graph?.edges[9]?.active ? 'Sever e9 (Cut Critical Link 6↔7)' : 'Restore e9 (Reconnect 6↔7)'}
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-success'}`}
+                      onClick={() => handleToggleEdge(5)}
+                      id="btn-scenario-f1-e5"
+                    >
+                      {graph?.edges[5]?.active ? 'Sever e5 (Simulate Block A Cut)' : 'Restore e5 (Direct Route)'}
+                    </button>
+                  </>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleReset}
+                  id="btn-restore-all"
+                >
+                  ↺ Restore All Walkways
+                </button>
+              </div>
             </div>
 
-            <div className="legend-bar">
-              <div className="legend-item">
-                <div className="legend-indicator active-edge"></div>
+            {/* Section 4: Graph Representation Switch */}
+            <div className="control-section">
+              <div className="section-title">
+                <span>⚙️ Storage Representation</span>
+              </div>
+              <div className="seg-switch" role="group" aria-label="Graph Data Structure Representation">
+                <button
+                  type="button"
+                  className={`seg-btn ${!useMatrix ? 'active' : ''}`}
+                  onClick={() => handleRepresentationChange(false)}
+                  id="btn-rep-list"
+                >
+                  Adjacency List
+                </button>
+                <button
+                  type="button"
+                  className={`seg-btn ${useMatrix ? 'active' : ''}`}
+                  onClick={() => handleRepresentationChange(true)}
+                  id="btn-rep-matrix"
+                >
+                  Adjacency Matrix
+                </button>
+              </div>
+              <div className="rep-complexity-caption">
+                {useMatrix ? (
+                  <span>
+                    Matrix: <strong style={{ color: 'var(--amber)' }}>O(V²)</strong> = {((graph?.n_vertices ?? 0) * (graph?.n_vertices ?? 0))} cells.
+                    Examines all columns.
+                  </span>
+                ) : (
+                  <span>
+                    List: <strong style={{ color: 'var(--emerald)' }}>O(V + E)</strong> = {graph?.n_vertices ?? 0} heads + {((graph?.n_edges ?? 0) * 2)} nodes.
+                    Examines incident edges only.
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Panel B: Center Viewport (Map-Centric Canvas, 65-75% width) */}
+        <section className="center-viewport" aria-label="Campus Network Viewport">
+          {/* Main Visualizer: Campus Map (MapLibre) or F1 Benchmark Graph (SVG) */}
+          <div className="canvas-container">
+            {graphMode === 'campus' ? (
+              <CampusMap
+                graph={graph}
+                srcVertex={srcVertex}
+                dstVertex={dstVertex}
+                selectedVertexId={selectedVertexId}
+                routeResult={routeResult}
+                traversalResult={traversalResult}
+                theme={theme}
+                onSelectVertex={(vId) => {
+                  setSelectedVertexId(vId);
+                  setInspectorTab('venue');
+                }}
+                onSetSource={(vId) => {
+                  setSrcVertex(vId);
+                  if (bridge) recomputeAll(bridge, vId, dstVertex, useMatrix);
+                }}
+                onSetDestination={(vId) => {
+                  setDstVertex(vId);
+                  if (bridge) recomputeAll(bridge, srcVertex, vId, useMatrix);
+                }}
+                onToggleEdge={handleToggleEdge}
+                onOpenSchematic={() => {
+                  setGalleryTab('schematic');
+                  setShowGallery(true);
+                }}
+              />
+            ) : (
+              /* F1 Reference Fixture SVG Canvas */
+              <div className="f1-canvas-wrapper">
+                <div className="f1-toolbar">
+                  <span className="status-pill info">📐 F1 Benchmark Fixture (12 Vertices, 13 Edges)</span>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    Standard deterministic test benchmark for CSC2101 validation.
+                  </span>
+                </div>
+                <div className="svg-canvas-wrapper">
+                  <svg
+                    className="svg-canvas"
+                    viewBox="0 0 1180 430"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    role="region"
+                    aria-label="F1 Graph Canvas"
+                  >
+                    <defs>
+                      <filter id="f1-glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                      <filter id="f1-glow-red" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                    </defs>
+
+                    {/* Edge Connections */}
+                    {graph?.edges.map((e) => {
+                      const uNode = graph.vertices[e.u];
+                      const vNode = graph.vertices[e.v];
+                      if (!uNode || !vNode) return null;
+
+                      const edgeKey = `${e.u}-${e.v}`;
+                      const routeHop = routeEdgeMap.get(edgeKey);
+                      const isHovered = hoveredEdge === e.id;
+                      const midX = (uNode.x + vNode.x) / 2;
+                      const midY = (uNode.y + vNode.y) / 2;
+
+                      return (
+                        <g
+                          key={`f1-edge-${e.id}`}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Edge e${e.id} between ${uNode.label} and ${vNode.label}`}
+                          onClick={() => handleToggleEdge(e.id)}
+                          onKeyDown={(evt) => {
+                            if (evt.key === 'Enter' || evt.key === ' ') {
+                              evt.preventDefault();
+                              handleToggleEdge(e.id);
+                            }
+                          }}
+                          onMouseEnter={() => setHoveredEdge(e.id)}
+                          onMouseLeave={() => setHoveredEdge(null)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <line
+                            x1={uNode.x}
+                            y1={uNode.y}
+                            x2={vNode.x}
+                            y2={vNode.y}
+                            stroke="transparent"
+                            strokeWidth={18}
+                          />
+
+                          {!e.active ? (
+                            <>
+                              <line
+                                x1={uNode.x}
+                                y1={uNode.y}
+                                x2={vNode.x}
+                                y2={vNode.y}
+                                stroke="#ef4444"
+                                strokeWidth={2.5}
+                                strokeDasharray="6,4"
+                                filter={isHovered ? 'url(#f1-glow-red)' : undefined}
+                              />
+                              <rect
+                                x={midX - 26}
+                                y={midY - 9}
+                                width={52}
+                                height={18}
+                                rx={4}
+                                fill="#ef4444"
+                                stroke="#991b1b"
+                              />
+                              <text
+                                x={midX}
+                                y={midY + 4}
+                                fill="#ffffff"
+                                fontSize={10}
+                                fontWeight="bold"
+                                textAnchor="middle"
+                                fontFamily="var(--font-mono)"
+                              >
+                                CLOSED
+                              </text>
+                            </>
+                          ) : routeHop !== undefined ? (
+                            <>
+                              <line
+                                x1={uNode.x}
+                                y1={uNode.y}
+                                x2={vNode.x}
+                                y2={vNode.y}
+                                stroke="#38bdf8"
+                                strokeWidth={isHovered ? 5 : 4}
+                                filter="url(#f1-glow-cyan)"
+                              />
+                              <circle
+                                cx={midX}
+                                cy={midY}
+                                r={10}
+                                fill="#0284c7"
+                                stroke="#38bdf8"
+                                strokeWidth={1.5}
+                              />
+                              <text
+                                x={midX}
+                                y={midY + 3.5}
+                                fill="#ffffff"
+                                fontSize={10}
+                                fontWeight="bold"
+                                textAnchor="middle"
+                                fontFamily="var(--font-mono)"
+                              >
+                                {routeHop}
+                              </text>
+                            </>
+                          ) : (
+                            <line
+                              x1={uNode.x}
+                              y1={uNode.y}
+                              x2={vNode.x}
+                              y2={vNode.y}
+                              stroke={isHovered ? 'var(--edge-hover)' : 'var(--edge-stroke)'}
+                              strokeWidth={isHovered ? 3 : 2}
+                            />
+                          )}
+                        </g>
+                      );
+                    })}
+
+                    {/* Vertices */}
+                    {graph?.vertices.map((v) => {
+                      const isSrc = v.id === srcVertex;
+                      const isDst = v.id === dstVertex;
+                      const isSelected = v.id === selectedVertexId;
+                      const isReached = reachedSet.has(v.id);
+                      const isHovered = hoveredVertex === v.id;
+
+                      let fillColor = 'var(--node-fill)';
+                      let strokeColor = 'var(--node-stroke)';
+                      let strokeWidth = 2;
+
+                      if (isSrc) {
+                        fillColor = '#065f46';
+                        strokeColor = '#10b981';
+                        strokeWidth = 3;
+                      } else if (isDst) {
+                        fillColor = '#075985';
+                        strokeColor = '#38bdf8';
+                        strokeWidth = 3;
+                      } else if (!isReached) {
+                        fillColor = 'var(--bg-app)';
+                        strokeColor = 'var(--rose)';
+                      }
+
+                      return (
+                        <g
+                          key={`f1-node-${v.id}`}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Node ${v.id}: ${v.label}`}
+                          onClick={() => {
+                            setSelectedVertexId(v.id);
+                            setInspectorTab('venue');
+                            if (v.id !== srcVertex) {
+                              setDstVertex(v.id);
+                              if (bridge) recomputeAll(bridge, srcVertex, v.id, useMatrix);
+                            }
+                          }}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            setSelectedVertexId(v.id);
+                            setSrcVertex(v.id);
+                            if (bridge) recomputeAll(bridge, v.id, dstVertex, useMatrix);
+                          }}
+                          onMouseEnter={() => setHoveredVertex(v.id)}
+                          onMouseLeave={() => setHoveredVertex(null)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {(isSrc || isDst || isSelected || isHovered) && (
+                            <circle
+                              cx={v.x}
+                              cy={v.y}
+                              r={24}
+                              fill="none"
+                              stroke={isSrc ? '#10b981' : isDst ? '#38bdf8' : isSelected ? 'var(--cyan)' : 'var(--border-medium)'}
+                              strokeWidth={isSelected ? 2 : 1.5}
+                              strokeDasharray={isHovered ? '3,3' : undefined}
+                            />
+                          )}
+
+                          <circle
+                            cx={v.x}
+                            cy={v.y}
+                            r={18}
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={!isReached ? '4,3' : undefined}
+                          />
+
+                          <text
+                            x={v.x}
+                            y={v.y + 4.5}
+                            fill="var(--node-text)"
+                            fontSize={12}
+                            fontWeight="bold"
+                            textAnchor="middle"
+                            fontFamily="var(--font-mono)"
+                          >
+                            {v.id}
+                          </text>
+
+                          <g transform={`translate(${v.x}, ${v.y + 24})`}>
+                            <rect
+                              x={-45}
+                              y={0}
+                              width={90}
+                              height={18}
+                              rx={4}
+                              fill="var(--bg-surface)"
+                              stroke="var(--border-medium)"
+                              opacity={0.95}
+                            />
+                            <text
+                              x={0}
+                              y={12.5}
+                              fill="var(--text-main)"
+                              fontSize={10.5}
+                              fontWeight="600"
+                              textAnchor="middle"
+                            >
+                              {v.label}
+                            </text>
+                          </g>
+
+                          {isSrc && (
+                            <g transform={`translate(${v.x}, ${v.y - 25})`}>
+                              <rect x={-16} y={0} width={32} height={14} rx={3} fill="#10b981" />
+                              <text x={0} y={10.5} fill="#040914" fontSize={9} fontWeight="800" textAnchor="middle">
+                                SRC
+                              </text>
+                            </g>
+                          )}
+                          {isDst && (
+                            <g transform={`translate(${v.x}, ${v.y - 25})`}>
+                              <rect x={-16} y={0} width={32} height={14} rx={3} fill="#38bdf8" />
+                              <text x={0} y={10.5} fill="#040914" fontSize={9} fontWeight="800" textAnchor="middle">
+                                DST
+                              </text>
+                            </g>
+                          )}
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+              </div>
+            )}
+
+            {/* Floating Route Summary Strip */}
+            <div className="route-summary-strip" id="route-summary-strip">
+              <div className="strip-item">
+                <span className="strip-label">Route</span>
+                <span className="strip-value highlight">
+                  {routeResult?.found ? `${routeResult.hop_count} Hops` : 'Severed / Blocked'}
+                </span>
+              </div>
+              <div className="strip-divider"></div>
+              <div className="strip-item strip-path-box">
+                <span className="strip-label">Walkway Path</span>
+                <div className="strip-path-scroll">
+                  {routeResult?.found && routeResult.path.length > 0 ? (
+                    routeResult.path.map((vId, idx) => (
+                      <React.Fragment key={`strip-v-${vId}-${idx}`}>
+                        <span
+                          className={`strip-node-chip ${vId === srcVertex ? 'src' : vId === dstVertex ? 'dst' : ''}`}
+                          onClick={() => {
+                            setSelectedVertexId(vId);
+                            setInspectorTab('venue');
+                          }}
+                        >
+                          {vId}: {graph?.vertices[vId]?.label}
+                        </span>
+                        {idx < routeResult.path.length - 1 && <span className="strip-arrow">→</span>}
+                      </React.Fragment>
+                    ))
+                  ) : (
+                    <span style={{ color: 'var(--rose)', fontSize: '12px' }}>
+                      No active path connects Vertex {srcVertex} to Vertex {dstVertex}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="strip-divider"></div>
+              <div className="strip-item">
+                <span className="strip-label">Representation</span>
+                <span className="strip-value">
+                  {useMatrix ? 'Matrix O(V²)' : 'List O(V+E)'}
+                </span>
+              </div>
+              <div className="strip-divider"></div>
+              <div className="strip-item">
+                <span className="strip-label">Components</span>
+                <span className="strip-value">
+                  {networkState?.component_count ?? 1} {networkState?.component_count === 1 ? '(Connected)' : '(Severed)'}
+                </span>
+              </div>
+            </div>
+
+            {/* Corner Map Legend */}
+            <div className="map-legend-corner" aria-label="Map Legend">
+              <div className="legend-row">
+                <span className="legend-dot active-edge"></span>
                 <span>Active Walkway</span>
               </div>
-              <div className="legend-item">
-                <div className="legend-indicator closed-edge"></div>
-                <span style={{ color: 'var(--rose)' }}>Closed (Dashed)</span>
+              <div className="legend-row">
+                <span className="legend-dot closed-edge"></span>
+                <span>Closed / Blocked</span>
               </div>
-              <div className="legend-item">
-                <div className="legend-indicator route-edge"></div>
-                <span style={{ color: 'var(--cyan)' }}>Route Hops</span>
+              <div className="legend-row">
+                <span className="legend-dot route-edge"></span>
+                <span>Optimal Route Hop</span>
               </div>
-              <div className="legend-item">
-                <div className="legend-indicator src-node"></div>
+              <div className="legend-row">
+                <span className="legend-dot src-node"></span>
                 <span>Source</span>
               </div>
-              <div className="legend-item">
-                <div className="legend-indicator dst-node"></div>
+              <div className="legend-row">
+                <span className="legend-dot dst-node"></span>
                 <span>Destination</span>
               </div>
             </div>
-
-            {graphMode === 'campus' && (
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setShowGallery(true)}
-                id="btn-open-gallery"
-                style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                <span>🗺️ Reference Maps &amp; Satellites</span>
-              </button>
-            )}
           </div>
-
-          {/* Mandatory Presentation Disclaimer in Campus Mode */}
-          {graphMode === 'campus' && (
-            <div className="campus-model-disclaimer" id="campus-disclaimer">
-              <span style={{ fontSize: '14px' }}>📌</span>
-              <span>
-                <strong>Illustrative graph model — connections are simplified for DSA demonstration and are not verified pedestrian directions.</strong>
-              </span>
-            </div>
-          )}
-
-          {/* Interactive SVG Network Map */}
-          <div className="svg-canvas-wrapper">
-            <svg
-              className="svg-canvas"
-              viewBox={graphMode === 'campus' ? '0 0 2048 1448' : '0 0 1180 430'}
-              preserveAspectRatio="xMidYMid meet"
-              xmlns="http://www.w3.org/2000/svg"
-              role="region"
-              aria-label="Campus Graph Canvas"
-            >
-              <defs>
-                <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-                <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="4" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-              </defs>
-
-              {/* Primary Interactive Wayfinding Schematic Layer */}
-              {graphMode === 'campus' && (
-                <image
-                  href="/maps/muj-campus-wayfinding-schematic.png"
-                  x="0"
-                  y="0"
-                  width="2048"
-                  height="1448"
-                  preserveAspectRatio="xMidYMid meet"
-                  opacity={theme === 'dark' ? 0.76 : theme === 'high-contrast' ? 0.55 : 0.95}
-                />
-              )}
-
-              {/* Edge Connections */}
-              {graph?.edges.map((e) => {
-                const uNode = graph.vertices[e.u];
-                const vNode = graph.vertices[e.v];
-                if (!uNode || !vNode) return null;
-
-                const edgeKey = `${e.u}-${e.v}`;
-                const routeHop = routeEdgeMap.get(edgeKey);
-                const isHovered = hoveredEdge === e.id;
-                const isCampus = graphMode === 'campus';
-
-                const midX = (uNode.x + vNode.x) / 2;
-                const midY = (uNode.y + vNode.y) / 2;
-
-                return (
-                  <g
-                    key={`edge-${e.id}`}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Walkway e${e.id} between ${uNode.label} and ${vNode.label}, ${e.active ? 'Active' : 'Closed'}`}
-                    onClick={() => handleToggleEdge(e.id)}
-                    onKeyDown={(evt) => {
-                      if (evt.key === 'Enter' || evt.key === ' ') {
-                        evt.preventDefault();
-                        handleToggleEdge(e.id);
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredEdge(e.id)}
-                    onMouseLeave={() => setHoveredEdge(null)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {/* Wider transparent hit-area */}
-                    <line
-                      x1={uNode.x}
-                      y1={uNode.y}
-                      x2={vNode.x}
-                      y2={vNode.y}
-                      stroke="transparent"
-                      strokeWidth={isCampus ? 28 : 18}
-                    />
-
-                    {/* Visible line */}
-                    {!e.active ? (
-                      /* Disabled / Closed edge */
-                      <>
-                        <line
-                          x1={uNode.x}
-                          y1={uNode.y}
-                          x2={vNode.x}
-                          y2={vNode.y}
-                          stroke="#ef4444"
-                          strokeWidth={isCampus ? 4 : 2.5}
-                          strokeDasharray={isCampus ? '10,6' : '6,4'}
-                          filter={isHovered ? 'url(#glow-red)' : undefined}
-                        />
-                        {/* CLOSED text badge */}
-                        <rect
-                          x={midX - (isCampus ? 36 : 26)}
-                          y={midY - (isCampus ? 12 : 9)}
-                          width={isCampus ? 72 : 52}
-                          height={isCampus ? 24 : 18}
-                          rx={isCampus ? 6 : 4}
-                          fill="#ef4444"
-                          stroke="#991b1b"
-                        />
-                        <text
-                          x={midX}
-                          y={midY + (isCampus ? 5.5 : 4)}
-                          fill="#ffffff"
-                          fontSize={isCampus ? 13 : 10}
-                          fontWeight="bold"
-                          textAnchor="middle"
-                          fontFamily="var(--font-mono)"
-                        >
-                          CLOSED
-                        </text>
-                      </>
-                    ) : routeHop !== undefined ? (
-                      /* Active Route Hop */
-                      <>
-                        <line
-                          x1={uNode.x}
-                          y1={uNode.y}
-                          x2={vNode.x}
-                          y2={vNode.y}
-                          stroke="#38bdf8"
-                          strokeWidth={isCampus ? (isHovered ? 8 : 6) : isHovered ? 5 : 4}
-                          filter="url(#glow-cyan)"
-                        />
-                        {/* Numbered Hop Badge */}
-                        <circle
-                          cx={midX}
-                          cy={midY}
-                          r={isCampus ? 14 : 10}
-                          fill="#0284c7"
-                          stroke="#38bdf8"
-                          strokeWidth={isCampus ? 2 : 1.5}
-                        />
-                        <text
-                          x={midX}
-                          y={midY + (isCampus ? 4.5 : 3.5)}
-                          fill="#ffffff"
-                          fontSize={isCampus ? 13 : 10}
-                          fontWeight="bold"
-                          textAnchor="middle"
-                          fontFamily="var(--font-mono)"
-                        >
-                          {routeHop}
-                        </text>
-                      </>
-                    ) : (
-                      /* Standard active edge */
-                      <line
-                        x1={uNode.x}
-                        y1={uNode.y}
-                        x2={vNode.x}
-                        y2={vNode.y}
-                        stroke={isHovered ? 'var(--edge-hover)' : 'var(--edge-stroke)'}
-                        strokeWidth={isCampus ? (isHovered ? 5 : 3.5) : isHovered ? 3 : 2}
-                      />
-                    )}
-                  </g>
-                );
-              })}
-
-              {/* Vertices */}
-              {graph?.vertices.map((v) => {
-                const isSrc = v.id === srcVertex;
-                const isDst = v.id === dstVertex;
-                const isSelected = v.id === selectedVertexId;
-                const isReached = reachedSet.has(v.id);
-                const isHovered = hoveredVertex === v.id;
-                const isCampus = graphMode === 'campus';
-
-                let fillColor = 'var(--node-fill)';
-                let strokeColor = 'var(--node-stroke)';
-                let strokeWidth = isCampus ? 2.8 : 2;
-
-                if (isSrc) {
-                  fillColor = '#065f46';
-                  strokeColor = '#10b981';
-                  strokeWidth = isCampus ? 4 : 3;
-                } else if (isDst) {
-                  fillColor = '#075985';
-                  strokeColor = '#38bdf8';
-                  strokeWidth = isCampus ? 4 : 3;
-                } else if (!isReached) {
-                  fillColor = 'var(--bg-app)';
-                  strokeColor = 'var(--rose)';
-                }
-
-                const badgeHalfWidth = Math.max(
-                  isCampus ? 66 : 50,
-                  v.label.length * (isCampus ? 5.2 : 4.2)
-                );
-
-                return (
-                  <g
-                    key={`vertex-${v.id}`}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Vertex ${v.id}: ${v.full_name || v.label}. ${isSrc ? 'Source' : isDst ? 'Destination' : isReached ? 'Reached' : 'Unreached'}`}
-                    onClick={() => {
-                      setSelectedVertexId(v.id);
-                      if (v.id !== srcVertex) {
-                        setDstVertex(v.id);
-                        if (bridge) recomputeAll(bridge, srcVertex, v.id, useMatrix);
-                      }
-                    }}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      setSelectedVertexId(v.id);
-                      setSrcVertex(v.id);
-                      if (bridge) recomputeAll(bridge, v.id, dstVertex, useMatrix);
-                    }}
-                    onKeyDown={(evt) => {
-                      if (evt.key === 'Enter' || evt.key === ' ') {
-                        evt.preventDefault();
-                        setSelectedVertexId(v.id);
-                        setDstVertex(v.id);
-                        if (bridge) recomputeAll(bridge, srcVertex, v.id, useMatrix);
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredVertex(v.id)}
-                    onMouseLeave={() => setHoveredVertex(null)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {/* Selection halo */}
-                    {(isSrc || isDst || isSelected || isHovered) && (
-                      <circle
-                        cx={v.x}
-                        cy={v.y}
-                        r={isCampus ? 34 : 24}
-                        fill="none"
-                        stroke={isSrc ? '#10b981' : isDst ? '#38bdf8' : isSelected ? 'var(--cyan)' : 'var(--border-medium)'}
-                        strokeWidth={isSelected ? (isCampus ? 3 : 2) : isCampus ? 2 : 1.5}
-                        strokeDasharray={isHovered ? '3,3' : undefined}
-                        opacity={0.9}
-                      />
-                    )}
-
-                    {/* Node circle */}
-                    <circle
-                      cx={v.x}
-                      cy={v.y}
-                      r={isCampus ? 24 : 18}
-                      fill={fillColor}
-                      stroke={strokeColor}
-                      strokeWidth={strokeWidth}
-                      strokeDasharray={!isReached ? '4,3' : undefined}
-                    />
-
-                    {/* Vertex ID text */}
-                    <text
-                      x={v.x}
-                      y={v.y + (isCampus ? 5.5 : 4.5)}
-                      fill="var(--node-text)"
-                      fontSize={isCampus ? 14 : 12}
-                      fontWeight="bold"
-                      textAnchor="middle"
-                      fontFamily="var(--font-mono)"
-                    >
-                      {v.id}
-                    </text>
-
-                    {/* Label Badge below vertex */}
-                    <g transform={`translate(${v.x}, ${v.y + (isCampus ? 30 : 24)})`}>
-                      <rect
-                        x={-badgeHalfWidth}
-                        y={0}
-                        width={badgeHalfWidth * 2}
-                        height={isCampus ? 22 : 18}
-                        rx={isCampus ? 5 : 4}
-                        fill="var(--bg-surface)"
-                        stroke="var(--border-medium)"
-                        opacity={0.95}
-                      />
-                      <text
-                        x={0}
-                        y={isCampus ? 15 : 12.5}
-                        fill="var(--text-main)"
-                        fontSize={isCampus ? 12.5 : 10.5}
-                        fontWeight="600"
-                        textAnchor="middle"
-                        fontFamily="var(--font-sans)"
-                      >
-                        {v.label}
-                      </text>
-                    </g>
-
-                    {/* Source / Destination / Unreached Badges */}
-                    {isSrc && (
-                      <g transform={`translate(${v.x}, ${v.y - (isCampus ? 33 : 25)})`}>
-                        <rect x={isCampus ? -20 : -16} y={0} width={isCampus ? 40 : 32} height={isCampus ? 18 : 14} rx={3} fill="#10b981" />
-                        <text x={0} y={isCampus ? 13 : 10.5} fill="#040914" fontSize={isCampus ? 11 : 9} fontWeight="800" textAnchor="middle">
-                          SRC
-                        </text>
-                      </g>
-                    )}
-
-                    {isDst && (
-                      <g transform={`translate(${v.x}, ${v.y - (isCampus ? 33 : 25)})`}>
-                        <rect x={isCampus ? -20 : -16} y={0} width={isCampus ? 40 : 32} height={isCampus ? 18 : 14} rx={3} fill="#38bdf8" />
-                        <text x={0} y={isCampus ? 13 : 10.5} fill="#040914" fontSize={isCampus ? 11 : 9} fontWeight="800" textAnchor="middle">
-                          DST
-                        </text>
-                      </g>
-                    )}
-
-                    {!isReached && !isSrc && (
-                      <g transform={`translate(${v.x}, ${v.y - (isCampus ? 33 : 25)})`}>
-                        <rect x={isCampus ? -42 : -34} y={0} width={isCampus ? 84 : 68} height={isCampus ? 18 : 14} rx={3} fill="var(--rose)" />
-                        <text x={0} y={isCampus ? 13 : 10.5} fill="#ffffff" fontSize={isCampus ? 10 : 8} fontWeight="800" textAnchor="middle">
-                          UNREACHED
-                        </text>
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
-          {/* Quick instructions underneath canvas */}
-          <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-            <span>Click any walkway to toggle closed/active state.</span>
-            <span>Click venue to view details &amp; set Destination; Right-click to set Source.</span>
-          </div>
-
-          {/* Supplemental Gallery Modal */}
-          {showGallery && (
-            <div className="gallery-modal-backdrop" onClick={() => setShowGallery(false)}>
-              <div className="gallery-modal-card" onClick={(e) => e.stopPropagation()}>
-                <div className="gallery-modal-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '18px' }}>🏛️</span>
-                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
-                      MUJ Campus Context &amp; Architectural References
-                    </h3>
-                  </div>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => setShowGallery(false)}
-                    id="btn-close-gallery"
-                  >
-                    ✕ Close
-                  </button>
-                </div>
-
-                <div className="gallery-tabs">
-                  <button
-                    className={`gallery-tab-btn ${galleryTab === 'masterplan' ? 'active' : ''}`}
-                    onClick={() => setGalleryTab('masterplan')}
-                  >
-                    Site Master Plan (Hafeez Contractor)
-                  </button>
-                  <button
-                    className={`gallery-tab-btn ${galleryTab === 'ab1_mess' ? 'active' : ''}`}
-                    onClick={() => setGalleryTab('ab1_mess')}
-                  >
-                    AB1 &amp; Old Mess Satellite
-                  </button>
-                  <button
-                    className={`gallery-tab-btn ${galleryTab === 'lhc_aic' ? 'active' : ''}`}
-                    onClick={() => setGalleryTab('lhc_aic')}
-                  >
-                    LHC &amp; AIC-MUJ Satellite
-                  </button>
-                  <button
-                    className={`gallery-tab-btn ${galleryTab === 'sports' ? 'active' : ''}`}
-                    onClick={() => setGalleryTab('sports')}
-                  >
-                    Football &amp; Sports Satellite
-                  </button>
-                </div>
-
-                <div className="gallery-image-viewport">
-                  {galleryTab === 'masterplan' && (
-                    <div className="gallery-item">
-                      <img
-                        src="/maps/muj-campus-masterplan.png"
-                        alt="MUJ Campus Master Site Plan by Architect Hafeez Contractor"
-                        className="gallery-img"
-                      />
-                      <p className="gallery-caption">
-                        <strong>Official Site Master Plan (Hafeez Contractor, AHC)</strong> — Division of Academic Zone (central axis along HT line) and Residential Zone, with numbered legend (1–9 Campus, 10–17 Hostel). Used as supplementary architectural context.
-                      </p>
-                    </div>
-                  )}
-                  {galleryTab === 'ab1_mess' && (
-                    <div className="gallery-item">
-                      <img
-                        src="/maps/muj-academic-block-old-mess-satellite.png"
-                        alt="Academic Block 1, Old Mess, Knowledge Centre Satellite"
-                        className="gallery-img"
-                      />
-                      <p className="gallery-caption">
-                        <strong>Academic Block 1 &amp; Old Mess Satellite View</strong> — Depicts Academic Block 1 (courtyard structure), Old Mess / Food Court, and Knowledge Centre. Map imagery &copy; Google Maps.
-                      </p>
-                    </div>
-                  )}
-                  {galleryTab === 'lhc_aic' && (
-                    <div className="gallery-item">
-                      <img
-                        src="/maps/muj-lecture-hall-aic-satellite.png"
-                        alt="Lecture Hall Complex, AIC-MUJ Satellite"
-                        className="gallery-img"
-                      />
-                      <p className="gallery-caption">
-                        <strong>Lecture Hall Complex &amp; AIC-MUJ Satellite View</strong> — Depicts large teaching halls (LHC), AIC-MUJ innovation center, and surrounding road corridors. Map imagery &copy; Google Maps.
-                      </p>
-                    </div>
-                  )}
-                  {galleryTab === 'sports' && (
-                    <div className="gallery-item">
-                      <img
-                        src="/maps/muj-football-ground-satellite.png"
-                        alt="MUJ Football Ground Satellite"
-                        className="gallery-img"
-                      />
-                      <p className="gallery-caption">
-                        <strong>MUJ Football Ground &amp; Sports Zone Satellite View</strong> — Depicts the football ground, cricket perimeter, and nearby Lecture Hall Complex. Map imagery &copy; Google Maps.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
         </section>
 
-        {/* Panel C: Right Results / Analysis Panel */}
-        <section className="panel-card results-panel" aria-label="Results and Metrics">
-          <div className="tab-bar">
-            <button
-              className={`tab-btn ${activeTab === 'routing' ? 'active' : ''}`}
-              onClick={() => setActiveTab('routing')}
-              id="tab-routing"
-            >
-              Route &amp; Traversals
-            </button>
-            <button
-              className={`tab-btn ${activeTab === 'metrics' ? 'active' : ''}`}
-              onClick={() => setActiveTab('metrics')}
-              id="tab-metrics"
-            >
-              C Counters
-            </button>
-            <button
-              className={`tab-btn ${activeTab === 'failureTable' ? 'active' : ''}`}
-              onClick={() => setActiveTab('failureTable')}
-              id="tab-failure-table"
-            >
-              Failure Table
-            </button>
-          </div>
-
-          {/* Tab 1: Routing & Traversals */}
-          {activeTab === 'routing' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {/* Route Summary Card */}
-              <div
-                style={{
-                  background: routeResult?.found ? 'rgba(56, 189, 248, 0.08)' : 'rgba(239, 68, 68, 0.1)',
-                  border: `1px solid ${routeResult?.found ? 'rgba(56, 189, 248, 0.3)' : 'rgba(239, 68, 68, 0.4)'}`,
-                  borderRadius: '6px',
-                  padding: '12px',
-                }}
+        {/* Panel C: Right Collapsible Inspector Panel (~320px) */}
+        <aside
+          className={`sidebar-panel right-panel ${rightPanelOpen ? 'open' : 'collapsed'}`}
+          aria-label="Inspector and Analysis"
+        >
+          <div className="sidebar-inner">
+            {/* Inspector Navigation Tabs */}
+            <div className="inspector-tabs" role="tablist">
+              <button
+                type="button"
+                className={`inspector-tab-btn ${inspectorTab === 'venue' ? 'active' : ''}`}
+                onClick={() => setInspectorTab('venue')}
+                id="tab-venue"
+                role="tab"
+                aria-selected={inspectorTab === 'venue'}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700 }}>
-                    {routeResult?.found ? 'Minimum-Hop Route' : 'Destination Unreachable'}
-                  </span>
-                  <span className={`status-pill ${routeResult?.found ? 'success' : 'error'}`}>
-                    {routeResult?.found ? `${routeResult.hop_count} Hops` : 'No Route'}
-                  </span>
-                </div>
+                🏢 Venue
+              </button>
+              <button
+                type="button"
+                className={`inspector-tab-btn ${inspectorTab === 'route' ? 'active' : ''}`}
+                onClick={() => setInspectorTab('route')}
+                id="tab-route"
+                role="tab"
+                aria-selected={inspectorTab === 'route'}
+              >
+                🧭 Route
+              </button>
+              <button
+                type="button"
+                className={`inspector-tab-btn ${inspectorTab === 'network' ? 'active' : ''}`}
+                onClick={() => setInspectorTab('network')}
+                id="tab-network"
+                role="tab"
+                aria-selected={inspectorTab === 'network'}
+              >
+                📊 Network
+              </button>
+              <button
+                type="button"
+                className={`inspector-tab-btn ${inspectorTab === 'venueIndex' ? 'active' : ''}`}
+                onClick={() => setInspectorTab('venueIndex')}
+                id="tab-venue-index"
+                role="tab"
+                aria-selected={inspectorTab === 'venueIndex'}
+              >
+                📑 Index
+              </button>
+              <button
+                type="button"
+                className={`inspector-tab-btn ${inspectorTab === 'schematic' ? 'active' : ''}`}
+                onClick={() => setInspectorTab('schematic')}
+                id="tab-schematic"
+                role="tab"
+                aria-selected={inspectorTab === 'schematic'}
+              >
+                🗺️ Reference
+              </button>
+            </div>
 
-                {routeResult?.found ? (
-                  <div style={{ marginTop: '8px' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                      Optimal Walkway Sequence (BFS Level-Order Tree):
-                    </div>
-                    <div className="sequence-container">
-                      {routeResult.path.map((vId, idx) => (
-                        <React.Fragment key={`route-hop-${vId}-${idx}`}>
-                          <span className="seq-chip route-hop">
-                            {vId}: {graph?.vertices[vId]?.label}
-                          </span>
-                          {idx < routeResult.path.length - 1 && (
-                            <span style={{ color: 'var(--cyan)', fontSize: '12px' }}>→</span>
+            <div className="inspector-content">
+              {/* Tab 1: Selected Venue Detail */}
+              {inspectorTab === 'venue' && (
+                <div className="tab-pane">
+                  {selectedVertex ? (
+                    <div className="venue-inspector-card">
+                      <div className="venue-header-box">
+                        <div className="venue-id-badge">Node #{selectedVertex.id}</div>
+                        <div className="venue-title-text">{selectedVertex.label}</div>
+                        {selectedVertex.id === srcVertex && <span className="status-pill success">SOURCE</span>}
+                        {selectedVertex.id === dstVertex && <span className="status-pill info">DESTINATION</span>}
+                      </div>
+
+                      <div className="venue-desc-box">
+                        {selectedVertex.full_name || selectedVertex.label}
+                      </div>
+
+                      {selectedVenueGeo && (
+                        <div className="geo-metadata-box">
+                          <div className="geo-row">
+                            <span className="geo-key">Category:</span>
+                            <span className="geo-val uppercase">{selectedVenueGeo.category}</span>
+                          </div>
+                          <div className="geo-row">
+                            <span className="geo-key">Coordinates:</span>
+                            <span className="geo-val font-mono">
+                              {selectedVenueGeo.coordinates[1].toFixed(5)}°N, {selectedVenueGeo.coordinates[0].toFixed(5)}°E
+                            </span>
+                          </div>
+                          <div className="geo-row">
+                            <span className="geo-key">Confidence:</span>
+                            <span className={`status-pill ${selectedVenueGeo.confidence === 'verified_poi' ? 'success' : 'warning'}`}>
+                              {selectedVenueGeo.confidence === 'verified_poi' ? 'Verified Satellite POI' : 'Approximate Alignment'}
+                            </span>
+                          </div>
+                          {selectedVenueGeo.notes && (
+                            <div className="geo-notes">
+                              {selectedVenueGeo.notes}
+                            </div>
                           )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#fca5a5' }}>
-                    Critical connecting walkway severed. No active path exists from vertex {srcVertex} ({graph?.vertices[srcVertex]?.label}) to vertex {dstVertex} ({graph?.vertices[dstVertex]?.label}).
-                  </div>
-                )}
-              </div>
-
-              {/* Traversal Order Card */}
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                    {traversalResult?.algorithm ?? 'BFS'} Traversal Sequence
-                  </span>
-                  <span style={{ fontSize: '11px', color: 'var(--cyan)' }}>
-                    {traversalResult?.order_len ?? 0} Nodes Visited
-                  </span>
-                </div>
-                <div className="sequence-container">
-                  {traversalResult?.order?.map((vId, idx) => (
-                    <React.Fragment key={`trav-${vId}-${idx}`}>
-                      <span className="seq-chip">
-                        {vId}: {graph?.vertices[vId]?.label}
-                      </span>
-                      {idx < (traversalResult.order.length - 1) && (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>,</span>
+                        </div>
                       )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
 
-              {/* Components & Connectivity Status */}
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '12px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                  Network Connectivity State
+                      <div className="venue-stats-grid">
+                        <div className="stat-card">
+                          <span className="stat-label">Degree</span>
+                          <span className="stat-value">{selectedVertexIncidentEdges.length}</span>
+                        </div>
+                        <div className="stat-card">
+                          <span className="stat-label">Walkways</span>
+                          <span className="stat-value">
+                            {selectedVertexIncidentEdges.filter((e) => e.active).length} / {selectedVertexIncidentEdges.length} Active
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Incident Edges List */}
+                      <div className="incident-edges-section">
+                        <div className="sub-heading">Connected Walkways</div>
+                        <div className="edge-list-chips">
+                          {selectedVertexIncidentEdges.map((e) => {
+                            const otherId = e.u === selectedVertex.id ? e.v : e.u;
+                            const otherLabel = graph?.vertices[otherId]?.label ?? otherId;
+                            return (
+                              <button
+                                key={`incident-${e.id}`}
+                                type="button"
+                                className={`edge-chip-btn ${e.active ? 'active' : 'severed'}`}
+                                onClick={() => handleToggleEdge(e.id)}
+                                title={`Click to ${e.active ? 'Close' : 'Re-open'} Walkway e${e.id}`}
+                              >
+                                <span>e{e.id} ↔ {otherLabel}</span>
+                                <span className="chip-status">{e.active ? 'ACTIVE' : 'CLOSED'}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Quick SRC / DST Buttons */}
+                      <div className="venue-action-buttons">
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => {
+                            setSrcVertex(selectedVertex.id);
+                            if (bridge) recomputeAll(bridge, selectedVertex.id, dstVertex, useMatrix);
+                          }}
+                          id="btn-set-src"
+                        >
+                          🟢 Set as Source
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => {
+                            setDstVertex(selectedVertex.id);
+                            if (bridge) recomputeAll(bridge, srcVertex, selectedVertex.id, useMatrix);
+                          }}
+                          id="btn-set-dst"
+                        >
+                          🔵 Set as Destination
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="empty-state-box">
+                      <span>Click any venue on the map to inspect its details and walkways.</span>
+                    </div>
+                  )}
                 </div>
-                <div className="metrics-grid">
-                  <div className="metric-box">
-                    <div className="metric-label">Components</div>
-                    <div className="metric-value">{networkState?.component_count ?? 1}</div>
-                    <div className="metric-sub">{networkState?.component_count === 1 ? 'Fully Connected' : 'Partitioned Graph'}</div>
+              )}
+
+              {/* Tab 2: Route & Traversal Sequence */}
+              {inspectorTab === 'route' && (
+                <div className="tab-pane">
+                  {/* Route Summary */}
+                  <div className={`route-card ${routeResult?.found ? 'found' : 'severed'}`}>
+                    <div className="route-card-header">
+                      <span className="route-card-title">
+                        {routeResult?.found ? 'Minimum-Hop Walkway Path' : 'Destination Unreachable'}
+                      </span>
+                      <span className={`status-pill ${routeResult?.found ? 'success' : 'error'}`}>
+                        {routeResult?.found ? `${routeResult.hop_count} Hops` : 'No Route'}
+                      </span>
+                    </div>
+
+                    {routeResult?.found ? (
+                      <div className="route-card-body">
+                        <div className="route-explanation-text">
+                          Optimal path computed by ISO C11 Breadth-First Search (BFS level-order predecessor tree):
+                        </div>
+                        <div className="route-hop-chips">
+                          {routeResult.path.map((vId, idx) => (
+                            <div key={`route-hop-card-${vId}-${idx}`} className="hop-item">
+                              <div
+                                className={`hop-chip ${vId === srcVertex ? 'src' : vId === dstVertex ? 'dst' : ''}`}
+                                onClick={() => {
+                                  setSelectedVertexId(vId);
+                                  setInspectorTab('venue');
+                                }}
+                              >
+                                <span className="hop-index">Hop {idx}</span>
+                                <span className="hop-label">{vId}: {graph?.vertices[vId]?.label}</span>
+                              </div>
+                              {idx < routeResult.path.length - 1 && <span className="hop-connector">↓</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="severed-notice">
+                        <p>
+                          A critical walkway connection has been severed. No active pathway connects
+                          <strong> {srcVertex} ({graph?.vertices[srcVertex]?.label})</strong> to
+                          <strong> {dstVertex} ({graph?.vertices[dstVertex]?.label})</strong>.
+                        </p>
+                        <p style={{ marginTop: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                          Click any closed walkway on the map or in the Failure Simulation panel to re-open and restore connectivity.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <div className="metric-box">
-                    <div className="metric-label">Reachable from SRC</div>
-                    <div className="metric-value">{networkState?.reachable_src_count ?? 0} / {graph?.n_vertices ?? 0}</div>
-                    <div className="metric-sub">Nodes in SRC partition</div>
-                  </div>
-                </div>
-                {componentsResult && componentsResult.component_count > 1 && (
-                  <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                    <span style={{ fontWeight: 600 }}>Component Breakdown:</span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
-                      {componentsResult.components.map((c) => (
-                        <span key={`comp-node-${c.vertex}`} className="seq-chip">
-                          Node {c.vertex}: Comp {c.component_id}
+
+                  {/* Traversal Order Breakdown */}
+                  <div className="traversal-order-card">
+                    <div className="traversal-header">
+                      <span className="traversal-title">
+                        {traversalResult?.algorithm ?? 'BFS'} Traversal Order
+                      </span>
+                      <span className="traversal-count">
+                        {traversalResult?.order_len ?? 0} Venues Visited
+                      </span>
+                    </div>
+                    <div className="traversal-sequence">
+                      {traversalResult?.order?.map((vId, idx) => (
+                        <span
+                          key={`trav-order-${vId}-${idx}`}
+                          className="trav-chip"
+                          onClick={() => {
+                            setSelectedVertexId(vId);
+                            setInspectorTab('venue');
+                          }}
+                        >
+                          {vId}: {graph?.vertices[vId]?.label}
+                          {idx < (traversalResult.order.length - 1) && <span className="trav-comma">,</span>}
                         </span>
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* Tab 2: C Operation Counters */}
-          {activeTab === 'metrics' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div className="metrics-grid">
-                <div className="metric-box">
-                  <div className="metric-label">Slots Examined</div>
-                  <div className="metric-value" style={{ color: useMatrix ? 'var(--amber)' : 'var(--emerald)' }}>
-                    {traversalResult?.metrics.neighbor_slots_examined ?? 0}
+              {/* Tab 3: C Operation Counters & Failure Simulation */}
+              {inspectorTab === 'network' && (
+                <div className="tab-pane">
+                  <div className="counters-grid">
+                    <div className="counter-box">
+                      <span className="counter-label">Neighbor Slots Examined</span>
+                      <span className="counter-val highlight" style={{ color: useMatrix ? 'var(--amber)' : 'var(--emerald)' }}>
+                        {traversalResult?.metrics.neighbor_slots_examined ?? 0}
+                      </span>
+                      <span className="counter-sub">
+                        {useMatrix
+                          ? `Matrix V² = ${(graph?.n_vertices ?? 0) * (graph?.n_vertices ?? 0)} potential cells`
+                          : `List 2E = ${(graph?.n_edges ?? 0) * 2} stored nodes`}
+                      </span>
+                    </div>
+
+                    <div className="counter-box">
+                      <span className="counter-label">Nodes Processed</span>
+                      <span className="counter-val">{traversalResult?.metrics.vertices_processed ?? 0}</span>
+                      <span className="counter-sub">Dequeued / Popped</span>
+                    </div>
+
+                    <div className="counter-box">
+                      <span className="counter-label">Inactive Skips</span>
+                      <span className="counter-val">{traversalResult?.metrics.edges_skipped_inactive ?? 0}</span>
+                      <span className="counter-sub">Closed walkways bypassed</span>
+                    </div>
+
+                    <div className="counter-box">
+                      <span className="counter-label">Queue Ops (BFS)</span>
+                      <span className="counter-val">
+                        {traversalResult?.metrics.queue_enqueues ?? 0} / {traversalResult?.metrics.queue_dequeues ?? 0}
+                      </span>
+                      <span className="counter-sub">Enqueues / Dequeues</span>
+                    </div>
+
+                    <div className="counter-box">
+                      <span className="counter-label">Stack Ops (DFS)</span>
+                      <span className="counter-val">
+                        {traversalResult?.metrics.stack_pushes ?? 0} / {traversalResult?.metrics.stack_pops ?? 0}
+                      </span>
+                      <span className="counter-sub">Pushes / Pops</span>
+                    </div>
+
+                    <div className="counter-box">
+                      <span className="counter-label">Stale Pops (DFS)</span>
+                      <span className="counter-val" style={{ color: 'var(--amber)' }}>
+                        {traversalResult?.metrics.stale_pops ?? 0}
+                      </span>
+                      <span className="counter-sub">Re-entrant pops skipped</span>
+                    </div>
                   </div>
-                  <div className="metric-sub">
-                    {useMatrix
-                      ? `Matrix: V² = ${(graph?.n_vertices ?? 0) * (graph?.n_vertices ?? 0)} potential cells`
-                      : `List: 2E = ${(graph?.n_edges ?? 0) * 2} stored nodes`}
+
+                  {/* Components Breakdown */}
+                  <div className="components-status-box">
+                    <div className="sub-heading">Partition &amp; Reachability</div>
+                    <div className="comp-stats-row">
+                      <span>Connected Components: <strong>{networkState?.component_count ?? 1}</strong></span>
+                      <span>Reachable from SRC: <strong>{networkState?.reachable_src_count ?? 0} / {graph?.n_vertices ?? 0}</strong></span>
+                    </div>
+                    {componentsResult && componentsResult.component_count > 1 && (
+                      <div className="comp-chips-wrap">
+                        {componentsResult.components.map((c) => (
+                          <span key={`comp-${c.vertex}`} className="comp-chip">
+                            Node {c.vertex}: Comp {c.component_id}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Single-Edge Failure Simulation Table */}
+                  <div className="failure-table-section">
+                    <div className="sub-heading">Single-Edge Failure Simulation</div>
+                    <p className="table-caption-note">
+                      Systematically simulates temporary single-edge closures via repeated C BFS traversals (O(E · (V+E))).
+                      Demonstrates operational partition impact without low-link bridge detection algorithms.
+                    </p>
+                    <div className="table-scroll-wrapper">
+                      <table className="failure-data-table">
+                        <thead>
+                          <tr>
+                            <th>Edge</th>
+                            <th>Walkway</th>
+                            <th>Status</th>
+                            <th>Reachable?</th>
+                            <th>Hops</th>
+                            <th>Comps</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {failureTable?.rows.map((row) => {
+                            const uLabel = graph?.vertices[row.u]?.label ?? row.u;
+                            const vLabel = graph?.vertices[row.v]?.label ?? row.v;
+                            const isCritical = !row.reachable;
+                            const isClosed = graph?.edges[row.edge_id]?.active === false;
+
+                            return (
+                              <tr
+                                key={`row-fail-${row.edge_id}`}
+                                onClick={() => handleToggleEdge(row.edge_id)}
+                                className={isCritical ? 'critical-row' : ''}
+                                title="Click to toggle this walkway"
+                              >
+                                <td className="font-mono bold">e{row.edge_id}</td>
+                                <td>{uLabel} ↔ {vLabel}</td>
+                                <td>
+                                  <span className={`status-pill ${isClosed ? 'error' : 'success'}`}>
+                                    {isClosed ? 'CLOSED' : 'ACTIVE'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span style={{ color: row.reachable ? 'var(--emerald)' : 'var(--rose)', fontWeight: 600 }}>
+                                    {row.reachable ? 'Yes' : 'Severed'}
+                                  </span>
+                                </td>
+                                <td>{row.hop_count === -1 ? '—' : row.hop_count}</td>
+                                <td>{row.component_count}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                <div className="metric-box">
-                  <div className="metric-label">Nodes Processed</div>
-                  <div className="metric-value">{traversalResult?.metrics.vertices_processed ?? 0}</div>
-                  <div className="metric-sub">Dequeued / Popped-not-stale</div>
-                </div>
-
-                <div className="metric-box">
-                  <div className="metric-label">Inactive Skips</div>
-                  <div className="metric-value">{traversalResult?.metrics.edges_skipped_inactive ?? 0}</div>
-                  <div className="metric-sub">Disabled edges bypassed</div>
-                </div>
-
-                <div className="metric-box">
-                  <div className="metric-label">Queue Ops (BFS)</div>
-                  <div className="metric-value">
-                    {traversalResult?.metrics.queue_enqueues ?? 0} / {traversalResult?.metrics.queue_dequeues ?? 0}
+              {/* Tab 4: Searchable Venue Index */}
+              {inspectorTab === 'venueIndex' && (
+                <div className="tab-pane">
+                  <div className="search-bar-wrap">
+                    <input
+                      type="text"
+                      className="form-input search-input"
+                      placeholder="Search venue name, ID or category..."
+                      value={venueSearchQuery}
+                      onChange={(e) => setVenueSearchQuery(e.target.value)}
+                      id="venue-search-input"
+                    />
+                    {venueSearchQuery && (
+                      <button
+                        type="button"
+                        className="search-clear-btn"
+                        onClick={() => setVenueSearchQuery('')}
+                        aria-label="Clear search"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
-                  <div className="metric-sub">Enqueues / Dequeues</div>
-                </div>
 
-                <div className="metric-box">
-                  <div className="metric-label">Stack Ops (DFS)</div>
-                  <div className="metric-value">
-                    {traversalResult?.metrics.stack_pushes ?? 0} / {traversalResult?.metrics.stack_pops ?? 0}
-                  </div>
-                  <div className="metric-sub">Pushes / Pops (Cap 2E+1)</div>
-                </div>
-
-                <div className="metric-box">
-                  <div className="metric-label">Stale Pops (DFS)</div>
-                  <div className="metric-value" style={{ color: 'var(--amber)' }}>
-                    {traversalResult?.metrics.stale_pops ?? 0}
-                  </div>
-                  <div className="metric-sub">Re-entrant pops skipped</div>
-                </div>
-              </div>
-
-              {/* Theoretical Complexity Comparison Note */}
-              <div
-                style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-medium)',
-                  borderRadius: '6px',
-                  padding: '12px',
-                  fontSize: '12px',
-                  color: 'var(--text-secondary)',
-                  lineHeight: '1.6',
-                }}
-              >
-                <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>
-                  Algorithm Complexity Note (CSC2101 Lecture 37):
-                </strong>
-                {useMatrix ? (
-                  <span>
-                    <strong>Adjacency Matrix (Active):</strong> Storage is <span style={{ fontFamily: 'var(--font-mono)' }}>O(V²)</span> ({((graph?.n_vertices ?? 0) * (graph?.n_vertices ?? 0))} cells).
-                    Every vertex checks all <span style={{ fontFamily: 'var(--font-mono)' }}>V={graph?.n_vertices ?? 0}</span> columns regardless of degree,
-                    producing {traversalResult?.metrics.neighbor_slots_examined ?? 0} slot examinations in the active traversal.
-                  </span>
-                ) : (
-                  <span>
-                    <strong>Adjacency List (Active):</strong> Storage is <span style={{ fontFamily: 'var(--font-mono)' }}>O(V + E)</span> ({graph?.n_vertices ?? 0} heads + {((graph?.n_edges ?? 0) * 2)} nodes).
-                    Traversal examines only existing incident neighbors, achieving asymptotic optimality on sparse networks.
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Tab 3: Single-Failure Impact Table */}
-          {activeTab === 'failureTable' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                <strong>Single-Edge Failure Simulation:</strong> Systematically evaluates network resilience by simulating the temporary closure of each edge individually and executing repeated C BFS traversals (<span style={{ fontFamily: 'var(--font-mono)' }}>O(E · (V+E))</span>). Reports the operational consequences of each simulated closure on destination reachability and connected components without using low-link bridge detection algorithms. Click any row to test that closure.
-              </div>
-
-              <div className="data-table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Edge</th>
-                      <th>Connection</th>
-                      <th>Status</th>
-                      <th>Destination Reachable?</th>
-                      <th>Hops</th>
-                      <th>Connected Components</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {failureTable?.rows.map((row) => {
-                      const uLabel = graph?.vertices[row.u]?.label ?? row.u;
-                      const vLabel = graph?.vertices[row.v]?.label ?? row.v;
-                      const isCritical = !row.reachable;
-                      const isClosed = graph?.edges[row.edge_id]?.active === false;
+                  <div className="venue-index-list">
+                    {filteredVenues.map((v) => {
+                      const geo = CAMPUS_VENUES.find((cg) => cg.id === v.id);
+                      const isSrc = v.id === srcVertex;
+                      const isDst = v.id === dstVertex;
+                      const isSelected = v.id === selectedVertexId;
 
                       return (
-                        <tr
-                          key={`fail-row-${row.edge_id}`}
-                          onClick={() => handleToggleEdge(row.edge_id)}
-                          className={isCritical ? 'critical-cut' : ''}
-                          style={{ cursor: 'pointer' }}
+                        <div
+                          key={`index-venue-${v.id}`}
+                          className={`venue-index-item ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSelectedVertexId(v.id);
+                            setInspectorTab('venue');
+                          }}
                         >
-                          <td style={{ fontWeight: 700, color: 'var(--cyan)' }}>e{row.edge_id}</td>
-                          <td style={{ fontSize: '11px', fontFamily: 'var(--font-sans)' }}>
-                            {uLabel} ↔ {vLabel}
-                          </td>
-                          <td>
-                            <span className={`status-pill ${isClosed ? 'error' : 'success'}`} style={{ fontSize: '10px' }}>
-                              {isClosed ? 'CLOSED' : 'ACTIVE'}
-                            </span>
-                          </td>
-                          <td>
-                            <span style={{ color: row.reachable ? 'var(--emerald)' : 'var(--rose)', fontWeight: 700 }}>
-                              {row.reachable ? 'Reachable (Redundant)' : 'Unreachable (Severed)'}
-                            </span>
-                          </td>
-                          <td>{row.hop_count === -1 ? '—' : row.hop_count}</td>
-                          <td style={{ color: row.component_count > 1 ? 'var(--amber)' : 'inherit', fontWeight: row.component_count > 1 ? 700 : 400 }}>
-                            {row.component_count}
-                          </td>
-                        </tr>
+                          <div className="item-main">
+                            <span className="item-id">#{v.id}</span>
+                            <span className="item-label">{v.label}</span>
+                            {isSrc && <span className="status-pill success mini">SRC</span>}
+                            {isDst && <span className="status-pill info mini">DST</span>}
+                          </div>
+                          <div className="item-sub">
+                            {geo ? (
+                              <>
+                                <span className="category-tag">{geo.category}</span>
+                                <span className={`confidence-tag ${geo.confidence === 'verified_poi' ? 'verified' : 'approx'}`}>
+                                  {geo.confidence === 'verified_poi' ? 'Verified' : 'Approx'}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="category-tag">F1 Node</span>
+                            )}
+                          </div>
+                        </div>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+                  </div>
+                </div>
+              )}
 
-          {/* Footer Metrics */}
-          <div
-            style={{
-              borderTop: '1px solid var(--border-subtle)',
-              paddingTop: '10px',
-              marginTop: 'auto',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '11px',
-              color: 'var(--text-muted)',
-            }}
-          >
-            <span>Active Walkways: {activeEdgeCount} / {graph?.n_edges ?? 0}</span>
-            <span>Closed: {closedEdgeCount}</span>
-            <span>Components: {networkState?.component_count ?? 1}</span>
+              {/* Tab 5: Schematic & Architectural References */}
+              {inspectorTab === 'schematic' && (
+                <div className="tab-pane">
+                  <div className="schematic-pane-card">
+                    <div className="sub-heading">MUJ Campus Wayfinding Schematic</div>
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                      Illustrated cream wayfinding schematic (not to scale). Preserved as supplementary reference.
+                    </p>
+                    <div
+                      className="schematic-preview-box"
+                      onClick={() => {
+                        setGalleryTab('schematic');
+                        setShowGallery(true);
+                      }}
+                      title="Click to expand schematic reference"
+                    >
+                      <img
+                        src="/maps/muj-campus-wayfinding-schematic.png"
+                        alt="MUJ Campus Wayfinding Schematic"
+                        className="schematic-thumb"
+                      />
+                      <div className="preview-overlay">🔍 Click to Expand</div>
+                    </div>
+
+                    <div className="reference-buttons-stack">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm btn-block"
+                        onClick={() => {
+                          setGalleryTab('ab1_mess');
+                          setShowGallery(true);
+                        }}
+                      >
+                        🛰️ AB1 &amp; Old Mess Satellite View
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm btn-block"
+                        onClick={() => {
+                          setGalleryTab('lhc_aic');
+                          setShowGallery(true);
+                        }}
+                      >
+                        🛰️ LHC &amp; AIC-MUJ Satellite View
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm btn-block"
+                        onClick={() => {
+                          setGalleryTab('sports');
+                          setShowGallery(true);
+                        }}
+                      >
+                        🛰️ Sports Grounds Satellite View
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </section>
+        </aside>
       </main>
+
+      {/* 3. High-Resolution Gallery & Architectural Reference Modal */}
+      {showGallery && (
+        <div className="gallery-modal-backdrop" onClick={() => setShowGallery(false)}>
+          <div className="gallery-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="gallery-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '20px' }}>🏛️</span>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                  MUJ Campus Context &amp; Architectural Reference Imagery
+                </h3>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setShowGallery(false)}
+                id="btn-close-gallery"
+                aria-label="Close Reference Modal"
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            <div className="gallery-tabs">
+              <button
+                type="button"
+                className={`gallery-tab-btn ${galleryTab === 'schematic' ? 'active' : ''}`}
+                onClick={() => setGalleryTab('schematic')}
+              >
+                Wayfinding Schematic (Hafeez Contractor)
+              </button>
+              <button
+                type="button"
+                className={`gallery-tab-btn ${galleryTab === 'masterplan' ? 'active' : ''}`}
+                onClick={() => setGalleryTab('masterplan')}
+              >
+                Hafeez Site Master Plan
+              </button>
+              <button
+                type="button"
+                className={`gallery-tab-btn ${galleryTab === 'ab1_mess' ? 'active' : ''}`}
+                onClick={() => setGalleryTab('ab1_mess')}
+              >
+                AB1 &amp; Old Mess Satellite
+              </button>
+              <button
+                type="button"
+                className={`gallery-tab-btn ${galleryTab === 'lhc_aic' ? 'active' : ''}`}
+                onClick={() => setGalleryTab('lhc_aic')}
+              >
+                LHC &amp; AIC-MUJ Satellite
+              </button>
+              <button
+                type="button"
+                className={`gallery-tab-btn ${galleryTab === 'sports' ? 'active' : ''}`}
+                onClick={() => setGalleryTab('sports')}
+              >
+                Football &amp; Sports Satellite
+              </button>
+            </div>
+
+            <div className="gallery-image-viewport">
+              {galleryTab === 'schematic' && (
+                <div className="gallery-item">
+                  <img
+                    src="/maps/muj-campus-wayfinding-schematic.png"
+                    alt="MUJ Campus Wayfinding Schematic"
+                    className="gallery-img"
+                  />
+                  <p className="gallery-caption">
+                    <strong>Official MUJ Campus Wayfinding Schematic</strong> — Cream-toned orientation drawing depicting Academic Blocks 1–3, Dome Building, Old Mess, LHC, Workshops, and Sports complex. Illustrative schematic layout, not to scale.
+                  </p>
+                </div>
+              )}
+              {galleryTab === 'masterplan' && (
+                <div className="gallery-item">
+                  <img
+                    src="/maps/muj-campus-masterplan.png"
+                    alt="MUJ Campus Master Site Plan by Architect Hafeez Contractor"
+                    className="gallery-img"
+                  />
+                  <p className="gallery-caption">
+                    <strong>Official Site Master Plan (Hafeez Contractor, AHC)</strong> — Division of Academic Zone and Residential Zone with central HT line axis. Used as supplementary architectural context.
+                  </p>
+                </div>
+              )}
+              {galleryTab === 'ab1_mess' && (
+                <div className="gallery-item">
+                  <img
+                    src="/maps/muj-academic-block-old-mess-satellite.png"
+                    alt="Academic Block 1, Old Mess, Knowledge Centre Satellite"
+                    className="gallery-img"
+                  />
+                  <p className="gallery-caption">
+                    <strong>Academic Block 1 &amp; Old Mess Satellite View</strong> — Academic Block 1 (courtyard structure), Old Mess / Food Court, and Knowledge Centre. Map imagery &copy; Google Maps.
+                  </p>
+                </div>
+              )}
+              {galleryTab === 'lhc_aic' && (
+                <div className="gallery-item">
+                  <img
+                    src="/maps/muj-lecture-hall-aic-satellite.png"
+                    alt="Lecture Hall Complex, AIC-MUJ Satellite"
+                    className="gallery-img"
+                  />
+                  <p className="gallery-caption">
+                    <strong>Lecture Hall Complex &amp; AIC-MUJ Satellite View</strong> — Tiered lecture halls (LHC), AIC-MUJ innovation hub, and connecting walkways. Map imagery &copy; Google Maps.
+                  </p>
+                </div>
+              )}
+              {galleryTab === 'sports' && (
+                <div className="gallery-item">
+                  <img
+                    src="/maps/muj-football-ground-satellite.png"
+                    alt="MUJ Football Ground Satellite"
+                    className="gallery-img"
+                  />
+                  <p className="gallery-caption">
+                    <strong>MUJ Football Ground &amp; Sports Zone Satellite View</strong> — Football turf, cricket ground perimeter, and nearby Lecture Hall Complex. Map imagery &copy; Google Maps.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

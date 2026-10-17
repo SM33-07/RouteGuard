@@ -198,7 +198,7 @@ This document provides complete, independently derived step tables and reference
 > No real-world walking times, GPS navigation, municipal transit, or emergency routing suitability is claimed.
 
 ### Graph Topology
-- **Vertices (12)**:
+- **Vertices (13)**:
   - `0`: `Main Gate` (Full: `Main Gate — Primary campus arrival & visitor entry`) `(750, 1260)`
   - `1`: `Dome Building` (Full: `Dome Building — Library, administration, services (Landmark 1)`) `(750, 1090)`
   - `2`: `Grand Stairs` (Full: `Grand Stairs / Central Plaza — Central arrival and circulation hub`) `(750, 980)`
@@ -211,8 +211,9 @@ This document provides complete, independently derived step tables and reference
   - `9`: `Football Ground` (Full: `Football Ground — Sports grounds (Landmark 7)`) `(1190, 560)`
   - `10`: `Cricket Ground` (Full: `Cricket Ground — Sports grounds (Landmark 7)`) `(1170, 360)`
   - `11`: `Outdoor Courts` (Full: `Outdoor Courts / Turfs — Sports grounds (Landmark 7)`) `(1250, 970)`
+  - `12`: `Knowledge Centre` (Full: `Knowledge Centre — Digital library & resource centre (approx. placement)`) `(1080, 1080)`
 
-- **Edges (15)**:
+- **Edges (17)**:
   - `e0: (0, 1)` — Main Gate <-> Dome Building
   - `e1: (1, 2)` — Dome Building <-> Grand Stairs
   - `e2: (2, 3)` — Grand Stairs <-> Academic Block 1
@@ -228,13 +229,15 @@ This document provides complete, independently derived step tables and reference
   - `e12: (7, 9)` — Lecture Hall Complex <-> Football Ground (Critical sports bridge)
   - `e13: (8, 11)` — Workshops / Labs <-> Outdoor Courts
   - `e14: (9, 10)` — Football Ground <-> Cricket Ground
+  - `e15: (1, 12)` — Dome Building <-> Knowledge Centre (Plaza connection)
+  - `e16: (4, 12)` — Academic Block 2 <-> Knowledge Centre (Courtyard connection)
 
 - **Ascending Adjacency List Structure**:
   - `0`: `[1]`
-  - `1`: `[0, 2]`
+  - `1`: `[0, 2, 12]`
   - `2`: `[1, 3, 4, 5]`
   - `3`: `[2, 5, 6]`
-  - `4`: `[2, 5, 8]`
+  - `4`: `[2, 5, 8, 12]`
   - `5`: `[2, 3, 4, 7, 8]`
   - `6`: `[3, 7]`
   - `7`: `[5, 6, 9]`
@@ -242,22 +245,25 @@ This document provides complete, independently derived step tables and reference
   - `9`: `[7, 10]`
   - `10`: `[9]`
   - `11`: `[8]`
+  - `12`: `[1, 4]`
 
 ---
 
 ### Campus BFS Hand Trace (Source: 0)
 - **Policy**: Mark visited on **enqueue**. Neighbor discovery tie-breaking: **strictly ascending neighbor ID**.
-- **Visit Order**: `0, 1, 2, 3, 4, 5, 6, 8, 7, 11, 9, 10`
+- **Visit Order**: `0, 1, 2, 12, 3, 4, 5, 6, 8, 7, 11, 9, 10`
 - **Derived Counters**:
-  - Vertices Processed: `12`
-  - Queue Enqueues: `12`
-  - Queue Dequeues: `12`
-  - Adjacency List Neighbor Slots Examined: `30` ($2 \times 15 = 30$)
-  - Adjacency Matrix Neighbor Slots Examined: `144` ($12 \times 12 = 144$)
+  - Vertices Processed: `13`
+  - Queue Enqueues: `13`
+  - Queue Dequeues: `13`
+  - Adjacency List Neighbor Slots Examined: `34` ($2 \times 17 = 34$)
+  - Adjacency Matrix Neighbor Slots Examined: `169` ($13 \times 13 = 169$)
   - Route from 0 (Main Gate) to 6 (Academic Block 3):
     `0 -> 1 -> 2 -> 3 -> 6` (4 hops).
   - Route from 0 (Main Gate) to 9 (Football Ground):
     `0 -> 1 -> 2 -> 5 -> 7 -> 9` (5 hops).
+  - Route from 0 (Main Gate) to 12 (Knowledge Centre):
+    `0 -> 1 -> 12` (2 hops).
 
 ---
 
@@ -265,11 +271,11 @@ This document provides complete, independently derived step tables and reference
 1. **Redundant Path Rerouting (Disable e6: 3 <-> 6)**:
    - Baseline route from 0 (Main Gate) to 6 (Academic Block 3): `0 -> 1 -> 2 -> 3 -> 6` (4 hops via e0, e1, e2, e6).
    - With `e6` disabled: BFS discovers alternate path via Old Mess and LHC: `0 -> 1 -> 2 -> 5 -> 7 -> 6` (5 hops via e0, e1, e4, e9, e11).
-   - Graph remains connected (`component_count = 1`, 12 reachable vertices).
+   - Graph remains connected (`component_count = 1`, 13 reachable vertices).
 2. **Critical Corridor Disconnection (Disable e12: 7 <-> 9)**:
    - Walkway between Lecture Hall Complex and Football Ground closed.
    - Route from 0 to 9: `UNREACHABLE` (`found = false`, `hop_count = -1`).
-   - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7, 8, 11}` of size 10; Component 2: `{9, 10}` of size 2).
-   - List BFS from 0: 10 vertices processed, 27 list slots examined, 1 inactive edge skipped (`e12`).
-   - Matrix BFS from 0: 10 vertices processed, 120 matrix slots examined ($10 \times 12$).
+   - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12}` of size 11; Component 2: `{9, 10}` of size 2).
+   - List BFS from 0: 11 vertices processed, 31 list slots examined, 1 inactive edge skipped (`e12`).
+   - Matrix BFS from 0: 11 vertices processed, 143 matrix slots examined ($11 \times 13$).
 

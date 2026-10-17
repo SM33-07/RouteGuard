@@ -129,7 +129,7 @@ RgStatus rg_fixture_f5_cycle4(RgGraph **out_graph) {
     return RG_OK;
 }
 
-static const char *s_campus_descriptions[12] = {
+static const char *s_campus_descriptions[13] = {
     "Main Gate — Primary campus arrival & visitor entry",
     "Dome Building — Library, administration, services (Landmark 1)",
     "Grand Stairs / Central Plaza — Central arrival and circulation hub",
@@ -141,11 +141,12 @@ static const char *s_campus_descriptions[12] = {
     "Workshops / Labs — Workshop-side teaching facilities (Landmark 8)",
     "Football Ground — Sports grounds (Landmark 7)",
     "Cricket Ground — Sports grounds (Landmark 7)",
-    "Outdoor Courts / Turfs — Sports grounds (Landmark 7)"
+    "Outdoor Courts / Turfs — Sports grounds (Landmark 7)",
+    "Knowledge Centre — Digital library & resource centre (approx. placement)"
 };
 
 const char *rg_fixture_campus_venue_description(int vertex_id) {
-    if (vertex_id < 0 || vertex_id >= 12) {
+    if (vertex_id < 0 || vertex_id >= 13) {
         return "Unknown Venue";
     }
     return s_campus_descriptions[vertex_id];
@@ -157,12 +158,12 @@ RgStatus rg_fixture_campus_muj(RgGraph **out_graph) {
     }
 
     RgGraph *g = NULL;
-    RgStatus s = rg_graph_create(12, 15, &g);
+    RgStatus s = rg_graph_create(13, 17, &g);
     if (s != RG_OK) {
         return s;
     }
 
-    /* Set 12 vertices: concise label + exact coordinates aligned to 2048x1448 schematic */
+    /* Set 13 vertices: concise label + exact coordinates aligned to 2048x1448 schematic */
     rg_set_vertex(g, 0, "Main Gate", 750, 1260);
     rg_set_vertex(g, 1, "Dome Building", 750, 1090);
     rg_set_vertex(g, 2, "Grand Stairs", 750, 980);
@@ -175,8 +176,9 @@ RgStatus rg_fixture_campus_muj(RgGraph **out_graph) {
     rg_set_vertex(g, 9, "Football Ground", 1190, 560);
     rg_set_vertex(g, 10, "Cricket Ground", 1170, 360);
     rg_set_vertex(g, 11, "Outdoor Courts", 1250, 970);
+    rg_set_vertex(g, 12, "Knowledge Centre", 1080, 1080);
 
-    /* Canonical edge insertion: IDs e0 through e14 (illustrative modeled walkways) */
+    /* Canonical edge insertion: IDs e0 through e16 (illustrative modeled walkways) */
     rg_add_edge(g, 0, 1, NULL);   /* e0: Main Gate <-> Dome Building */
     rg_add_edge(g, 1, 2, NULL);   /* e1: Dome Building <-> Grand Stairs */
     rg_add_edge(g, 2, 3, NULL);   /* e2: Grand Stairs <-> Academic Block 1 */
@@ -192,6 +194,8 @@ RgStatus rg_fixture_campus_muj(RgGraph **out_graph) {
     rg_add_edge(g, 7, 9, NULL);   /* e12: Lecture Hall Complex <-> Football Ground (Critical sports bridge) */
     rg_add_edge(g, 8, 11, NULL);  /* e13: Workshops / Labs <-> Outdoor Courts */
     rg_add_edge(g, 9, 10, NULL);  /* e14: Football Ground <-> Cricket Ground */
+    rg_add_edge(g, 1, 12, NULL);  /* e15: Dome Building <-> Knowledge Centre */
+    rg_add_edge(g, 4, 12, NULL);  /* e16: Academic Block 2 <-> Knowledge Centre */
 
     *out_graph = g;
     return RG_OK;
