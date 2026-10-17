@@ -1,7 +1,12 @@
 #include "rg_test.h"
 #include "rg_wasm_bridge.h"
 #include "rg_alloc.h"
+#include <stdio.h>
 #include <string.h>
+
+int g_tests_total = 0;
+int g_tests_passed = 0;
+int g_tests_failed = 0;
 
 void test_rg_x_11_wasm_bridge(void) {
     RG_TEST_START("RG-X-11");
@@ -39,7 +44,7 @@ void test_rg_x_11_wasm_bridge(void) {
     RG_ASSERT(strstr(dfs_json, "\"stale_pops\":2") != NULL);
     RG_ASSERT(strstr(dfs_json, "\"order_len\":12") != NULL);
 
-    /* 6. Edge e9 cut (critical bridge) */
+    /* 6. Edge e9 cut (critical link) */
     int dis_e9 = rg_wasm_set_edge_active(9, 0);
     RG_ASSERT_INT_EQ(dis_e9, 0);
 
@@ -84,4 +89,19 @@ void test_rg_x_11_wasm_bridge(void) {
     RG_ASSERT(strstr(svg_xml, "SYNTHETIC NETWORK") != NULL);
 
     RG_TEST_END();
+}
+
+int main(void) {
+    printf("========================================================\n");
+    printf("RouteGuard WebAssembly Bridge Isolated Contract Test\n");
+    printf("========================================================\n\n");
+
+    test_rg_x_11_wasm_bridge();
+
+    printf("\n========================================================\n");
+    printf("BRIDGE TEST RESULTS: %d Total | %d Passed | %d Failed\n",
+           g_tests_total, g_tests_passed, g_tests_failed);
+    printf("========================================================\n");
+
+    return (g_tests_failed == 0) ? 0 : 1;
 }

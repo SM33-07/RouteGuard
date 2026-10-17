@@ -39,77 +39,77 @@ EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_get_graph_json(void);
 
 /**
- * @brief Enable or disable an edge by ID.
- * @param edge_id 0-based edge ID.
- * @param active 1 to enable, 0 to disable.
- * @return 0 on success, negative on error.
+ * @brief Set the active state of an edge by its canonical ID.
+ * @param edge_id The edge ID (0 to n_edges-1).
+ * @param active 1 for active, 0 for disabled.
+ * @return 0 on success, -1 on error.
  */
 EMSCRIPTEN_KEEPALIVE
 int rg_wasm_set_edge_active(int edge_id, int active);
 
 /**
- * @brief Execute BFS traversal and compute route from src to dst.
+ * @brief Run BFS from source to destination.
  * @param src Source vertex ID.
  * @param dst Destination vertex ID.
- * @param use_matrix 1 for Adjacency Matrix, 0 for Adjacency List.
- * @return Pointer to static JSON buffer containing traversal order, route, and metrics.
+ * @param use_matrix 1 for matrix, 0 for list.
+ * @return JSON string with traversal order, route, hop count, and metrics.
  */
 EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_run_bfs(int src, int dst, int use_matrix);
 
 /**
- * @brief Execute iterative DFS traversal from src.
+ * @brief Run DFS from source to destination.
  * @param src Source vertex ID.
- * @param dst Destination vertex ID (to test reachability).
- * @param use_matrix 1 for Adjacency Matrix, 0 for Adjacency List.
- * @return Pointer to static JSON buffer containing traversal order, reachability, and metrics.
+ * @param dst Destination vertex ID.
+ * @param use_matrix 1 for matrix, 0 for list.
+ * @return JSON string with DFS order, reachability, stale pops, and metrics.
  */
 EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_run_dfs(int src, int dst, int use_matrix);
 
 /**
- * @brief Find minimum-hop route from src to dst.
+ * @brief Find the minimum-hop route between source and destination.
  * @param src Source vertex ID.
  * @param dst Destination vertex ID.
- * @param use_matrix 1 for Adjacency Matrix, 0 for Adjacency List.
- * @return Pointer to static JSON buffer containing route vertices, hop count, and metrics.
+ * @param use_matrix 1 for matrix, 0 for list.
+ * @return JSON string with path array, hop count, and status.
  */
 EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_find_route(int src, int dst, int use_matrix);
 
 /**
- * @brief Compute connected components of current graph state.
- * @param use_matrix 1 for Adjacency Matrix, 0 for Adjacency List.
- * @return Pointer to static JSON buffer with component count and vertex component IDs.
+ * @brief Compute connected components.
+ * @param use_matrix 1 for matrix, 0 for list.
+ * @return JSON string with component count and component labels per vertex.
  */
 EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_get_components(int use_matrix);
 
 /**
- * @brief Get current network state summary for (src, dst).
+ * @brief Get current network resilience state for source-destination pair.
  * @param src Source vertex ID.
  * @param dst Destination vertex ID.
- * @param use_matrix 1 for Adjacency Matrix, 0 for Adjacency List.
- * @return Pointer to static JSON buffer with reachable count, component count, and route status.
+ * @param use_matrix 1 for matrix, 0 for list.
+ * @return JSON string with reachable count, component count, route status, and hops.
  */
 EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_get_network_state(int src, int dst, int use_matrix);
 
 /**
- * @brief Compute single-edge failure impact table across all edges.
+ * @brief Generate single-edge failure impact table as JSON.
  * @param src Source vertex ID.
  * @param dst Destination vertex ID.
- * @return Pointer to static JSON buffer containing 13 rows of impact data.
+ * @return JSON string with array of edge failure rows.
  */
 EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_get_failure_table(int src, int dst);
 
 /**
- * @brief Export current graph state to an SVG string using the C11 exporter.
+ * @brief Export current graph as SVG.
  * @param src Source vertex ID.
  * @param dst Destination vertex ID.
- * @param use_matrix 1 for Adjacency Matrix, 0 for Adjacency List.
- * @return Pointer to static buffer containing full SVG XML.
+ * @param use_matrix 1 for matrix, 0 for list.
+ * @return Pointer to static SVG buffer.
  */
 EMSCRIPTEN_KEEPALIVE
 const char *rg_wasm_export_svg(int src, int dst, int use_matrix);

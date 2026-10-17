@@ -61,7 +61,7 @@ $sources = @(
     "src/rg_analysis.c",
     "src/rg_fixture.c",
     "src/rg_svg.c",
-    "src/rg_wasm_bridge.c"
+    "wasm/rg_wasm_bridge.c"
 )
 
 $emccArgs = @(
@@ -72,6 +72,7 @@ $emccArgs = @(
     "-Wshadow",
     "-O2",
     "-Iinclude",
+    "-Iwasm",
     "-s", "WASM=1",
     "-s", "SINGLE_FILE=1",
     "-s", "EXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','FS']",

@@ -13,6 +13,7 @@ ifeq ($(OS),Windows_NT)
   DEVNUL := nul
   TARGET_CMD := bin\routeguard.exe
   TEST_CMD := bin\rg_tests.exe
+  BRIDGE_TEST_CMD := bin\rg_bridge_test.exe
   OUT_RUN1 := out\demo_run1.txt
   OUT_RUN2 := out\demo_run2.txt
 else
@@ -21,6 +22,7 @@ else
   DEVNUL := /dev/null
   TARGET_CMD := ./bin/routeguard
   TEST_CMD := ./bin/rg_tests
+  BRIDGE_TEST_CMD := ./bin/rg_bridge_test
   OUT_RUN1 := out/demo_run1.txt
   OUT_RUN2 := out/demo_run2.txt
 endif
@@ -49,12 +51,10 @@ CFLAGS = -std=c11 -Wall -Wextra -pedantic -Wshadow $(OPT_LEVEL) -Iinclude
 STRICT_CFLAGS = -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror $(OPT_LEVEL) -Iinclude
 
 SRC = src/rg_alloc.c src/rg_graph.c src/rg_queue.c src/rg_stack.c \
-      src/rg_traverse.c src/rg_analysis.c src/rg_fixture.c src/rg_svg.c \
-      src/rg_wasm_bridge.c
+      src/rg_traverse.c src/rg_analysis.c src/rg_fixture.c src/rg_svg.c
 
 TEST_SRC = tests/test_main.c tests/test_graph.c tests/test_traverse.c \
-           tests/test_analysis.c tests/test_fixture_ref.c tests/test_random.c \
-           tests/test_bridge.c
+           tests/test_analysis.c tests/test_fixture_ref.c tests/test_random.c
 
 OBJ = $(patsubst src/%.c,obj/%.o,$(SRC))
 TEST_OBJ = $(patsubst tests/%.c,obj/%.o,$(TEST_SRC))
@@ -129,14 +129,18 @@ wasm: dirs
 ifeq ($(OS),Windows_NT)
 	powershell -ExecutionPolicy Bypass -File build_wasm.ps1
 else
-	emcc -std=c11 -Wall -Wextra -pedantic -Wshadow -O2 -Iinclude \
+	emcc -std=c11 -Wall -Wextra -pedantic -Wshadow -O2 -Iinclude -Iwasm \
 		src/rg_alloc.c src/rg_graph.c src/rg_queue.c src/rg_stack.c \
 		src/rg_traverse.c src/rg_analysis.c src/rg_fixture.c src/rg_svg.c \
-		src/rg_wasm_bridge.c \
+		wasm/rg_wasm_bridge.c \
 		-s WASM=1 -s SINGLE_FILE=1 \
 		-s EXPORTED_RUNTIME_METHODS="['ccall','cwrap','UTF8ToString','FS']" \
 		-s EXPORTED_FUNCTIONS="['_rg_wasm_init','_rg_wasm_reset','_rg_wasm_get_graph_json','_rg_wasm_set_edge_active','_rg_wasm_run_bfs','_rg_wasm_run_dfs','_rg_wasm_find_route','_rg_wasm_get_components','_rg_wasm_get_network_state','_rg_wasm_get_failure_table','_rg_wasm_export_svg','_malloc','_free']" \
 		-s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_ES6=1 \
 		-o frontend/src/wasm/routeguard.js
 endif
+
+test-bridge: $(OBJ) | dirs
+	$(CC) $(CFLAGS) -Iwasm -Itests -o bin/rg_bridge_test$(EXE_EXT) $(OBJ) wasm/rg_wasm_bridge.c wasm/test_bridge.c
+	$(BRIDGE_TEST_CMD)
 

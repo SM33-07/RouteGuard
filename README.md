@@ -17,7 +17,7 @@ RouteGuard is an interactive graph-based routing and network connectivity simula
 *Architecture Overview:*  
 - **Core Engine:** Written strictly in **pure ISO C11** using only standard library headers (`<stdio.h>`, `<stdlib.h>`, `<stdbool.h>`, `<string.h>`, `<errno.h>`). It implements dual graph representations (Adjacency Matrix and Adjacency List), Breadth-First Search (BFS), Depth-First Search (DFS), predecessor route reconstruction, connected components, and brute-force single-failure analysis. Out-of-scope concepts (Dijkstra, A*, priority queues/heaps, minimum spanning trees, disjoint-set/union-find, and low-link bridge algorithms) are strictly excluded.
 - **Native CLI:** Interactive menu-driven console interface and deterministic batch test runner (`routeguard.exe`).
-- **WebAssembly Presentation Layer:** The authoritative C11 engine compiled to WebAssembly via Emscripten and exposed through a safe C bridge (`src/rg_wasm_bridge.c`).
+- **WebAssembly Presentation Layer:** The authoritative C11 engine compiled to WebAssembly via Emscripten and exposed through an isolated C bridge in `wasm/` (`wasm/rg_wasm_bridge.c`). Zero algorithms are reimplemented in TypeScript.
 - **Interactive Browser Frontend:** A polished dark-mode network resilience dashboard built with React 19, TypeScript, and Vite in `frontend/`, rendering interactive SVG network topologies and live analytics directly from the compiled C WebAssembly engine.
 
 ### SRS v0.2 Requirement Status Summary
@@ -98,15 +98,18 @@ mingw32-make demo-check
 ```
 
 ### B. WebAssembly Module Compilation
-Compiles `src/` (excluding `main.c`) and `src/rg_wasm_bridge.c` to `frontend/src/wasm/routeguard.js` with TypeScript definitions:
+Compiles `src/` (excluding `main.c`) and isolated `wasm/rg_wasm_bridge.c` to `frontend/src/wasm/routeguard.js` with TypeScript definitions:
 ```powershell
 # Using PowerShell build driver:
 .\build.ps1 -Target wasm
 
 # Or using GNU Make:
 mingw32-make wasm
+
+# Run standalone native bridge contract test:
+mingw32-make test-bridge
 ```
-*Note:* The build script automatically detects Emscripten on `PATH` or resolves it from `$env:RG_EMSDK_DIR` (defaulting to `C:\emsdk`).
+*Note:* The build script automatically detects Emscripten on `PATH` or resolves it from `$env:RG_EMSDK_DIR` (defaulting to `C:\emsdk`). The compiled single-file module (`routeguard.js`, SHA-256: `C230E55772A8B35BAE0687346DEB8AFD64D5455CE1B738270A04204CD65B09D8`) is committed so a fresh clone can launch the UI immediately without installing Emscripten.
 
 ### C. Interactive Frontend: Local Development & Production Build
 The frontend is a standalone client-side React + TypeScript application that executes the C11 engine inside the browser using WebAssembly. No backend server or database is required.
@@ -182,7 +185,7 @@ TEST RESULTS: 28 Total | 28 Passed | 0 Failed
 - **Results**: 67,574 individual state comparisons; **0 mismatches** (`docs/evidence/differential_testing.txt`).
 
 ### WebAssembly Bridge Contract Test (`RG-X-11`)
-- **Bridge Test**: Implemented in `tests/test_bridge.c` validating native and WebAssembly JSON serialization, BFS/DFS metrics, edge toggling, graph reset, single-failure table generation, and SVG export.
+- **Bridge Test**: Implemented in isolated `wasm/test_bridge.c` (executable via `mingw32-make test-bridge`) validating native and WebAssembly JSON serialization, BFS/DFS metrics, edge toggling, graph reset, single-failure table generation, and SVG export.
 - **Result**: Passed cleanly with zero memory leaks.
 
 ### Mutation Testing (100% Kill Rate)
@@ -190,14 +193,15 @@ Evaluated across 10 distinct fault injection mutants in an isolated temporary cl
 - **Mutants Evaluated**: 10 | **Mutants Killed**: 10 (100.0% kill rate) (`docs/evidence/mutation.txt`).
 
 ### Browser Subagent End-to-End Verification
-The frontend was fully evaluated in a real browser session (`http://localhost:5173/`, recorded to `routeguard_frontend_test_1792194315768.webp`):
+The frontend was fully evaluated in a real browser session (`http://localhost:5173/`, recorded to `theme_and_e9_audit_1792195694227.webp` and checklist `docs/evidence/frontend_manual_checklist.md`):
 1. **Baseline F1 Verification**: Route 0 (Main Gate) to 10 (Medical Annex) finds 8-hop route `0 → 1 → 3 → 4 → 6 → 7 → 8 → 9 → 10`.
 2. **Complexity Counters**: Adjacency List examines 26 slots; Adjacency Matrix examines 144 slots.
-3. **Critical Bridge Cut (`e9`)**: Disconnecting e9 immediately updates canvas to "CLOSED", sets route to "Destination Unreachable", partitions network into 2 components, and reduces reachable count to 8.
-4. **Bridge Restoration (`e9`)**: Restoring e9 immediately re-establishes the 8-hop route and restores 1 component.
+3. **Critical Link Cut (`e9`)**: Disconnecting e9 immediately updates canvas to "CLOSED", sets route to "Destination Unreachable", partitions network into 2 components, and reduces reachable count to 8.
+4. **Link Restoration (`e9`)**: Restoring e9 immediately re-establishes the 8-hop route and restores 1 component.
 5. **Redundant Cut (`e5`)**: Disconnecting e5 reroutes traffic via Block B (`0 → 1 → 3 → 5 → 6 → 7 → 8 → 9 → 10`), preserving an 8-hop shortest route.
 6. **Failure Table**: 13-row resilience matrix rendered directly from C engine.
-7. **Console Status**: Zero runtime errors, zero uncaught exceptions.
+7. **Themes**: Dark, Light, and High-Contrast (WCAG AAA) fully verified.
+8. **Console Status**: Zero runtime errors, zero uncaught exceptions.
 
 ---
 
@@ -211,7 +215,7 @@ RouteGuard/
 ├── build.ps1                  # Native PowerShell build driver
 ├── build_wasm.ps1             # WebAssembly build driver (Emscripten)
 ├── .gitignore                 # Object, binary, and output directory exclusions
-├── include/                   # ISO C11 Public Headers
+├── include/                   # ISO C11 Public Headers (Native Engine Only)
 │   ├── rg_alloc.h             # Memory allocation wrappers and leak tracking
 │   ├── rg_graph.h             # Graph data structures and validation
 │   ├── rg_queue.h             # FIFO queue for BFS
@@ -219,9 +223,8 @@ RouteGuard/
 │   ├── rg_traverse.h          # BFS, DFS, and route reconstruction
 │   ├── rg_analysis.h          # Components and single-failure analysis
 │   ├── rg_fixture.h           # Benchmark fixtures F1 through F5
-│   ├── rg_svg.h               # Deterministic SVG export
-│   └── rg_wasm_bridge.h       # C11-to-WASM bridge header
-├── src/                       # ISO C11 Source Implementations
+│   └── rg_svg.h               # Deterministic SVG export
+├── src/                       # ISO C11 Source Implementations (Native Engine Only)
 │   ├── rg_alloc.c             # Allocator wrappers and fault injection hook
 │   ├── rg_graph.c             # Dual representation graph engine
 │   ├── rg_queue.c             # Fixed-capacity queue implementation
@@ -230,34 +233,38 @@ RouteGuard/
 │   ├── rg_analysis.c          # Repeated BFS component & failure analysis
 │   ├── rg_fixture.c           # Campus and edge-case benchmark graphs
 │   ├── rg_svg.c               # XML-compliant SVG generator
-│   ├── rg_wasm_bridge.c       # WebAssembly bridge implementation
 │   └── main.c                 # Menu-driven CLI and deterministic demo runner
-├── tests/                     # Automated Test Suite
+├── wasm/                      # Isolated WebAssembly Bridge Layer (Excluded from Native Engine)
+│   ├── rg_wasm_bridge.h       # C-to-WASM bridge public header
+│   ├── rg_wasm_bridge.c       # Stateful JSON serialization & C engine facade
+│   └── test_bridge.c          # Standalone bridge contract test (RG-X-11)
+├── tests/                     # Automated Native Test Suite (27 Tests)
 │   ├── rg_test.h              # Minimal assertion framework
 │   ├── test_main.c            # Test runner entry point
 │   ├── test_graph.c           # Graph structure and memory tests
 │   ├── test_traverse.c        # BFS and DFS traversal tests
 │   ├── test_analysis.c        # Resilience and failure analysis tests
 │   ├── test_fixture_ref.c     # Benchmark metrics and reference tests
-│   ├── test_random.c          # Differential testing oracle (300 random graphs)
-│   └── test_bridge.c          # WASM bridge contract test
+│   └── test_random.c          # Differential testing oracle (300 random graphs)
 ├── frontend/                  # React + TypeScript + Vite Browser Frontend
 │   ├── index.html             # Application entry point
 │   ├── package.json           # Frontend dependencies and scripts
 │   ├── vite.config.ts         # Vite bundler configuration
 │   └── src/
 │       ├── App.tsx            # Network resilience console UI
-│       ├── index.css          # Dark-theme operations console styling
+│       ├── index.css          # Dark/Light/HC operations console styling
 │       ├── main.tsx           # React bootstrap entry point
 │       └── wasm/              # Compiled WebAssembly artifacts & TypeScript bridge
 │           ├── bridge.ts      # Typed TypeScript wrapper for C engine
-│           ├── routeguard.js  # Emscripten WASM module
+│           ├── routeguard.js  # Emscripten WASM module (embedded base64 WASM)
 │           └── routeguard.d.ts # TypeScript definitions
 └── docs/                      # Authoritative Documentation
     ├── DESIGN.md              # Invariants, algorithms, pseudocode, and complexity
     ├── FIXTURES.md            # Hand-traced step tables and closure matrices
     ├── TEST_PLAN.md           # SRS Section 10 test contract mapping
     ├── TRACEABILITY.md        # Requirements traceability matrix
+    ├── VIVA_NOTES.md          # 25 examiner viva preparation questions & answers
+    └── evidence/              # Raw verification logs & browser checklists
     ├── VIVA_NOTES.md          # 25 examiner viva preparation questions & answers
     └── evidence/              # Raw verification logs
         ├── env.txt            # Host toolchain and probe logs

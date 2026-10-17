@@ -29,6 +29,13 @@ export const App: React.FC = () => {
   const [networkState, setNetworkState] = useState<NetworkState | null>(null);
   const [failureTable, setFailureTable] = useState<FailureTableResult | null>(null);
 
+  // Theme state: dark | light | high-contrast
+  const [theme, setTheme] = useState<'dark' | 'light' | 'high-contrast'>('dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   // Tooltip & Hover state
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<number | null>(null);
@@ -237,6 +244,35 @@ export const App: React.FC = () => {
         </div>
 
         <div className="header-actions">
+          <div className="theme-toggle-group" role="group" aria-label="Theme selection">
+            <button
+              type="button"
+              className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
+              onClick={() => setTheme('dark')}
+              id="theme-dark-btn"
+              title="Graphite/Navy Dark Mode"
+            >
+              🌙 Dark
+            </button>
+            <button
+              type="button"
+              className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
+              onClick={() => setTheme('light')}
+              id="theme-light-btn"
+              title="Clean Slate Light Mode"
+            >
+              ☀️ Light
+            </button>
+            <button
+              type="button"
+              className={`theme-btn ${theme === 'high-contrast' ? 'active' : ''}`}
+              onClick={() => setTheme('high-contrast')}
+              id="theme-hc-btn"
+              title="High-Contrast Mode (WCAG AAA)"
+            >
+              👁️ High Contrast
+            </button>
+          </div>
           <button className="btn btn-secondary btn-sm" onClick={handleReset} id="btn-header-reset">
             ↺ Reset Graph
           </button>
@@ -357,14 +393,14 @@ export const App: React.FC = () => {
                 onClick={() => handleToggleEdge(9)}
                 id="btn-scenario-e9"
               >
-                {graph?.edges[9]?.active ? 'Disable e9 (Critical Bridge Cut)' : 'Restore e9 (Reconnect Complex)'}
+                {graph?.edges[9]?.active ? 'Sever e9 (Cut Connecting Link)' : 'Restore e9 (Reconnect Walkway)'}
               </button>
               <button
                 className={`btn btn-sm ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-secondary'}`}
                 onClick={() => handleToggleEdge(5)}
                 id="btn-scenario-e5"
               >
-                {graph?.edges[5]?.active ? 'Disable e5 (Redundant Cut: Block A)' : 'Restore e5 (Direct Plaza)'}
+                {graph?.edges[5]?.active ? 'Sever e5 (Simulate Block A Cut)' : 'Restore e5 (Direct Route)'}
               </button>
               <button className="btn btn-secondary btn-sm" onClick={handleReset} id="btn-restore-all">
                 Restore All Walkways (Reset)
@@ -551,7 +587,7 @@ export const App: React.FC = () => {
                         y1={uNode.y}
                         x2={vNode.x}
                         y2={vNode.y}
-                        stroke={isHovered ? '#94a3b8' : '#475569'}
+                        stroke={isHovered ? 'var(--edge-hover)' : 'var(--edge-stroke)'}
                         strokeWidth={isHovered ? 3 : 2}
                       />
                     )}
@@ -566,8 +602,8 @@ export const App: React.FC = () => {
                 const isReached = reachedSet.has(v.id);
                 const isHovered = hoveredVertex === v.id;
 
-                let fillColor = '#1e293b';
-                let strokeColor = '#64748b';
+                let fillColor = 'var(--node-fill)';
+                let strokeColor = 'var(--node-stroke)';
                 let strokeWidth = 2;
 
                 if (isSrc) {
@@ -579,8 +615,8 @@ export const App: React.FC = () => {
                   strokeColor = '#38bdf8';
                   strokeWidth = 3;
                 } else if (!isReached) {
-                  fillColor = '#111827';
-                  strokeColor = '#475569';
+                  fillColor = 'var(--bg-app)';
+                  strokeColor = 'var(--rose)';
                 }
 
                 return (
@@ -608,10 +644,10 @@ export const App: React.FC = () => {
                         cy={v.y}
                         r={24}
                         fill="none"
-                        stroke={isSrc ? '#10b981' : isDst ? '#38bdf8' : '#94a3b8'}
-                        strokeWidth={1}
+                        stroke={isSrc ? '#10b981' : isDst ? '#38bdf8' : 'var(--border-medium)'}
+                        strokeWidth={1.5}
                         strokeDasharray={isHovered ? '2,2' : undefined}
-                        opacity={0.6}
+                        opacity={0.8}
                       />
                     )}
 
@@ -630,7 +666,7 @@ export const App: React.FC = () => {
                     <text
                       x={v.x}
                       y={v.y + 4.5}
-                      fill="#ffffff"
+                      fill="var(--node-text)"
                       fontSize={12}
                       fontWeight="bold"
                       textAnchor="middle"
@@ -647,13 +683,13 @@ export const App: React.FC = () => {
                         width={100}
                         height={16}
                         rx={3}
-                        fill="rgba(15, 23, 42, 0.85)"
-                        stroke="rgba(51, 65, 85, 0.8)"
+                        fill="var(--bg-surface)"
+                        stroke="var(--border-medium)"
                       />
                       <text
                         x={0}
                         y={12}
-                        fill="#f8fafc"
+                        fill="var(--text-main)"
                         fontSize={10}
                         fontWeight="600"
                         textAnchor="middle"
@@ -684,8 +720,8 @@ export const App: React.FC = () => {
 
                     {!isReached && !isSrc && (
                       <g transform={`translate(${v.x}, ${v.y - 25})`}>
-                        <rect x={-32} y={0} width={64} height={14} rx={3} fill="#334155" />
-                        <text x={0} y={10.5} fill="#cbd5e1" fontSize={8} fontWeight="700" textAnchor="middle">
+                        <rect x={-34} y={0} width={68} height={14} rx={3} fill="var(--rose)" />
+                        <text x={0} y={10.5} fill="#ffffff" fontSize={8} fontWeight="800" textAnchor="middle">
                           UNREACHED
                         </text>
                       </g>
@@ -770,7 +806,7 @@ export const App: React.FC = () => {
                   </div>
                 ) : (
                   <div style={{ marginTop: '8px', fontSize: '12px', color: '#fca5a5' }}>
-                    Critical bridge walkway disconnected. No path exists from vertex {srcVertex} ({graph?.vertices[srcVertex]?.label}) to vertex {dstVertex} ({graph?.vertices[dstVertex]?.label}).
+                    Critical connecting walkway severed. No path exists from vertex {srcVertex} ({graph?.vertices[srcVertex]?.label}) to vertex {dstVertex} ({graph?.vertices[dstVertex]?.label}).
                   </div>
                 )}
               </div>
@@ -918,9 +954,8 @@ export const App: React.FC = () => {
           {/* Tab 3: Single-Failure Impact Table */}
           {activeTab === 'failureTable' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                Evaluates network resilience by simulating the closure of each walkway individually via brute-force repeated BFS (<span style={{ fontFamily: 'var(--font-mono)' }}>O(E · (V+E))</span>).
-                Click any row to toggle that walkway.
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                <strong>Single-Edge Failure Simulation:</strong> Systematically evaluates network resilience by simulating the temporary closure of each edge individually and executing repeated C BFS traversals (<span style={{ fontFamily: 'var(--font-mono)' }}>O(E · (V+E))</span>). Reports the operational consequences of each simulated closure on destination reachability and connected components without using low-link bridge detection algorithms. Click any row to test that closure.
               </div>
 
               <div className="data-table-container">
@@ -930,9 +965,9 @@ export const App: React.FC = () => {
                       <th>Edge</th>
                       <th>Connection</th>
                       <th>Status</th>
-                      <th>Route?</th>
+                      <th>Destination Reachable?</th>
                       <th>Hops</th>
-                      <th>Comps</th>
+                      <th>Connected Components</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -960,11 +995,11 @@ export const App: React.FC = () => {
                           </td>
                           <td>
                             <span style={{ color: row.reachable ? 'var(--emerald)' : 'var(--rose)', fontWeight: 700 }}>
-                              {row.reachable ? 'YES' : 'NO (CUT)'}
+                              {row.reachable ? 'Reachable (Redundant)' : 'Unreachable (Severed)'}
                             </span>
                           </td>
                           <td>{row.hop_count === -1 ? '—' : row.hop_count}</td>
-                          <td style={{ color: row.component_count > 1 ? 'var(--amber)' : 'inherit' }}>
+                          <td style={{ color: row.component_count > 1 ? 'var(--amber)' : 'inherit', fontWeight: row.component_count > 1 ? 700 : 400 }}>
                             {row.component_count}
                           </td>
                         </tr>

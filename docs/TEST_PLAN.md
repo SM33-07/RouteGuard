@@ -19,7 +19,7 @@ This test plan defines the formal test-ID contract strictly aligned with **SRS v
 | `RG-DFS-01` | `test_rg_dfs_01` | `tests/test_traverse.c` | Iterative DFS traversal from known start (0) | F1 | Matches exact visit order: `0, 1, 3, 2, 4, 6, 5, 7, 8, 9, 10, 11` |
 | `RG-DFS-02` | `test_rg_dfs_02` | `tests/test_traverse.c` | DFS reachability in disconnected graph | F2 | 0->1, 0->2, 3->4 true; 0->3, 0->5, 0->6 false |
 | `RG-COMP-01`| `test_rg_comp_01` | `tests/test_analysis.c` | Count connected components on baseline | F1 | Exactly 1 component |
-| `RG-FAIL-01`| `test_rg_fail_01` | `tests/test_analysis.c` | Disable critical bridge walkway `e9` (6-7) | F1 | Destination becomes unreachable; reachable=8; components=2 |
+| `RG-FAIL-01`| `test_rg_fail_01` | `tests/test_analysis.c` | Disable critical connecting walkway `e9` (6-7) | F1 | Destination becomes unreachable; reachable=8; components=2 |
 | `RG-FAIL-02`| `test_rg_fail_02` | `tests/test_analysis.c` | Disable redundant walkway `e5` (3-4) | F1 | Destination remains reachable (8 hops via Block B); components=1 |
 | `RG-FAIL-03`| `test_rg_fail_03` | `tests/test_analysis.c` | Re-enable walkway and reset graph | F1 | Baseline results restored (8 hops via Block A; 1 component) |
 | `RG-REP-01` | `test_rg_rep_01` | `tests/test_traverse.c` | Matrix vs List BFS equivalence | F1 | Identical visit order, reachability, and hop distances |
@@ -42,7 +42,7 @@ This test plan defines the formal test-ID contract strictly aligned with **SRS v
 | `RG-X-08` | `test_rg_x_08` | `tests/test_traverse.c` | Iterative DFS preorder vs Recursive DFS preorder | F1, F2, F4, F5 | Exact preorder agreement across all benchmark topologies |
 | `RG-X-09` | `test_rg_x_09` | `tests/test_traverse.c` | Slot-count complexity check (matrix vs list) | F1 | Matrix scans 144 slots ($V^2$) vs List scans 26 slots ($2E$) |
 | `RG-X-10` | `test_rg_x_10_differential_oracle` | `tests/test_random.c` | Independent differential testing oracle (300 random graphs) | Random G(V,p) | 67,574 assertions; 0 mismatches against relaxation and label propagation oracles |
-| `RG-X-11` | `test_rg_x_11_wasm_bridge` | `tests/test_bridge.c` | WebAssembly C11 bridge contract & JSON serialization | F1 | Full validation of init, reset, BFS/DFS metrics, edge toggles, failure table, and SVG |
+| `RG-X-11` | `test_rg_x_11_wasm_bridge` | `wasm/test_bridge.c` (`make test-bridge`) | WebAssembly C11 bridge contract & JSON serialization | F1 | Full validation of init, reset, BFS/DFS metrics, edge toggles, failure table, and SVG |
 
 ---
 

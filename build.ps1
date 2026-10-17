@@ -89,8 +89,7 @@ $srcFiles = @(
     'src/rg_traverse.c',
     'src/rg_analysis.c',
     'src/rg_fixture.c',
-    'src/rg_svg.c',
-    'src/rg_wasm_bridge.c'
+    'src/rg_svg.c'
 )
 
 $testFiles = @(
@@ -99,8 +98,7 @@ $testFiles = @(
     'tests/test_traverse.c',
     'tests/test_analysis.c',
     'tests/test_fixture_ref.c',
-    'tests/test_random.c',
-    'tests/test_bridge.c'
+    'tests/test_random.c'
 )
 
 Write-Host "Using compiler: $resolvedGcc" -ForegroundColor DarkGray

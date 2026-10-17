@@ -41,6 +41,31 @@ void test_rg_fail_01(void) {
     RG_ASSERT_INT_EQ(after.reachable_src_count, 8);
     RG_ASSERT_INT_EQ(after.component_count, 2);
 
+    /* Counter audit: F1 expectations with edge e9 disabled */
+    RgTraverseResult *res_mat = NULL, *res_list = NULL;
+    rg_traverse_result_create(g->n_vertices, &res_mat);
+    rg_traverse_result_create(g->n_vertices, &res_list);
+
+    bfs_matrix(g, src, res_mat);
+    bfs_list(g, src, res_list);
+
+    /* 8 vertices processed / reachable */
+    RG_ASSERT_INT_EQ(res_mat->metrics.vertices_processed, 8);
+    RG_ASSERT_INT_EQ(res_list->metrics.vertices_processed, 8);
+
+    /* 96 matrix slots examined (8 vertices * 12 cols) */
+    RG_ASSERT_INT_EQ(res_mat->metrics.neighbor_slots_examined, 96);
+
+    /* 19 list slots examined (3 + 2 + 2 + 1 + 4 + 2 + 2 + 3) */
+    RG_ASSERT_INT_EQ(res_list->metrics.neighbor_slots_examined, 19);
+
+    /* 1 skipped-inactive edge (edge e9 incident to vertex 6) */
+    RG_ASSERT_INT_EQ(res_mat->metrics.edges_skipped_inactive, 1);
+    RG_ASSERT_INT_EQ(res_list->metrics.edges_skipped_inactive, 1);
+
+    rg_traverse_result_free(res_mat);
+    rg_traverse_result_free(res_list);
+
     rg_graph_free(g);
     RG_TEST_END();
 }

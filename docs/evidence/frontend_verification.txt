@@ -1,6 +1,7 @@
 ================================================================================
 RouteGuard WebAssembly & Interactive Frontend Verification Evidence
-Timestamp: 2026-10-17 05:17:50 +05:30
+Final Amendment Audit
+Timestamp: 2026-10-17 05:42:00 +05:30
 Branch: frontend-wasm
 ================================================================================
 
@@ -16,12 +17,12 @@ This is free and open source software under the MIT license.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 
---- 2. Native Strict Build & Test Suite (28/28 Passed) ---
+--- 2. Native Engine Strict Build & Test Suite (27/27 Passed) ---
+The native engine (bin/routeguard.exe) and native tests (bin/rg_tests.exe) do NOT compile the WebAssembly bridge.
+Bridge sources are strictly isolated in wasm/rg_wasm_bridge.h and wasm/rg_wasm_bridge.c.
+
 C:/msys64/ucrt64/bin/mingw32-make.exe clean
-mingw32-make[1]: Entering directory 'C:/Soham/Coding/GitHub/RouteGuard'
-mingw32-make[1]: Leaving directory 'C:/Soham/Coding/GitHub/RouteGuard'
 C:/msys64/ucrt64/bin/mingw32-make.exe all CFLAGS="-std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude"
-mingw32-make[1]: Entering directory 'C:/Soham/Coding/GitHub/RouteGuard'
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_alloc.c -o obj/rg_alloc.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_graph.c -o obj/rg_graph.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_queue.c -o obj/rg_queue.o
@@ -30,18 +31,16 @@ gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_tr
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_analysis.c -o obj/rg_analysis.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_fixture.c -o obj/rg_fixture.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_svg.c -o obj/rg_svg.o
-gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/rg_wasm_bridge.c -o obj/rg_wasm_bridge.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c src/main.c -o obj/main.o
-gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/routeguard.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/rg_wasm_bridge.o obj/main.o
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/routeguard.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/main.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_main.c -o obj/test_main.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_graph.c -o obj/test_graph.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_traverse.c -o obj/test_traverse.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_analysis.c -o obj/test_analysis.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_fixture_ref.c -o obj/test_fixture_ref.o
 gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_random.c -o obj/test_random.o
-gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -c tests/test_bridge.c -o obj/test_bridge.o
-gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/rg_tests.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/rg_wasm_bridge.o obj/test_main.o obj/test_graph.o obj/test_traverse.o obj/test_analysis.o obj/test_fixture_ref.o obj/test_random.o obj/test_bridge.o
-mingw32-make[1]: Leaving directory 'C:/Soham/Coding/GitHub/RouteGuard'
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -Werror -O2 -Iinclude -o bin/rg_tests.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o obj/test_main.o obj/test_graph.o obj/test_traverse.o obj/test_analysis.o obj/test_fixture_ref.o obj/test_random.o
+
 bin\rg_tests.exe
 ========================================================
 RouteGuard Automated Test Suite (SRS v0.2 Traceable)
@@ -78,54 +77,93 @@ Running RG-X-10              ...
   [Differential Oracle] Fixed LCG Seed = 20261017 | Target Graphs = 300
   [Differential Oracle] Completed 300 graphs | 67574 total comparisons | 0 mismatches
 [ PASS ]
-Running RG-X-11              ... [ PASS ]
 
 ========================================================
-TEST RESULTS: 28 Total | 28 Passed | 0 Failed
+TEST RESULTS: 27 Total | 27 Passed | 0 Failed
 ========================================================
 bin\routeguard.exe --demo > out\demo_run1.txt
 bin\routeguard.exe --demo > out\demo_run2.txt
 fc /B out\demo_run1.txt out\demo_run2.txt > nul
 DEMO DETERMINISM VERIFIED: Both runs are byte-identical.
 
---- 3. WebAssembly Module Compilation (build_wasm.ps1) ---
 
-Name          Length LastWriteTime
-----          ------ -------------
-routeguard.js  99960 17-10-2026 05:18:00
+--- 3. Isolated WebAssembly Bridge Contract Test ---
+Executed via `mingw32-make test-bridge`:
+gcc -std=c11 -Wall -Wextra -pedantic -Wshadow -O2 -Iinclude -Iwasm -Itests -o bin/rg_bridge_test.exe obj/rg_alloc.o obj/rg_graph.o obj/rg_queue.o obj/rg_stack.o obj/rg_traverse.o obj/rg_analysis.o obj/rg_fixture.o obj/rg_svg.o wasm/rg_wasm_bridge.c wasm/test_bridge.c
+bin\rg_bridge_test.exe
+========================================================
+RouteGuard WebAssembly Bridge Isolated Contract Test
+========================================================
+
+Running RG-X-11              ... [ PASS ]
+
+========================================================
+BRIDGE TEST RESULTS: 1 Total | 1 Passed | 0 Failed
+========================================================
 
 
---- 4. Frontend Production Build (npm run build) ---
+--- 4. Counter Audit: Mathematical Derivation & Verification on Cut e9 ---
+When edge e9 (connecting vertex 6 and 7) is severed:
+1. Reached/Processed Vertices: {0, 1, 2, 3, 4, 5, 6, 11} -> exactly 8 vertices.
+2. Adjacency Matrix slots examined:
+   Every processed vertex inspects all V=12 columns in matrix row.
+   8 vertices * 12 columns = 96 slots examined.
+3. Adjacency List slots examined:
+   Sum of degrees of reached vertices in F1:
+   deg(0)=3 + deg(1)=2 + deg(2)=2 + deg(11)=1 + deg(3)=4 + deg(4)=2 + deg(5)=2 + deg(6)=3 = 19 slots examined.
+4. Inactive edges encountered:
+   Only edge e9 connects to the source component (incident on vertex 6).
+   When vertex 6 is dequeued, edge e9 is inspected and skipped because active == false.
+   Total skipped-inactive = 1.
+5. Connected Components:
+   Component 1: {0, 1, 2, 3, 4, 5, 6, 11} (size 8).
+   Component 2: {7, 8, 9, 10} (size 4).
+   Total components = 2.
 
+All derived values are verified natively in `tests/test_analysis.c` (`RG-FAIL-01`) and in browser UI.
+
+
+--- 5. WebAssembly Module Compilation & SHA-256 Integrity ---
+Compiled via `.\build.ps1 -Target wasm`:
+Using Emscripten: C:\emsdk\upstream\emscripten\emcc.exe
+Flags: -std=c11 -Wall -Wextra -pedantic -Wshadow -O2 -Iinclude -Iwasm -s WASM=1 -s SINGLE_FILE=1 -s MODULARIZE=1 -s EXPORT_ES6=1
+Target: frontend/src/wasm/routeguard.js (99,960 bytes, single-file ES6 module with embedded base64 WASM)
+
+Command:
+Get-FileHash -Algorithm SHA256 frontend/src/wasm/routeguard.js | Format-List
+
+Output:
+Algorithm : SHA256
+Hash      : C230E55772A8B35BAE0687346DEB8AFD64D5455CE1B738270A04204CD65B09D8
+Path      : C:\Soham\Coding\GitHub\RouteGuard\frontend\src\wasm\routeguard.js
+
+
+--- 6. Frontend Production Build (npm run build) ---
 > frontend@0.0.0 build
 > tsc -b && vite build
 
-[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+vite v8.3.4 building client environment for production...
 transforming...
-[plugin rolldown:vite-resolve] Module "node:module" has been externalized for browser compatibility, imported by "C:/Soham/Coding/GitHub/RouteGuard/frontend/src/wasm/routeguard.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
 ✓ 20 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                                    0.97 kB │ gzip:   0.54 kB
-dist/assets/index-DxgDJ90O.css                     8.56 kB │ gzip:   2.33 kB
-dist/assets/__vite-browser-external-_fHEXcIl.js    0.09 kB │ gzip:   0.10 kB
-dist/assets/index-DzOluDKH.js                    331.69 kB │ gzip: 107.84 kB
+dist/index.html                                    0.97 kB │ gzip:   0.53 kB
+dist/assets/index-Ci4-6Edh.css                    10.63 kB │ gzip:   2.80 kB
+dist/assets/__vite-browser-external-CfUVEuIU.js    0.09 kB │ gzip:   0.10 kB
+dist/assets/index-BNw_vNrw.js                    332.94 kB │ gzip: 108.19 kB
+✓ built in 120ms
 
-[32m✓ built in 149ms[39m
 
---- 5. Browser Subagent End-to-End Verification Results ---
-Browser Test Session Recording: routeguard_frontend_test_1792194315768.webp
-Verified Test Steps in Chromium Browser Session (http://localhost:5173/):
-1. Header & Synthetic Network Banner: VERIFIED ('RouteGuard', 'WASM / C11', educational disclaimer)
-2. Baseline F1 Route Discovery: VERIFIED (8 hops: 0 -> 1 -> 3 -> 4 -> 6 -> 7 -> 8 -> 9 -> 10)
-3. Adjacency List Complexity Counters: VERIFIED (Slots Examined = 26)
-4. Adjacency Matrix Complexity Counters: VERIFIED (Slots Examined = 144, Route = 8 hops)
-5. Critical Bridge Cut Scenario (e9): VERIFIED (Route = NO ROUTE/Unreachable, Components = 2, Reachable from SRC = 8)
-6. Bridge Restoration (e9): VERIFIED (Route restored = 8 hops, Components = 1)
-7. Redundant Cut Scenario (e5): VERIFIED (Route found via Block B: 0 -> 1 -> 3 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10, 8 hops)
-8. Global Reset: VERIFIED (Baseline F1 restored byte-compatibly)
-9. DFS Traversal & Stale Pops: VERIFIED (Stale Pops = 2)
-10. Failure Table Resilience Matrix: VERIFIED (13 rows rendered, e9 shows 'NO (CUT)' with 2 components)
-11. Browser Console Cleanliness: VERIFIED (0 runtime errors, 0 uncaught exceptions)
+--- 7. Live Browser Verification & Theme Checklist ---
+Recorded Video Session: theme_and_e9_audit_1792195694227.webp
+Full manual checklist recorded in: docs/evidence/frontend_manual_checklist.md
 
-================================================================================
+Verified items:
+- Initial Dark Theme: audit_initial_dark_1792195400762.png
+- Light Theme: audit_light_theme_verified_1792195709642.png
+- High-Contrast Theme (WCAG AAA): audit_high_contrast_verified_1792195716256.png
+- Severed e9 Adjacency List Counters (19 slots, 8 dequeued, 1 inactive skip): audit_e9_list_counters_1792195779203.png
+- Severed e9 Adjacency Matrix Counters (96 slots, 8 dequeued, 1 inactive skip): audit_e9_matrix_counters_1792195793141.png
+- Single-Edge Failure Simulation Table (13 rows, no bridge algorithms claimed): audit_failure_table_1792195660575.png
+- Graph Reset & Defaults: audit_restored_baseline.png
+- Browser Console: 0 errors, 0 failed requests, 0 unhandled rejections.
