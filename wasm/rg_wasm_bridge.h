@@ -25,6 +25,21 @@ EMSCRIPTEN_KEEPALIVE
 int rg_wasm_init(void);
 
 /**
+ * @brief Initialize or re-initialize the WASM global graph with a specific fixture.
+ * @param fixture_id 0 = F1 Reference Graph, 1 = MUJ Campus Demo.
+ * @return 0 on success, non-zero on failure.
+ */
+EMSCRIPTEN_KEEPALIVE
+int rg_wasm_init_fixture(int fixture_id);
+
+/**
+ * @brief Get the currently active fixture ID (0 = F1 Reference Graph, 1 = MUJ Campus Demo).
+ */
+EMSCRIPTEN_KEEPALIVE
+int rg_wasm_get_active_fixture(void);
+
+
+/**
  * @brief Reset the graph, re-enabling all edges.
  * @return 0 on success, non-zero on failure.
  */

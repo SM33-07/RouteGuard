@@ -76,7 +76,7 @@ $emccArgs = @(
     "-s", "WASM=1",
     "-s", "SINGLE_FILE=1",
     "-s", "EXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','FS']",
-    "-s", "EXPORTED_FUNCTIONS=['_rg_wasm_init','_rg_wasm_reset','_rg_wasm_get_graph_json','_rg_wasm_set_edge_active','_rg_wasm_run_bfs','_rg_wasm_run_dfs','_rg_wasm_find_route','_rg_wasm_get_components','_rg_wasm_get_network_state','_rg_wasm_get_failure_table','_rg_wasm_export_svg','_malloc','_free']",
+    "-s", "EXPORTED_FUNCTIONS=['_rg_wasm_init','_rg_wasm_init_fixture','_rg_wasm_get_active_fixture','_rg_wasm_reset','_rg_wasm_get_graph_json','_rg_wasm_set_edge_active','_rg_wasm_run_bfs','_rg_wasm_run_dfs','_rg_wasm_find_route','_rg_wasm_get_components','_rg_wasm_get_network_state','_rg_wasm_get_failure_table','_rg_wasm_export_svg','_malloc','_free']",
     "-s", "ALLOW_MEMORY_GROWTH=1",
     "-s", "MODULARIZE=1",
     "-s", "EXPORT_ES6=1",
@@ -96,6 +96,8 @@ $targetDts = Join-Path $OutputDir "routeguard.d.ts"
 $dtsContent = @"
 export interface RouteGuardModule {
     _rg_wasm_init(): number;
+    _rg_wasm_init_fixture(fixture_id: number): number;
+    _rg_wasm_get_active_fixture(): number;
     _rg_wasm_reset(): number;
     _rg_wasm_get_graph_json(): number;
     _rg_wasm_set_edge_active(edge_id: number, active: number): number;
@@ -111,6 +113,7 @@ export interface RouteGuardModule {
 
 export default function createRouteGuardModule(): Promise<RouteGuardModule>;
 "@
+
 Set-Content -Path $targetDts -Value $dtsContent -Encoding UTF8
 
 Write-Host "WASM Build complete:" -ForegroundColor Green

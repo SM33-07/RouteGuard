@@ -3,6 +3,7 @@ import createRouteGuardModule, { type RouteGuardModule } from './routeguard.js';
 export interface Vertex {
   id: number;
   label: string;
+  full_name?: string;
   x: number;
   y: number;
 }
@@ -15,11 +16,14 @@ export interface Edge {
 }
 
 export interface GraphData {
+  fixture_id?: number;
+  fixture_name?: string;
   n_vertices: number;
   n_edges: number;
   vertices: Vertex[];
   edges: Edge[];
 }
+
 
 export interface Metrics {
   vertices_processed: number;
@@ -101,6 +105,15 @@ export class RouteGuardBridge {
     return res === 0;
   }
 
+  public initFixture(fixtureId: number): boolean {
+    const res = this.mod._rg_wasm_init_fixture(fixtureId);
+    return res === 0;
+  }
+
+  public getActiveFixture(): number {
+    return this.mod._rg_wasm_get_active_fixture();
+  }
+
   public reset(): boolean {
     const res = this.mod._rg_wasm_reset();
     return res === 0;
@@ -161,12 +174,12 @@ export class RouteGuardBridge {
 
 let bridgeInstance: RouteGuardBridge | null = null;
 
-export async function getRouteGuardBridge(): Promise<RouteGuardBridge> {
+export async function getRouteGuardBridge(defaultFixture: number = 1): Promise<RouteGuardBridge> {
   if (bridgeInstance) {
     return bridgeInstance;
   }
   const mod = await createRouteGuardModule();
-  mod._rg_wasm_init();
+  mod._rg_wasm_init_fixture(defaultFixture);
   bridgeInstance = new RouteGuardBridge(mod);
   return bridgeInstance;
 }

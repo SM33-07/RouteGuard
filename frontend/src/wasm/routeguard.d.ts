@@ -1,5 +1,7 @@
 ﻿export interface RouteGuardModule {
     _rg_wasm_init(): number;
+    _rg_wasm_init_fixture(fixture_id: number): number;
+    _rg_wasm_get_active_fixture(): number;
     _rg_wasm_reset(): number;
     _rg_wasm_get_graph_json(): number;
     _rg_wasm_set_edge_active(edge_id: number, active: number): number;

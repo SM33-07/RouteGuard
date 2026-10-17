@@ -12,19 +12,39 @@ static RgGraph *g_wasm_graph = NULL;
 static char s_json_buffer[JSON_BUF_SIZE];
 static char s_svg_buffer[SVG_BUF_SIZE];
 
+static int s_active_fixture = 0; /* 0 = F1, 1 = MUJ Campus */
+
 static void ensure_graph_initialized(void) {
     if (g_wasm_graph == NULL) {
-        rg_fixture_f1_campus(&g_wasm_graph);
+        if (s_active_fixture == 1) {
+            rg_fixture_campus_muj(&g_wasm_graph);
+        } else {
+            rg_fixture_f1_campus(&g_wasm_graph);
+        }
     }
 }
 
 int rg_wasm_init(void) {
+    return rg_wasm_init_fixture(s_active_fixture);
+}
+
+int rg_wasm_init_fixture(int fixture_id) {
     if (g_wasm_graph != NULL) {
         rg_graph_free(g_wasm_graph);
         g_wasm_graph = NULL;
     }
-    RgStatus st = rg_fixture_f1_campus(&g_wasm_graph);
+    s_active_fixture = (fixture_id == 1) ? 1 : 0;
+    RgStatus st;
+    if (s_active_fixture == 1) {
+        st = rg_fixture_campus_muj(&g_wasm_graph);
+    } else {
+        st = rg_fixture_f1_campus(&g_wasm_graph);
+    }
     return (st == RG_OK) ? 0 : (int)st;
+}
+
+int rg_wasm_get_active_fixture(void) {
+    return s_active_fixture;
 }
 
 int rg_wasm_reset(void) {
@@ -43,15 +63,19 @@ const char *rg_wasm_get_graph_json(void) {
         return s_json_buffer;
     }
 
+    const char *fixture_name = (s_active_fixture == 1) ? "MUJ Campus Demo" : "F1 Reference Graph";
     int offset = snprintf(s_json_buffer, JSON_BUF_SIZE,
-                          "{\"n_vertices\":%d,\"n_edges\":%d,\"vertices\":[",
-                          g_wasm_graph->n_vertices, g_wasm_graph->n_edges);
+                          "{\"fixture_id\":%d,\"fixture_name\":\"%s\",\"n_vertices\":%d,\"n_edges\":%d,\"vertices\":[",
+                          s_active_fixture, fixture_name, g_wasm_graph->n_vertices, g_wasm_graph->n_edges);
 
     for (int i = 0; i < g_wasm_graph->n_vertices; i++) {
         const char *comma = (i < g_wasm_graph->n_vertices - 1) ? "," : "";
+        const char *full_desc = (s_active_fixture == 1)
+                                ? rg_fixture_campus_venue_description(i)
+                                : g_wasm_graph->labels[i];
         offset += snprintf(s_json_buffer + offset, JSON_BUF_SIZE - offset,
-                           "{\"id\":%d,\"label\":\"%s\",\"x\":%d,\"y\":%d}%s",
-                           i, g_wasm_graph->labels[i],
+                           "{\"id\":%d,\"label\":\"%s\",\"full_name\":\"%s\",\"x\":%d,\"y\":%d}%s",
+                           i, g_wasm_graph->labels[i], full_desc,
                            g_wasm_graph->coords_x[i], g_wasm_graph->coords_y[i],
                            comma);
     }
@@ -70,6 +94,7 @@ const char *rg_wasm_get_graph_json(void) {
     snprintf(s_json_buffer + offset, JSON_BUF_SIZE - offset, "]}");
     return s_json_buffer;
 }
+
 
 int rg_wasm_set_edge_active(int edge_id, int active) {
     ensure_graph_initialized();
