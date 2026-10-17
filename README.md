@@ -1,7 +1,7 @@
 # RouteGuard
 
-**Author:** `<STUDENT NAME>`  
-**Registration Number:** `<REG NO>`  
+**Author:** `Soham More`  
+**Registration Number:** `2502051952`  
 **Course:** CSC2101 (Data Structures and Algorithms) / CSC2130 (DSA Lab)  
 **Implementation Standard:** Pure ISO C11 (Standard Library only) + WebAssembly (Emscripten)  
 **Academic Scope Boundary:** Strictly bounded through CSC2101 Lecture 37  
