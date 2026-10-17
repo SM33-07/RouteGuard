@@ -445,7 +445,10 @@ button, input, select, textarea {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-  white-space: nowrap;
+  /* Allow wrapping for long labels — scenario buttons need this */
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .btn-sm {
@@ -713,16 +716,28 @@ button, input, select, textarea {
   width: 100%;
   height: 100%;
   position: relative;
-  overflow: hidden;
+  /* Must NOT clip absolute children like the route strip and corner legend */
+  overflow: visible;
+  min-width: 0;
+  min-height: 0;
 }
 
 .campus-map-wrapper {
   width: 100%;
   height: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .campus-map-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* MapLibre GL JS canvas container — MUST be sized explicitly */
+.maplibre-container {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
 }
@@ -796,6 +811,25 @@ button, input, select, textarea {
   background: var(--bg-surface);
   border-color: var(--amber);
   color: var(--amber);
+}
+
+/* Network / Tile Connection Error Banner */
+.map-error-banner {
+  position: absolute;
+  top: 56px;
+  left: 12px;
+  right: 12px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #fca5a5;
+  z-index: 20;
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Mandatory Campus Presentation Disclaimer */
@@ -919,7 +953,7 @@ button, input, select, textarea {
   font-weight: 700;
 }
 
-/* Corner Map Legend */
+/* Corner Map Legend — also used outside .campus-map-wrapper (in App.tsx canvas-container) */
 .map-legend-corner {
   position: absolute;
   bottom: 12px;
@@ -936,6 +970,103 @@ button, input, select, textarea {
   box-shadow: var(--shadow-sm);
   font-size: 10.5px;
   color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Map Floating Legend (used in CampusMap.tsx)
+   ========================================================================== */
+.map-floating-legend {
+  position: absolute;
+  bottom: 56px;
+  right: 12px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  padding: 8px 12px;
+  z-index: 15;
+  box-shadow: var(--shadow-sm);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  min-width: 160px;
+}
+
+.legend-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Line swatches for edge types */
+.legend-line {
+  display: inline-block;
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-line.active-line {
+  background-color: #64748b;
+}
+
+.legend-line.closed-line {
+  background: repeating-linear-gradient(
+    90deg,
+    #ef4444 0,
+    #ef4444 5px,
+    transparent 5px,
+    transparent 9px
+  );
+  height: 3px;
+}
+
+.legend-line.route-line {
+  background-color: var(--cyan);
+  box-shadow: 0 0 5px var(--cyan);
+  height: 4px;
+}
+
+/* Dot swatches for node types */
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-dot.src-dot {
+  background-color: var(--emerald);
+  box-shadow: 0 0 5px var(--emerald);
+}
+
+.legend-dot.dst-dot {
+  background-color: var(--cyan);
+  box-shadow: 0 0 5px var(--cyan);
+}
+
+.legend-dot.unreached-dot {
+  background-color: transparent;
+  border: 2px dashed var(--rose);
+  width: 9px;
+  height: 9px;
 }
 
 .legend-row {
@@ -1156,17 +1287,19 @@ button, input, select, textarea {
   border-bottom: 1px solid var(--border-subtle);
   overflow-x: auto;
   flex-shrink: 0;
+  /* Prevent individual tabs from growing beyond natural width */
 }
 
 .inspector-tab-btn {
-  flex: 1;
+  /* Don't stretch — let each tab be its natural width, allowing scroll */
+  flex: 0 0 auto;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--text-secondary);
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 10px 8px;
+  padding: 8px 6px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;

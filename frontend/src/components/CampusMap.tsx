@@ -5,13 +5,18 @@ import {
   Marker,
   NavigationControl,
   AttributionControl,
+  setWorkerUrl,
   type GeoJSONSource,
   type ErrorEvent,
 } from 'maplibre-gl';
 import type { Feature, FeatureCollection, LineString } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// Fix for Vite bundler: explicitly bundle the MapLibre worker so tiles render correctly
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+setWorkerUrl(maplibreWorkerUrl);
 import { CAMPUS_VENUES, MUJ_CAMPUS_CENTER, MUJ_DEFAULT_ZOOM } from '../campus_venues';
 import type { GraphData, RouteResult, TraversalResult } from '../wasm/bridge';
+
 
 interface CampusMapProps {
   graph: GraphData | null;
