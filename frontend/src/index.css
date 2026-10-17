@@ -456,6 +456,16 @@ button, input, select, textarea {
   padding: 5px 10px;
 }
 
+/* Scenario buttons: shorter labels, rely on title tooltip for full description */
+.btn-scenario {
+  font-size: 11px;
+  padding: 5px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 .btn-primary {
   background-color: var(--cyan);
   color: #040914;
@@ -742,6 +752,22 @@ button, input, select, textarea {
   height: 100%;
 }
 
+/* Inline disclaimer in top-right toolbar */
+.campus-model-disclaimer-inline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  background: var(--bg-glass);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 5px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* Map Floating Top Toolbar */
 .map-floating-toolbar {
   position: absolute;
@@ -813,7 +839,167 @@ button, input, select, textarea {
   color: var(--amber);
 }
 
-/* Network / Tile Connection Error Banner */
+/* ==========================================================================
+   Compact Single Map Legend (replaces duplicate)
+   ========================================================================== */
+.map-legend-compact {
+  position: absolute;
+  bottom: 56px; /* above route bar */
+  right: 12px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-medium);
+  border-radius: 7px;
+  padding: 7px 10px;
+  z-index: 15;
+  pointer-events: none;
+  min-width: 148px;
+  box-shadow: var(--shadow-sm);
+}
+
+.legend-compact-title {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 5px;
+}
+
+.legend-compact-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+}
+
+.lc-line {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.lc-active { background-color: #7c93ae; }
+
+.lc-closed {
+  background: repeating-linear-gradient(
+    90deg,
+    #ef4444 0,
+    #ef4444 5px,
+    transparent 5px,
+    transparent 9px
+  );
+  height: 3px;
+}
+
+.lc-route {
+  background-color: var(--cyan);
+  box-shadow: 0 0 4px var(--cyan);
+  height: 4px;
+}
+
+.lc-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lc-src { background-color: var(--emerald); box-shadow: 0 0 4px var(--emerald); }
+.lc-dst { background-color: var(--cyan); box-shadow: 0 0 4px var(--cyan); }
+
+/* ==========================================================================
+   Compact Route Summary Bar (replaces strip + scrollbar)
+   ========================================================================== */
+.route-compact-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-medium);
+  padding: 7px 14px;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  z-index: 14;
+  /* No overflow-x scroll — chips wrap */
+  overflow: hidden;
+  max-height: 56px;
+  box-sizing: border-box;
+}
+
+.rcb-hop-pill {
+  flex-shrink: 0;
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  align-self: center;
+}
+
+.rcb-path-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.rcb-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  color: var(--text-main);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.12s ease;
+}
+
+.rcb-chip:hover { border-color: var(--cyan); color: var(--cyan); }
+
+.rcb-chip.chip-src {
+  border-color: var(--emerald);
+  color: var(--emerald);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.rcb-chip.chip-dst {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.rcb-arrow {
+  color: var(--text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.rcb-blocked {
+  color: var(--rose);
+  font-size: 11.5px;
+  font-weight: 600;
+  align-self: center;
+}
+
 .map-error-banner {
   position: absolute;
   top: 56px;
@@ -1112,19 +1298,39 @@ button, input, select, textarea {
   background-color: var(--cyan);
 }
 
-/* Map Venue Marker Pins */
+/* ==========================================================================
+   Map Venue Marker Pins — smart label visibility
+   ========================================================================== */
 .map-venue-marker {
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.15s ease;
+  transition: transform 0.12s ease;
 }
 
-.map-venue-marker:hover {
-  transform: translateY(-2px) scale(1.05);
+.map-venue-marker:hover,
+.map-venue-marker:focus-visible {
+  transform: translateY(-3px) scale(1.07);
   z-index: 30;
+}
+
+/* Label hidden by default for non-critical venues */
+.map-venue-marker.label-hover .marker-label-tag {
+  display: none;
+}
+
+/* Show label on hover/focus for non-critical venues */
+.map-venue-marker.label-hover:hover .marker-label-tag,
+.map-venue-marker.label-hover:focus-visible .marker-label-tag,
+.map-venue-marker.label-hover:focus-within .marker-label-tag {
+  display: flex;
+}
+
+/* Always-visible label for SRC, DST, route vertices, selected */
+.map-venue-marker.label-always .marker-label-tag {
+  display: flex;
 }
 
 .marker-pin {
@@ -1285,25 +1491,27 @@ button, input, select, textarea {
   display: flex;
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-subtle);
-  overflow-x: auto;
   flex-shrink: 0;
-  /* Prevent individual tabs from growing beyond natural width */
+  /* 4 tabs: each gets equal width, no overflow */
+  overflow: hidden;
 }
 
 .inspector-tab-btn {
-  /* Don't stretch — let each tab be its natural width, allowing scroll */
-  flex: 0 0 auto;
+  /* Equally share the 320px right panel */
+  flex: 1 1 0;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--text-secondary);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 8px 6px;
+  padding: 9px 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inspector-tab-btn:hover {

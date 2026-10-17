@@ -17,7 +17,6 @@ setWorkerUrl(maplibreWorkerUrl);
 import { CAMPUS_VENUES, MUJ_CAMPUS_CENTER, MUJ_DEFAULT_ZOOM } from '../campus_venues';
 import type { GraphData, RouteResult, TraversalResult } from '../wasm/bridge';
 
-
 interface CampusMapProps {
   graph: GraphData | null;
   srcVertex: number;
@@ -30,7 +29,6 @@ interface CampusMapProps {
   onSetSource: (vId: number) => void;
   onSetDestination: (vId: number) => void;
   onToggleEdge: (edgeId: number) => void;
-  onOpenSchematic: () => void;
 }
 
 export const CampusMap: React.FC<CampusMapProps> = ({
@@ -45,7 +43,6 @@ export const CampusMap: React.FC<CampusMapProps> = ({
   onSetSource,
   onSetDestination,
   onToggleEdge,
-  onOpenSchematic,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -69,6 +66,15 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     return s;
   }, [traversalResult]);
 
+  // Set of vertices on the highlighted route path
+  const routeVertexSet = React.useMemo(() => {
+    const s = new Set<number>();
+    if (routeResult && routeResult.found) {
+      routeResult.path.forEach((id) => s.add(id));
+    }
+    return s;
+  }, [routeResult]);
+
   // Set of route edges for highlighting
   const routeEdgePairs = React.useMemo(() => {
     const pairs = new Set<string>();
@@ -86,7 +92,6 @@ export const CampusMap: React.FC<CampusMapProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Vector tile style from OpenFreeMap
     const styleUrl = 'https://tiles.openfreemap.org/styles/liberty';
 
     const map = new MapLibreMap({
@@ -94,14 +99,14 @@ export const CampusMap: React.FC<CampusMapProps> = ({
       style: styleUrl,
       center: MUJ_CAMPUS_CENTER,
       zoom: MUJ_DEFAULT_ZOOM,
-      pitch: 25,
-      bearing: -15,
-      attributionControl: false, // Customized below for compliant styling
+      pitch: 20,
+      bearing: -10,
+      attributionControl: false,
     });
 
     map.addControl(
       new AttributionControl({
-        compact: false,
+        compact: true,
         customAttribution:
           '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
       }),
@@ -116,7 +121,6 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     });
 
     map.on('error', (e: ErrorEvent) => {
-      // Catch tile loading or connectivity failures
       if (e && e.error && e.error.message && e.error.message.includes('fetch')) {
         setMapError('Vector tile connection unavailable. Remote basemap requires network access.');
       }
@@ -124,7 +128,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({
 
     mapRef.current = map;
 
-    // Responsive container ResizeObserver
+    // Responsive ResizeObserver
     const ro = new ResizeObserver(() => {
       map.resize();
     });
@@ -137,18 +141,16 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     };
   }, []);
 
-  // 2. Render GeoJSON Walkway Layers (active, closed, and minimum-hop route)
+  // 2. Render GeoJSON Walkway Layers
   const updateGeoJSONLayers = useCallback(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || !graph) return;
 
-    // Build map of vertex coordinates
     const coordMap = new Map<number, [number, number]>();
     CAMPUS_VENUES.forEach((v) => {
       coordMap.set(v.id, v.coordinates);
     });
 
-    // Build FeatureCollection for edges
     const edgeFeatures: Feature<LineString>[] = [];
     const routeFeatures: Feature<LineString>[] = [];
 
@@ -196,80 +198,50 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     if (edgeSource) {
       edgeSource.setData(edgesGeoJSON);
     } else {
-      map.addSource('campus-edges', {
-        type: 'geojson',
-        data: edgesGeoJSON,
-      });
+      map.addSource('campus-edges', { type: 'geojson', data: edgesGeoJSON });
 
-      // Layer 1: Modeled walkways (Active)
       map.addLayer({
         id: 'campus-edges-active',
         type: 'line',
         source: 'campus-edges',
         filter: ['all', ['==', ['get', 'active'], true], ['!=', ['get', 'isRoute'], true]],
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-        },
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: {
-          'line-color': theme === 'light' ? '#334155' : theme === 'high-contrast' ? '#ffffff' : '#64748b',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 3, 18, 5],
-          'line-opacity': 0.85,
+          'line-color': theme === 'light' ? '#475569' : theme === 'high-contrast' ? '#ffffff' : '#7c93ae',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2.5, 18, 4.5],
+          'line-opacity': 0.8,
         },
       });
 
-      // Layer 2: Closed walkways (Dashed red)
       map.addLayer({
         id: 'campus-edges-closed',
         type: 'line',
         source: 'campus-edges',
         filter: ['==', ['get', 'active'], false],
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-        },
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: {
           'line-color': '#ef4444',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 3.5, 18, 5.5],
-          'line-dasharray': [2, 2],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 3, 18, 5],
+          'line-dasharray': [3, 2],
           'line-opacity': 0.95,
         },
       });
 
-      // Interactive hover & click on edges
-      map.on('mouseenter', 'campus-edges-active', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', 'campus-edges-active', () => {
-        map.getCanvas().style.cursor = '';
-      });
-      map.on('mouseenter', 'campus-edges-closed', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', 'campus-edges-closed', () => {
-        map.getCanvas().style.cursor = '';
-      });
+      map.on('mouseenter', 'campus-edges-active', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'campus-edges-active', () => { map.getCanvas().style.cursor = ''; });
+      map.on('mouseenter', 'campus-edges-closed', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'campus-edges-closed', () => { map.getCanvas().style.cursor = ''; });
 
       map.on('click', 'campus-edges-active', (e) => {
         if (!e.features || !e.features[0]) return;
         const p = e.features[0].properties;
-        setSelectedEdgeForAction({
-          id: Number(p.edgeId),
-          u: Number(p.u),
-          v: Number(p.v),
-          active: Boolean(p.active),
-        });
+        setSelectedEdgeForAction({ id: Number(p.edgeId), u: Number(p.u), v: Number(p.v), active: Boolean(p.active) });
       });
 
       map.on('click', 'campus-edges-closed', (e) => {
         if (!e.features || !e.features[0]) return;
         const p = e.features[0].properties;
-        setSelectedEdgeForAction({
-          id: Number(p.edgeId),
-          u: Number(p.u),
-          v: Number(p.v),
-          active: Boolean(p.active),
-        });
+        setSelectedEdgeForAction({ id: Number(p.edgeId), u: Number(p.u), v: Number(p.v), active: Boolean(p.active) });
       });
     }
 
@@ -278,40 +250,29 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     if (routeSource) {
       routeSource.setData(routeGeoJSON);
     } else {
-      map.addSource('campus-route', {
-        type: 'geojson',
-        data: routeGeoJSON,
-      });
+      map.addSource('campus-route', { type: 'geojson', data: routeGeoJSON });
 
-      // Layer 3: Glowing Route Background
       map.addLayer({
         id: 'campus-route-glow',
         type: 'line',
         source: 'campus-route',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-        },
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: {
           'line-color': '#06b6d4',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 8, 18, 14],
-          'line-opacity': 0.45,
-          'line-blur': 3,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 10, 18, 18],
+          'line-opacity': 0.35,
+          'line-blur': 4,
         },
       });
 
-      // Layer 4: Primary Minimum-Hop Route Line
       map.addLayer({
         id: 'campus-route-line',
         type: 'line',
         source: 'campus-route',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-        },
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: {
           'line-color': '#38bdf8',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 4.5, 18, 7.5],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 15, 4, 18, 7],
           'line-opacity': 1.0,
         },
       });
@@ -322,12 +283,11 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     updateGeoJSONLayers();
   }, [updateGeoJSONLayers]);
 
-  // 3. Render HTML Venue Markers on Map
+  // 3. Render HTML Venue Markers — smart label visibility
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || !graph) return;
 
-    // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current.clear();
 
@@ -335,14 +295,23 @@ export const CampusMap: React.FC<CampusMapProps> = ({
       const isSrc = venue.id === srcVertex;
       const isDst = venue.id === dstVertex;
       const isSelected = venue.id === selectedVertexId;
+      const isOnRoute = routeVertexSet.has(venue.id);
       const isReached = reachedSet.has(venue.id);
       const isUnreached = !isReached && traversalResult !== null;
 
-      // Create custom marker DOM element
+      // Label always visible for: SRC, DST, selected, on route
+      const alwaysShowLabel = isSrc || isDst || isSelected || isOnRoute;
+
       const el = document.createElement('div');
-      el.className = `map-venue-marker ${isSrc ? 'marker-src' : ''} ${isDst ? 'marker-dst' : ''} ${
-        isSelected ? 'marker-selected' : ''
-      } ${isUnreached ? 'marker-unreached' : ''}`;
+      el.className = [
+        'map-venue-marker',
+        isSrc ? 'marker-src' : '',
+        isDst ? 'marker-dst' : '',
+        isSelected ? 'marker-selected' : '',
+        isUnreached ? 'marker-unreached' : '',
+        alwaysShowLabel ? 'label-always' : 'label-hover',
+      ].filter(Boolean).join(' ');
+
       el.setAttribute('role', 'button');
       el.setAttribute('tabindex', '0');
       el.setAttribute(
@@ -350,38 +319,25 @@ export const CampusMap: React.FC<CampusMapProps> = ({
         `Venue ${venue.id}: ${venue.label}${isSrc ? ' (Source)' : ''}${isDst ? ' (Destination)' : ''}`
       );
 
-      // Icon symbol based on category or state
       let badgeHtml = '';
-      if (isSrc) {
-        badgeHtml = '<span class="marker-badge src-badge">SRC</span>';
-      } else if (isDst) {
-        badgeHtml = '<span class="marker-badge dst-badge">DST</span>';
-      } else if (isUnreached) {
-        badgeHtml = '<span class="marker-badge unreached-badge">UNREACHED</span>';
-      } else if (venue.landmarkIndex) {
-        badgeHtml = `<span class="marker-badge landmark-badge">#${venue.landmarkIndex}</span>`;
-      }
+      if (isSrc)         badgeHtml = '<span class="marker-badge src-badge">SRC</span>';
+      else if (isDst)    badgeHtml = '<span class="marker-badge dst-badge">DST</span>';
+      else if (isUnreached) badgeHtml = '<span class="marker-badge unreached-badge">✗</span>';
 
       const iconEmoji =
-        venue.category === 'library'
-          ? '🏛️'
-          : venue.category === 'dining'
-          ? '🍽️'
-          : venue.category === 'sports'
-          ? '⚽'
-          : venue.category === 'arrival'
-          ? '🚪'
-          : '🏢';
+        venue.category === 'library'  ? '🏛️'
+        : venue.category === 'dining' ? '🍽️'
+        : venue.category === 'sports' ? '⚽'
+        : venue.category === 'arrival'? '🚪'
+        : '🏢';
 
       el.innerHTML = `
         <div class="marker-pin">
           <span class="marker-icon">${iconEmoji}</span>
           <span class="marker-id">${venue.id}</span>
-        </div>
-        <div class="marker-label-tag">
-          ${venue.label}
           ${badgeHtml}
         </div>
+        <div class="marker-label-tag">${venue.label}</div>
       `;
 
       el.addEventListener('click', (evt) => {
@@ -409,61 +365,61 @@ export const CampusMap: React.FC<CampusMapProps> = ({
 
       markersRef.current.set(venue.id, marker);
     });
-  }, [mapLoaded, graph, srcVertex, dstVertex, selectedVertexId, reachedSet, traversalResult, onSelectVertex, onSetSource, onSetDestination]);
+  }, [mapLoaded, graph, srcVertex, dstVertex, selectedVertexId, routeVertexSet, reachedSet, traversalResult, onSelectVertex, onSetSource, onSetDestination]);
 
-  // Camera focus on selected vertex (e.g. from Venue Index or Search)
+  // Camera focus on selected vertex
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || selectedVertexId === null) return;
     const venue = CAMPUS_VENUES.find((v) => v.id === selectedVertexId);
     if (venue) {
-      map.easeTo({
-        center: venue.coordinates,
-        zoom: Math.max(map.getZoom(), 16.6),
-        duration: 650,
-      });
+      map.easeTo({ center: venue.coordinates, zoom: Math.max(map.getZoom(), 16.6), duration: 550 });
     }
   }, [selectedVertexId, mapLoaded]);
 
-  // Fit bounds to entire campus network
   const handleFitNetwork = () => {
     const map = mapRef.current;
     if (!map) return;
     const bounds = new LngLatBounds();
     CAMPUS_VENUES.forEach((v) => bounds.extend(v.coordinates));
-    map.fitBounds(bounds, { padding: 60, maxZoom: 17.5, duration: 800 });
+    map.fitBounds(bounds, { padding: { top: 80, bottom: 100, left: 40, right: 40 }, maxZoom: 17, duration: 800 });
   };
 
-  // Reset to default center
   const handleResetCenter = () => {
     const map = mapRef.current;
     if (!map) return;
-    map.flyTo({ center: MUJ_CAMPUS_CENTER, zoom: MUJ_DEFAULT_ZOOM, pitch: 25, bearing: -15, duration: 700 });
+    map.flyTo({ center: MUJ_CAMPUS_CENTER, zoom: MUJ_DEFAULT_ZOOM, pitch: 20, bearing: -10, duration: 700 });
   };
+
+  // Compact route path display
+  const routePathDisplay = React.useMemo(() => {
+    if (!routeResult || !routeResult.found || !graph) return null;
+    return routeResult.path.map((id) => graph.vertices[id]?.label ?? `#${id}`);
+  }, [routeResult, graph]);
 
   return (
     <div className="campus-map-wrapper">
-      {/* Top Map Action Bar */}
+      {/* Compact floating top toolbar */}
       <div className="map-floating-toolbar">
         <div className="toolbar-left">
           <span className="map-badge">
-            <span className="status-indicator-dot online"></span>
-            <span>MapLibre GL Vector Basemap</span>
+            <span className="status-indicator-dot online" />
+            <span>OpenFreeMap · OSM</span>
           </span>
           <button
             type="button"
             className="btn btn-sm btn-toolbar"
             onClick={handleFitNetwork}
-            title="Fit all campus venues in view"
+            title="Fit all 13 campus venues in view"
             id="btn-fit-network"
           >
-            ⤢ Fit Campus Network
+            ⤢ Fit Network
           </button>
           <button
             type="button"
             className="btn btn-sm btn-toolbar"
             onClick={handleResetCenter}
-            title="Reset map view to campus center"
+            title="Reset map to campus center"
             id="btn-reset-map-view"
           >
             ⟳ Reset View
@@ -471,75 +427,85 @@ export const CampusMap: React.FC<CampusMapProps> = ({
         </div>
 
         <div className="toolbar-right">
-          <button
-            type="button"
-            className="btn btn-sm btn-schematic-toggle"
-            onClick={onOpenSchematic}
-            id="btn-open-schematic-ref"
-            title="View original cream schematic drawing & satellite images"
-          >
-            📋 Schematic &amp; Satellites Reference
-          </button>
+          <span className="campus-model-disclaimer-inline" id="campus-disclaimer">
+            <span>📌</span>
+            <span>Illustrative graph model — not verified walkways</span>
+          </span>
         </div>
       </div>
 
-      {/* Mandatory Presentation Disclaimer */}
-      <div className="campus-model-disclaimer" id="campus-disclaimer">
-        <span style={{ fontSize: '13px' }}>📌</span>
-        <span>
-          <strong>Illustrative graph model:</strong> modeled connections are simplified for DSA demonstration and are not verified pedestrian directions.
-        </span>
-      </div>
-
-      {/* Network / Tile Error Fallback Notice */}
+      {/* Network / Tile Error Fallback */}
       {mapError && (
         <div className="map-error-banner" role="alert">
-          <span>⚠️ {mapError}</span>
-          <button
-            className="btn btn-sm btn-secondary"
-            onClick={onOpenSchematic}
-            style={{ marginLeft: '12px' }}
-          >
-            Switch to Offline Schematic View
-          </button>
+          <span>⚠️ {mapError} — Graph overlay remains available.</span>
         </div>
       )}
 
-      {/* MapLibre WebGL Canvas Container */}
+      {/* MapLibre WebGL Canvas */}
       <div ref={mapContainerRef} className="maplibre-container" id="maplibre-campus-canvas" />
 
-      {/* Floating Map Legend */}
-      <div className="map-floating-legend">
-        <div className="legend-title">Campus Graph Legend</div>
-        <div className="legend-items">
-          <div className="legend-item">
-            <span className="legend-line active-line"></span>
-            <span>Active Walkway</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-line closed-line"></span>
-            <span>Closed / Blocked (Dashed)</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-line route-line"></span>
-            <span>Minimum-Hop Route</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot src-dot"></span>
-            <span>Source [SRC]</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot dst-dot"></span>
-            <span>Destination [DST]</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot unreached-dot"></span>
-            <span>Unreached Partition</span>
-          </div>
+      {/* Single legend — bottom-right, compact */}
+      <div className="map-legend-compact" aria-label="Campus Graph Legend">
+        <div className="legend-compact-title">Graph Legend</div>
+        <div className="legend-compact-row">
+          <span className="lc-line lc-active" />
+          <span>Active walkway</span>
+        </div>
+        <div className="legend-compact-row">
+          <span className="lc-line lc-closed" />
+          <span>Closed / blocked</span>
+        </div>
+        <div className="legend-compact-row">
+          <span className="lc-line lc-route" />
+          <span>Min-hop route</span>
+        </div>
+        <div className="legend-compact-row">
+          <span className="lc-dot lc-src" />
+          <span>Source [SRC]</span>
+        </div>
+        <div className="legend-compact-row">
+          <span className="lc-dot lc-dst" />
+          <span>Destination [DST]</span>
         </div>
       </div>
 
-      {/* Explicit Walkway Action Modal / Popover */}
+      {/* Compact route summary bar — bottom, wrapping chips */}
+      <div className="route-compact-bar" id="route-compact-bar">
+        {routeResult?.found && routePathDisplay ? (
+          <>
+            <span className="rcb-hop-pill">
+              {routeResult.hop_count} Hops
+            </span>
+            <div className="rcb-path-chips">
+              {routePathDisplay.map((label, idx) => (
+                <React.Fragment key={`rcb-${idx}`}>
+                  <span
+                    className={`rcb-chip ${idx === 0 ? 'chip-src' : idx === routePathDisplay.length - 1 ? 'chip-dst' : ''}`}
+                    onClick={() => {
+                      const vId = routeResult.path[idx];
+                      onSelectVertex(vId);
+                    }}
+                  >
+                    {routeResult.path[idx]}: {label}
+                  </span>
+                  {idx < routePathDisplay.length - 1 && (
+                    <span className="rcb-arrow">→</span>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+            <span className="rcb-repr-tag">
+              {/* Repr shown in inspector */}
+            </span>
+          </>
+        ) : (
+          <span className="rcb-blocked">
+            ✗ No active path from {CAMPUS_VENUES[srcVertex]?.label ?? srcVertex} to {CAMPUS_VENUES[dstVertex]?.label ?? dstVertex}
+          </span>
+        )}
+      </div>
+
+      {/* Edge Action Modal */}
       {selectedEdgeForAction && (
         <div className="edge-action-modal-backdrop" onClick={() => setSelectedEdgeForAction(null)}>
           <div className="edge-action-card" onClick={(e) => e.stopPropagation()}>
@@ -548,7 +514,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({
                 Walkway e{selectedEdgeForAction.id}
               </span>
               <button
-                className="btn btn-sm btn-icon"
+                className="btn btn-sm btn-secondary"
                 onClick={() => setSelectedEdgeForAction(null)}
                 aria-label="Close"
               >
@@ -557,20 +523,13 @@ export const CampusMap: React.FC<CampusMapProps> = ({
             </div>
             <div className="edge-action-body">
               <p style={{ margin: '0 0 10px 0', fontSize: '13px' }}>
-                Connecting:{' '}
-                <strong>
-                  Node {selectedEdgeForAction.u} ({CAMPUS_VENUES[selectedEdgeForAction.u]?.label})
-                </strong>{' '}
-                ↔{' '}
-                <strong>
-                  Node {selectedEdgeForAction.v} ({CAMPUS_VENUES[selectedEdgeForAction.v]?.label})
-                </strong>
+                <strong>{CAMPUS_VENUES[selectedEdgeForAction.u]?.label ?? selectedEdgeForAction.u}</strong>
+                {' ↔ '}
+                <strong>{CAMPUS_VENUES[selectedEdgeForAction.v]?.label ?? selectedEdgeForAction.v}</strong>
               </p>
               <p style={{ margin: '0 0 14px 0', fontSize: '12px', color: 'var(--text-secondary)' }}>
                 Status:{' '}
-                <span
-                  className={`status-pill ${selectedEdgeForAction.active ? 'success' : 'error'}`}
-                >
+                <span className={`status-pill ${selectedEdgeForAction.active ? 'success' : 'error'}`}>
                   {selectedEdgeForAction.active ? 'ACTIVE' : 'CLOSED'}
                 </span>
               </p>
@@ -591,7 +550,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({
                     setSelectedEdgeForAction(null);
                   }}
                 >
-                  {selectedEdgeForAction.active ? '🚫 Close / Disable Walkway' : '✅ Re-Open Walkway'}
+                  {selectedEdgeForAction.active ? '🚫 Close Walkway' : '✅ Re-Open Walkway'}
                 </button>
               </div>
             </div>

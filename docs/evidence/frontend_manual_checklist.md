@@ -48,3 +48,26 @@ Every verified item was directly tested, observed, and recorded during live brow
 - Feature title: **Single-Edge Failure Simulation**.
 - Clear academic boundary notice: *"Systematically evaluates network resilience by simulating the temporary closure of each edge individually and executing repeated C BFS traversals ($O(E \cdot (V+E))$). Reports the operational consequences of each simulated closure on destination reachability and connected components without using low-link bridge detection algorithms."*
 - Fully compliant with CSC2101 Lecture 37 scope (no Tarjan, Kosaraju, or low-link algorithms).
+
+---
+
+## 3. Final Map-First UI/UX Polish Verification (Branch: `ui-polish`)
+
+- **Date**: 2026-10-18
+- **Branch**: `ui-polish`
+- **Browser**: Headless Chromium (Agentic browser subagent)
+- **Target Resolutions**: 1366×768 (Standard Laptop), 1920×1080 (Presentation Display)
+- **Session Video**: `routeguard_final_ui_polish_verification_1792271832668.webp`
+
+| Check ID | Verification Item | Status | Screenshot Artifact | Observed Evidence |
+| :--- | :--- | :---: | :--- | :--- |
+| **TC-POLISH-01** | **Single Compact Legend** | `[x] VERIFIED` | `polish_1366x768_baseline_1792271847661.png` | Exactly one campus graph legend anchored at bottom-right inside map workspace. Explains active walkway, severed walkway, minimum-hop route, and source/dest pins with distinctive colors and stroke styles. Duplicate legend eliminated. |
+| **TC-POLISH-02** | **Route Summary Bar Redesign** | `[x] VERIFIED` | `polish_1366x768_baseline_1792271847661.png` | Bottom route strip redesigned into compact inline card inside map. Hop count indicator, source/dest badges, and ordered node sequence wrap cleanly with 0 horizontal scrollbar at 1366×768 and 1920×1080. |
+| **TC-POLISH-03** | **Decluttered Venue Labels** | `[x] VERIFIED` | `polish_1366x768_baseline_1792271847661.png` | Marker label visibility policy: source, destination, and highlighted route vertices show persistent labels. Non-route vertices display clean circular pins with full labels revealed on hover/focus/selection, preventing label collisions around AB1, Old Mess, Dome, Grand Stairs, and Knowledge Centre. |
+| **TC-POLISH-04** | **Sidebar Button & Label Fit** | `[x] VERIFIED` | `polish_1366x768_baseline_1792271847661.png` | Scenario buttons (`Sever e6`, `Sever e12`, `Restore All`) fit comfortably in 280px left panel without clipping or text overflow. Full scenario descriptions provided via native `title` tooltips. |
+| **TC-POLISH-05** | **Right Inspector Tab Spacing** | `[x] VERIFIED` | `polish_1366x768_baseline_1792271847661.png` | Tabs (`🏢 Venue`, `🧭 Route`, `📊 Network`, `📑 Index`) fit container width without crowding or wrapping. |
+| **TC-POLISH-06** | **Unified Map Floating Toolbar** | `[x] VERIFIED` | `polish_1366x768_baseline_1792271847661.png` | Basemap toggle, "Fit Network", and "Reset View" unified into a clean floating pill toolbar at top-left away from venue labels. Old schematic modal button removed from primary toolbar. |
+| **TC-POLISH-07** | **Interactive Failure & Reroute** | `[x] VERIFIED` | `polish_1366x768_failure_1792271870653.png` | Severing `e6` dynamically closes walkway in C engine, renders dashed red edge, and computes alternative path via LHC (`0 → 1 → 2 → 5 → 7 → 6`, 5 hops). |
+| **TC-POLISH-08** | **Full HD Presentation View** | `[x] VERIFIED` | `polish_1920x1080_presentation_1792271926675.png` | Clean presentation layout at 1920×1080 with comfortable contrast, balanced spacing, and zero layout breakage. |
+| **TC-POLISH-09** | **Academic & C11 Engine Parity** | `[x] VERIFIED` | `bin/rg_tests.exe`, `bin/rg_bridge_test.exe` | 28/28 native unit tests passed; isolated bridge contract passed. Zero algorithmic code written in TypeScript; all traversals, routes, reachability, and counters are 100% C-authoritative. |
+

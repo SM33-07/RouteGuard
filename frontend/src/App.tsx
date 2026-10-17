@@ -40,7 +40,7 @@ export const App: React.FC = () => {
   // Dismissible Educational Header Banner
   const [bannerDismissed, setBannerDismissed] = useState<boolean>(false);
 
-  // Reference Gallery Modal
+  // Reference Gallery Modal (opened from Reference inspector tab)
   const [showGallery, setShowGallery] = useState<boolean>(false);
   const [galleryTab, setGalleryTab] = useState<'schematic' | 'masterplan' | 'ab1_mess' | 'lhc_aic' | 'sports'>('schematic');
 
@@ -565,52 +565,56 @@ export const App: React.FC = () => {
                 </select>
               </div>
 
-              {/* Mode-specific quick scenarios */}
+              {/* Mode-specific quick scenarios — compact labels with full description in title */}
               <div className="scenario-stack">
                 {graphMode === 'campus' ? (
                   <>
                     <button
                       type="button"
-                      className={`btn btn-sm ${graph?.edges[6]?.active ? 'btn-danger' : 'btn-success'}`}
+                      className={`btn btn-sm btn-scenario ${graph?.edges[6]?.active ? 'btn-danger' : 'btn-success'}`}
                       onClick={() => handleToggleEdge(6)}
                       id="btn-scenario-campus-e6"
+                      title={graph?.edges[6]?.active
+                        ? 'Sever e6: AB1 ↔ AB3 cut — BFS will reroute via LHC'
+                        : 'Restore e6: Reconnect Academic Block 1 ↔ Block 3'}
                     >
-                      {graph?.edges[6]?.active
-                        ? 'Sever e6 (AB1↔AB3 Cut → Reroute via LHC)'
-                        : 'Restore e6 (Reconnect AB1↔AB3)'}
+                      {graph?.edges[6]?.active ? '✂ e6 — Sever AB1↔AB3' : '✓ e6 — Restore AB1↔AB3'}
                     </button>
                     <button
                       type="button"
-                      className={`btn btn-sm ${graph?.edges[12]?.active ? 'btn-danger' : 'btn-success'}`}
+                      className={`btn btn-sm btn-scenario ${graph?.edges[12]?.active ? 'btn-danger' : 'btn-success'}`}
                       onClick={() => {
                         handleToggleEdge(12);
                         setDstVertex(9);
                         if (bridge) recomputeAll(bridge, srcVertex, 9, useMatrix);
                       }}
                       id="btn-scenario-campus-e12"
+                      title={graph?.edges[12]?.active
+                        ? 'Sever e12: LHC ↔ Football Ground cut — Sports zone disconnects'
+                        : 'Restore e12: Reconnect Sports zone via LHC'}
                     >
-                      {graph?.edges[12]?.active
-                        ? 'Sever e12 (LHC↔Football Cut → Disconnect Sports)'
-                        : 'Restore e12 (Reconnect Sports Zone)'}
+                      {graph?.edges[12]?.active ? '✂ e12 — Sever LHC↔Sports' : '✓ e12 — Restore Sports Zone'}
                     </button>
                   </>
                 ) : (
                   <>
                     <button
                       type="button"
-                      className={`btn btn-sm ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-success'}`}
+                      className={`btn btn-sm btn-scenario ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-success'}`}
                       onClick={() => handleToggleEdge(9)}
                       id="btn-scenario-f1-e9"
+                      title={graph?.edges[9]?.active ? 'Sever e9: cuts critical link 6↔7' : 'Restore e9: reconnect 6↔7'}
                     >
-                      {graph?.edges[9]?.active ? 'Sever e9 (Cut Critical Link 6↔7)' : 'Restore e9 (Reconnect 6↔7)'}
+                      {graph?.edges[9]?.active ? '✂ e9 — Sever 6↔7' : '✓ e9 — Restore 6↔7'}
                     </button>
                     <button
                       type="button"
-                      className={`btn btn-sm ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-success'}`}
+                      className={`btn btn-sm btn-scenario ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-success'}`}
                       onClick={() => handleToggleEdge(5)}
                       id="btn-scenario-f1-e5"
+                      title={graph?.edges[5]?.active ? 'Sever e5: Block A cut' : 'Restore e5: direct route'}
                     >
-                      {graph?.edges[5]?.active ? 'Sever e5 (Simulate Block A Cut)' : 'Restore e5 (Direct Route)'}
+                      {graph?.edges[5]?.active ? '✂ e5 — Block A Cut' : '✓ e5 — Restore Direct'}
                     </button>
                   </>
                 )}
@@ -619,8 +623,9 @@ export const App: React.FC = () => {
                   className="btn btn-secondary btn-sm"
                   onClick={handleReset}
                   id="btn-restore-all"
+                  title="Reset all edges to active state and default src/dst"
                 >
-                  ↺ Restore All Walkways
+                  ↺ Restore All
                 </button>
               </div>
             </div>
@@ -691,10 +696,6 @@ export const App: React.FC = () => {
                   if (bridge) recomputeAll(bridge, srcVertex, vId, useMatrix);
                 }}
                 onToggleEdge={handleToggleEdge}
-                onOpenSchematic={() => {
-                  setGalleryTab('schematic');
-                  setShowGallery(true);
-                }}
               />
             ) : (
               /* F1 Reference Fixture SVG Canvas */
@@ -971,79 +972,6 @@ export const App: React.FC = () => {
               </div>
             )}
 
-            {/* Floating Route Summary Strip */}
-            <div className="route-summary-strip" id="route-summary-strip">
-              <div className="strip-item">
-                <span className="strip-label">Route</span>
-                <span className="strip-value highlight">
-                  {routeResult?.found ? `${routeResult.hop_count} Hops` : 'Severed / Blocked'}
-                </span>
-              </div>
-              <div className="strip-divider"></div>
-              <div className="strip-item strip-path-box">
-                <span className="strip-label">Walkway Path</span>
-                <div className="strip-path-scroll">
-                  {routeResult?.found && routeResult.path.length > 0 ? (
-                    routeResult.path.map((vId, idx) => (
-                      <React.Fragment key={`strip-v-${vId}-${idx}`}>
-                        <span
-                          className={`strip-node-chip ${vId === srcVertex ? 'src' : vId === dstVertex ? 'dst' : ''}`}
-                          onClick={() => {
-                            setSelectedVertexId(vId);
-                            setInspectorTab('venue');
-                          }}
-                        >
-                          {vId}: {graph?.vertices[vId]?.label}
-                        </span>
-                        {idx < routeResult.path.length - 1 && <span className="strip-arrow">→</span>}
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    <span style={{ color: 'var(--rose)', fontSize: '12px' }}>
-                      No active path connects Vertex {srcVertex} to Vertex {dstVertex}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="strip-divider"></div>
-              <div className="strip-item">
-                <span className="strip-label">Representation</span>
-                <span className="strip-value">
-                  {useMatrix ? 'Matrix O(V²)' : 'List O(V+E)'}
-                </span>
-              </div>
-              <div className="strip-divider"></div>
-              <div className="strip-item">
-                <span className="strip-label">Components</span>
-                <span className="strip-value">
-                  {networkState?.component_count ?? 1} {networkState?.component_count === 1 ? '(Connected)' : '(Severed)'}
-                </span>
-              </div>
-            </div>
-
-            {/* Corner Map Legend */}
-            <div className="map-legend-corner" aria-label="Map Legend">
-              <div className="legend-row">
-                <span className="legend-dot active-edge"></span>
-                <span>Active Walkway</span>
-              </div>
-              <div className="legend-row">
-                <span className="legend-dot closed-edge"></span>
-                <span>Closed / Blocked</span>
-              </div>
-              <div className="legend-row">
-                <span className="legend-dot route-edge"></span>
-                <span>Optimal Route Hop</span>
-              </div>
-              <div className="legend-row">
-                <span className="legend-dot src-node"></span>
-                <span>Source</span>
-              </div>
-              <div className="legend-row">
-                <span className="legend-dot dst-node"></span>
-                <span>Destination</span>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -1053,7 +981,7 @@ export const App: React.FC = () => {
           aria-label="Inspector and Analysis"
         >
           <div className="sidebar-inner">
-            {/* Inspector Navigation Tabs */}
+            {/* Inspector Navigation Tabs — 4 tabs, evenly spaced */}
             <div className="inspector-tabs" role="tablist">
               <button
                 type="button"
@@ -1062,6 +990,7 @@ export const App: React.FC = () => {
                 id="tab-venue"
                 role="tab"
                 aria-selected={inspectorTab === 'venue'}
+                title="Selected venue details and walkways"
               >
                 🏢 Venue
               </button>
@@ -1072,6 +1001,7 @@ export const App: React.FC = () => {
                 id="tab-route"
                 role="tab"
                 aria-selected={inspectorTab === 'route'}
+                title="Route path and traversal order from C engine"
               >
                 🧭 Route
               </button>
@@ -1082,6 +1012,7 @@ export const App: React.FC = () => {
                 id="tab-network"
                 role="tab"
                 aria-selected={inspectorTab === 'network'}
+                title="C operation counters, components, and failure table"
               >
                 📊 Network
               </button>
@@ -1092,18 +1023,9 @@ export const App: React.FC = () => {
                 id="tab-venue-index"
                 role="tab"
                 aria-selected={inspectorTab === 'venueIndex'}
+                title="Searchable directory of all campus venues"
               >
                 📑 Index
-              </button>
-              <button
-                type="button"
-                className={`inspector-tab-btn ${inspectorTab === 'schematic' ? 'active' : ''}`}
-                onClick={() => setInspectorTab('schematic')}
-                id="tab-schematic"
-                role="tab"
-                aria-selected={inspectorTab === 'schematic'}
-              >
-                🗺️ Reference
               </button>
             </div>
 
