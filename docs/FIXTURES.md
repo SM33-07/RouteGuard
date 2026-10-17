@@ -198,80 +198,78 @@ This document provides complete, independently derived step tables and reference
 > No real-world walking times, GPS navigation, municipal transit, or emergency routing suitability is claimed.
 
 ### Graph Topology
-- **Vertices (13)**:
-  - `0`: `VIP Gate` (Full: `VIP Gate`) `(120, 620)`
-  - `1`: `Indian National Flag` (Full: `Indian National Flag`) `(240, 560)`
-  - `2`: `Seminar Hall (1C)` (Full: `Seminar Hall — 2nd Floor, Admin Block (1C)`) `(360, 680)`
-  - `3`: `Old Library (1C)` (Full: `Old Library — Ground Floor, Admin Block (1C)`) `(360, 560)`
-  - `4`: `GHS Gate` (Full: `GHS Gate`) `(240, 300)`
-  - `5`: `Academic Block 1 (1AB)` (Full: `Academic Block 1 (1AB)`) `(480, 460)`
-  - `6`: `Food Court - Old Mess` (Full: `Food Court — Old Mess`) `(480, 300)`
-  - `7`: `Academic Block 2 (2AB)` (Full: `Academic Block 2 (2AB)`) `(650, 420)`
-  - `8`: `Registration Desk (3AB)` (Full: `Registration Desk — Ground Floor, opposite Smt. V. Pai Auditorium, 3AB`) `(820, 420)`
-  - `9`: `Smt. V. Pai Auditorium` (Full: `Smt. Vasanti Pai Auditorium — Ground Floor, 3AB`) `(940, 520)`
-  - `10`: `Conference Hall (3AB)` (Full: `Conference Hall — 2nd Floor, 3AB`) `(940, 340)`
-  - `11`: `Food Court - LHC` (Full: `Food Court — LHC`) `(980, 220)`
-  - `12`: `Knowledge Centre` (Full: `Knowledge Centre`) `(1100, 140)`
+- **Vertices (12)**:
+  - `0`: `Main Gate` (Full: `Main Gate — Primary campus arrival & visitor entry`) `(750, 1260)`
+  - `1`: `Dome Building` (Full: `Dome Building — Library, administration, services (Landmark 1)`) `(750, 1090)`
+  - `2`: `Grand Stairs` (Full: `Grand Stairs / Central Plaza — Central arrival and circulation hub`) `(750, 980)`
+  - `3`: `Academic Block 1` (Full: `Academic Block 1 — Left side of the central stairs (Landmark 2)`) `(470, 910)`
+  - `4`: `Academic Block 2` (Full: `Academic Block 2 — Right side of the central stairs (Landmark 3)`) `(980, 910)`
+  - `5`: `Old Mess / Food Court` (Full: `Old Mess / Food Court — Dining and student seating (Landmark 4)`) `(740, 740)`
+  - `6`: `Academic Block 3` (Full: `Academic Block 3 — Arts, media and specialist spaces (Landmark 6)`) `(440, 580)`
+  - `7`: `Lecture Hall Complex` (Full: `Lecture Hall Complex — Large teaching halls (Landmark 5)`) `(800, 580)`
+  - `8`: `Workshops / Labs` (Full: `Workshops / Labs — Workshop-side teaching facilities (Landmark 8)`) `(1200, 750)`
+  - `9`: `Football Ground` (Full: `Football Ground — Sports grounds (Landmark 7)`) `(1190, 560)`
+  - `10`: `Cricket Ground` (Full: `Cricket Ground — Sports grounds (Landmark 7)`) `(1170, 360)`
+  - `11`: `Outdoor Courts` (Full: `Outdoor Courts / Turfs — Sports grounds (Landmark 7)`) `(1250, 970)`
 
 - **Edges (15)**:
-  - `e0: (0, 1)` — VIP Gate <-> Indian National Flag
-  - `e1: (1, 3)` — Indian National Flag <-> Old Library (1C)
-  - `e2: (2, 3)` — Seminar Hall (1C) <-> Old Library (1C) [Admin Block internal link]
-  - `e3: (3, 5)` — Old Library (1C) <-> Academic Block 1 (1AB) [Admin to 1AB walkway]
-  - `e4: (4, 5)` — GHS Gate <-> Academic Block 1 (1AB) [Hostel gate to 1AB walkway]
-  - `e5: (4, 6)` — GHS Gate <-> Food Court — Old Mess [Hostel gate to Mess walkway]
-  - `e6: (5, 6)` — Academic Block 1 (1AB) <-> Food Court — Old Mess [1AB to Mess courtyard]
-  - `e7: (5, 7)` — Academic Block 1 (1AB) <-> Academic Block 2 (2AB) [1AB to 2AB walkway]
-  - `e8: (6, 7)` — Food Court — Old Mess <-> Academic Block 2 (2AB) [Mess to 2AB walkway]
-  - `e9: (7, 8)` — Academic Block 2 (2AB) <-> Registration Desk (3AB) [Zone 1 to Zone 2 critical connecting corridor]
-  - `e10: (8, 9)` — Registration Desk (3AB) <-> Smt. Vasanti Pai Auditorium (3AB) [Auditorium ground foyer]
-  - `e11: (8, 10)` — Registration Desk (3AB) <-> Conference Hall (3AB) [3AB central stairs to 2nd Floor]
-  - `e12: (9, 10)` — Smt. Vasanti Pai Auditorium (3AB) <-> Conference Hall (3AB) [3AB internal hall stairs]
-  - `e13: (8, 11)` — Registration Desk (3AB) <-> Food Court — LHC [3AB to LHC walkway]
-  - `e14: (11, 12)` — Food Court — LHC <-> Knowledge Centre [LHC to Knowledge Centre walkway]
+  - `e0: (0, 1)` — Main Gate <-> Dome Building
+  - `e1: (1, 2)` — Dome Building <-> Grand Stairs
+  - `e2: (2, 3)` — Grand Stairs <-> Academic Block 1
+  - `e3: (2, 4)` — Grand Stairs <-> Academic Block 2
+  - `e4: (2, 5)` — Grand Stairs <-> Old Mess / Food Court
+  - `e5: (3, 5)` — Academic Block 1 <-> Old Mess / Food Court
+  - `e6: (3, 6)` — Academic Block 1 <-> Academic Block 3 (Redundant corridor)
+  - `e7: (4, 5)` — Academic Block 2 <-> Old Mess / Food Court
+  - `e8: (4, 8)` — Academic Block 2 <-> Workshops / Labs
+  - `e9: (5, 7)` — Old Mess / Food Court <-> Lecture Hall Complex
+  - `e10: (5, 8)` — Old Mess / Food Court <-> Workshops / Labs
+  - `e11: (6, 7)` — Academic Block 3 <-> Lecture Hall Complex
+  - `e12: (7, 9)` — Lecture Hall Complex <-> Football Ground (Critical sports bridge)
+  - `e13: (8, 11)` — Workshops / Labs <-> Outdoor Courts
+  - `e14: (9, 10)` — Football Ground <-> Cricket Ground
 
 - **Ascending Adjacency List Structure**:
   - `0`: `[1]`
-  - `1`: `[0, 3]`
-  - `2`: `[3]`
-  - `3`: `[1, 2, 5]`
-  - `4`: `[5, 6]`
-  - `5`: `[3, 4, 6, 7]`
-  - `6`: `[4, 5, 7]`
-  - `7`: `[5, 6, 8]`
-  - `8`: `[7, 9, 10, 11]`
-  - `9`: `[8, 10]`
-  - `10`: `[8, 9]`
-  - `11`: `[8, 12]`
-  - `12`: `[11]`
+  - `1`: `[0, 2]`
+  - `2`: `[1, 3, 4, 5]`
+  - `3`: `[2, 5, 6]`
+  - `4`: `[2, 5, 8]`
+  - `5`: `[2, 3, 4, 7, 8]`
+  - `6`: `[3, 7]`
+  - `7`: `[5, 6, 9]`
+  - `8`: `[4, 5, 11]`
+  - `9`: `[7, 10]`
+  - `10`: `[9]`
+  - `11`: `[8]`
 
 ---
 
 ### Campus BFS Hand Trace (Source: 0)
 - **Policy**: Mark visited on **enqueue**. Neighbor discovery tie-breaking: **strictly ascending neighbor ID**.
-- **Visit Order**: `0, 1, 3, 2, 5, 4, 6, 7, 8, 9, 10, 11, 12`
+- **Visit Order**: `0, 1, 2, 3, 4, 5, 6, 8, 7, 11, 9, 10`
 - **Derived Counters**:
-  - Vertices Processed: `13`
-  - Queue Enqueues: `13`
-  - Queue Dequeues: `13`
+  - Vertices Processed: `12`
+  - Queue Enqueues: `12`
+  - Queue Dequeues: `12`
   - Adjacency List Neighbor Slots Examined: `30` ($2 \times 15 = 30$)
-  - Adjacency Matrix Neighbor Slots Examined: `169` ($13 \times 13 = 169$)
-  - Route from 0 (VIP Gate) to 8 (Registration Desk):
-    `0 -> 1 -> 3 -> 5 -> 7 -> 8` (5 hops).
-  - Route from 0 (VIP Gate) to 12 (Knowledge Centre):
-    `0 -> 1 -> 3 -> 5 -> 7 -> 8 -> 11 -> 12` (7 hops).
+  - Adjacency Matrix Neighbor Slots Examined: `144` ($12 \times 12 = 144$)
+  - Route from 0 (Main Gate) to 6 (Academic Block 3):
+    `0 -> 1 -> 2 -> 3 -> 6` (4 hops).
+  - Route from 0 (Main Gate) to 9 (Football Ground):
+    `0 -> 1 -> 2 -> 5 -> 7 -> 9` (5 hops).
 
 ---
 
 ### Campus Failure & Rerouting Scenarios
-1. **Redundant Path Rerouting (Disable e7: 5 <-> 7)**:
-   - Baseline route from 4 (GHS Gate) to 7 (2AB): `4 -> 5 -> 7` (2 hops via e4, e7).
-   - With `e7` disabled: BFS discovers alternate path via Old Mess: `4 -> 6 -> 7` (2 hops via e5, e8).
-   - Graph remains connected (`component_count = 1`, 13 reachable vertices).
-2. **Critical Corridor Disconnection (Disable e9: 7 <-> 8)**:
-   - Walkway between 2AB and Registration Desk (3AB) closed.
-   - Route from 0 to 8: `UNREACHABLE` (`found = false`, `hop_count = -1`).
-   - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7}` of size 8; Component 2: `{8, 9, 10, 11, 12}` of size 5).
-   - List BFS from 0: 8 vertices processed, 19 list slots examined, 1 inactive edge skipped (`e9`).
-   - Matrix BFS from 0: 8 vertices processed, 104 matrix slots examined ($8 \times 13$).
+1. **Redundant Path Rerouting (Disable e6: 3 <-> 6)**:
+   - Baseline route from 0 (Main Gate) to 6 (Academic Block 3): `0 -> 1 -> 2 -> 3 -> 6` (4 hops via e0, e1, e2, e6).
+   - With `e6` disabled: BFS discovers alternate path via Old Mess and LHC: `0 -> 1 -> 2 -> 5 -> 7 -> 6` (5 hops via e0, e1, e4, e9, e11).
+   - Graph remains connected (`component_count = 1`, 12 reachable vertices).
+2. **Critical Corridor Disconnection (Disable e12: 7 <-> 9)**:
+   - Walkway between Lecture Hall Complex and Football Ground closed.
+   - Route from 0 to 9: `UNREACHABLE` (`found = false`, `hop_count = -1`).
+   - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7, 8, 11}` of size 10; Component 2: `{9, 10}` of size 2).
+   - List BFS from 0: 10 vertices processed, 27 list slots examined, 1 inactive edge skipped (`e12`).
+   - Matrix BFS from 0: 10 vertices processed, 120 matrix slots examined ($10 \times 12$).
 

@@ -21,10 +21,12 @@ export const App: React.FC = () => {
 
   // Controls
   const [srcVertex, setSrcVertex] = useState<number>(0);
-  const [dstVertex, setDstVertex] = useState<number>(8); // Registration Desk in campus mode
+  const [dstVertex, setDstVertex] = useState<number>(6); // Academic Block 3 in campus mode
   const [selectedVertexId, setSelectedVertexId] = useState<number | null>(0);
   const [useMatrix, setUseMatrix] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'routing' | 'metrics' | 'failureTable'>('routing');
+  const [showGallery, setShowGallery] = useState<boolean>(false);
+  const [galleryTab, setGalleryTab] = useState<'masterplan' | 'ab1_mess' | 'lhc_aic' | 'sports'>('masterplan');
 
   // Operation Results from C engine
   const [traversalResult, setTraversalResult] = useState<TraversalResult | null>(null);
@@ -77,9 +79,9 @@ export const App: React.FC = () => {
         setBridge(b);
         setGraphMode('campus');
         setSrcVertex(0);
-        setDstVertex(8);
+        setDstVertex(6);
         setSelectedVertexId(0);
-        recomputeAll(b, 0, 8, false);
+        recomputeAll(b, 0, 6, false);
         setLoading(false);
       } catch (err: unknown) {
         console.error('Failed to initialize RouteGuard WASM module:', err);
@@ -98,7 +100,7 @@ export const App: React.FC = () => {
     setGraphMode(mode);
 
     const newSrc = 0;
-    const newDst = mode === 'campus' ? 8 : 10;
+    const newDst = mode === 'campus' ? 6 : 10;
     setSrcVertex(newSrc);
     setDstVertex(newDst);
     setSelectedVertexId(newSrc);
@@ -118,7 +120,7 @@ export const App: React.FC = () => {
   const handleReset = () => {
     if (!bridge) return;
     bridge.reset();
-    const defaultDst = graphMode === 'campus' ? 8 : 10;
+    const defaultDst = graphMode === 'campus' ? 6 : 10;
     setSrcVertex(0);
     setDstVertex(defaultDst);
     setSelectedVertexId(0);
@@ -479,22 +481,26 @@ export const App: React.FC = () => {
               {graphMode === 'campus' ? (
                 <>
                   <button
-                    className={`btn btn-sm ${graph?.edges[7]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                    onClick={() => handleToggleEdge(7)}
-                    id="btn-scenario-campus-e7"
+                    className={`btn btn-sm ${graph?.edges[6]?.active ? 'btn-danger' : 'btn-secondary'}`}
+                    onClick={() => handleToggleEdge(6)}
+                    id="btn-scenario-campus-e6"
                   >
-                    {graph?.edges[7]?.active
-                      ? 'Sever e7 (Simulate 1AB↔2AB Cut → Reroute)'
-                      : 'Restore e7 (Reconnect 1AB↔2AB)'}
+                    {graph?.edges[6]?.active
+                      ? 'Sever e6 (AB1↔AB3 Cut → Reroute via LHC)'
+                      : 'Restore e6 (Reconnect AB1↔AB3)'}
                   </button>
                   <button
-                    className={`btn btn-sm ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                    onClick={() => handleToggleEdge(9)}
-                    id="btn-scenario-campus-e9"
+                    className={`btn btn-sm ${graph?.edges[12]?.active ? 'btn-danger' : 'btn-secondary'}`}
+                    onClick={() => {
+                      handleToggleEdge(12);
+                      setDstVertex(9);
+                      if (bridge) recomputeAll(bridge, srcVertex, 9, useMatrix);
+                    }}
+                    id="btn-scenario-campus-e12"
                   >
-                    {graph?.edges[9]?.active
-                      ? 'Sever e9 (Cut Zone 1↔2 Concourse → Disconnect)'
-                      : 'Restore e9 (Reconnect Concourse)'}
+                    {graph?.edges[12]?.active
+                      ? 'Sever e12 (LHC↔Football Cut → Disconnect Sports)'
+                      : 'Restore e12 (Reconnect Sports Zone)'}
                   </button>
                 </>
               ) : (
@@ -552,10 +558,10 @@ export const App: React.FC = () => {
           <div className="canvas-toolbar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {graphMode === 'campus' ? 'MUJ Campus Walkway Topology' : 'F1 Benchmark Graph Topology'}
+                {graphMode === 'campus' ? 'MUJ Campus Wayfinding Topology' : 'F1 Benchmark Graph Topology'}
               </span>
               <span className="status-pill success">
-                {graphMode === 'campus' ? 'MUJ Campus (13 Venues)' : 'F1 Fixture (12 Nodes)'}
+                {graphMode === 'campus' ? 'MUJ Campus (12 Venues)' : 'F1 Fixture (12 Nodes)'}
               </span>
             </div>
 
@@ -581,6 +587,17 @@ export const App: React.FC = () => {
                 <span>Destination</span>
               </div>
             </div>
+
+            {graphMode === 'campus' && (
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setShowGallery(true)}
+                id="btn-open-gallery"
+                style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span>🗺️ Reference Maps &amp; Satellites</span>
+              </button>
+            )}
           </div>
 
           {/* Mandatory Presentation Disclaimer in Campus Mode */}
@@ -597,7 +614,7 @@ export const App: React.FC = () => {
           <div className="svg-canvas-wrapper">
             <svg
               className="svg-canvas"
-              viewBox={graphMode === 'campus' ? '0 0 1220 460' : '0 0 1180 430'}
+              viewBox={graphMode === 'campus' ? '0 0 2048 1448' : '0 0 1180 430'}
               preserveAspectRatio="xMidYMid meet"
               xmlns="http://www.w3.org/2000/svg"
               role="region"
@@ -614,22 +631,18 @@ export const App: React.FC = () => {
                 </filter>
               </defs>
 
-              {/* Contextual Campus Poster Layer (when present in public/maps/) */}
+              {/* Primary Interactive Wayfinding Schematic Layer */}
               {graphMode === 'campus' && (
                 <image
-                  href="/maps/muj-campus-map.png"
+                  href="/maps/muj-campus-wayfinding-schematic.png"
                   x="0"
                   y="0"
-                  width="1220"
-                  height="460"
+                  width="2048"
+                  height="1448"
                   preserveAspectRatio="xMidYMid meet"
-                  opacity={0.3}
-                  onError={(e) => {
-                    (e.target as SVGImageElement).style.display = 'none';
-                  }}
+                  opacity={theme === 'dark' ? 0.76 : theme === 'high-contrast' ? 0.55 : 0.95}
                 />
               )}
-
 
               {/* Edge Connections */}
               {graph?.edges.map((e) => {
@@ -640,6 +653,7 @@ export const App: React.FC = () => {
                 const edgeKey = `${e.u}-${e.v}`;
                 const routeHop = routeEdgeMap.get(edgeKey);
                 const isHovered = hoveredEdge === e.id;
+                const isCampus = graphMode === 'campus';
 
                 const midX = (uNode.x + vNode.x) / 2;
                 const midY = (uNode.y + vNode.y) / 2;
@@ -668,7 +682,7 @@ export const App: React.FC = () => {
                       x2={vNode.x}
                       y2={vNode.y}
                       stroke="transparent"
-                      strokeWidth={18}
+                      strokeWidth={isCampus ? 28 : 18}
                     />
 
                     {/* Visible line */}
@@ -681,25 +695,25 @@ export const App: React.FC = () => {
                           x2={vNode.x}
                           y2={vNode.y}
                           stroke="#ef4444"
-                          strokeWidth={2.5}
-                          strokeDasharray="6,4"
+                          strokeWidth={isCampus ? 4 : 2.5}
+                          strokeDasharray={isCampus ? '10,6' : '6,4'}
                           filter={isHovered ? 'url(#glow-red)' : undefined}
                         />
                         {/* CLOSED text badge */}
                         <rect
-                          x={midX - 26}
-                          y={midY - 9}
-                          width={52}
-                          height={18}
-                          rx={4}
+                          x={midX - (isCampus ? 36 : 26)}
+                          y={midY - (isCampus ? 12 : 9)}
+                          width={isCampus ? 72 : 52}
+                          height={isCampus ? 24 : 18}
+                          rx={isCampus ? 6 : 4}
                           fill="#ef4444"
                           stroke="#991b1b"
                         />
                         <text
                           x={midX}
-                          y={midY + 4}
+                          y={midY + (isCampus ? 5.5 : 4)}
                           fill="#ffffff"
-                          fontSize={10}
+                          fontSize={isCampus ? 13 : 10}
                           fontWeight="bold"
                           textAnchor="middle"
                           fontFamily="var(--font-mono)"
@@ -716,16 +730,23 @@ export const App: React.FC = () => {
                           x2={vNode.x}
                           y2={vNode.y}
                           stroke="#38bdf8"
-                          strokeWidth={isHovered ? 5 : 4}
+                          strokeWidth={isCampus ? (isHovered ? 8 : 6) : isHovered ? 5 : 4}
                           filter="url(#glow-cyan)"
                         />
                         {/* Numbered Hop Badge */}
-                        <circle cx={midX} cy={midY} r={10} fill="#0284c7" stroke="#38bdf8" strokeWidth={1.5} />
+                        <circle
+                          cx={midX}
+                          cy={midY}
+                          r={isCampus ? 14 : 10}
+                          fill="#0284c7"
+                          stroke="#38bdf8"
+                          strokeWidth={isCampus ? 2 : 1.5}
+                        />
                         <text
                           x={midX}
-                          y={midY + 3.5}
+                          y={midY + (isCampus ? 4.5 : 3.5)}
                           fill="#ffffff"
-                          fontSize={10}
+                          fontSize={isCampus ? 13 : 10}
                           fontWeight="bold"
                           textAnchor="middle"
                           fontFamily="var(--font-mono)"
@@ -741,7 +762,7 @@ export const App: React.FC = () => {
                         x2={vNode.x}
                         y2={vNode.y}
                         stroke={isHovered ? 'var(--edge-hover)' : 'var(--edge-stroke)'}
-                        strokeWidth={isHovered ? 3 : 2}
+                        strokeWidth={isCampus ? (isHovered ? 5 : 3.5) : isHovered ? 3 : 2}
                       />
                     )}
                   </g>
@@ -755,25 +776,29 @@ export const App: React.FC = () => {
                 const isSelected = v.id === selectedVertexId;
                 const isReached = reachedSet.has(v.id);
                 const isHovered = hoveredVertex === v.id;
+                const isCampus = graphMode === 'campus';
 
                 let fillColor = 'var(--node-fill)';
                 let strokeColor = 'var(--node-stroke)';
-                let strokeWidth = 2;
+                let strokeWidth = isCampus ? 2.8 : 2;
 
                 if (isSrc) {
                   fillColor = '#065f46';
                   strokeColor = '#10b981';
-                  strokeWidth = 3;
+                  strokeWidth = isCampus ? 4 : 3;
                 } else if (isDst) {
                   fillColor = '#075985';
                   strokeColor = '#38bdf8';
-                  strokeWidth = 3;
+                  strokeWidth = isCampus ? 4 : 3;
                 } else if (!isReached) {
                   fillColor = 'var(--bg-app)';
                   strokeColor = 'var(--rose)';
                 }
 
-                const badgeHalfWidth = Math.max(50, v.label.length * 4.2);
+                const badgeHalfWidth = Math.max(
+                  isCampus ? 66 : 50,
+                  v.label.length * (isCampus ? 5.2 : 4.2)
+                );
 
                 return (
                   <g
@@ -811,12 +836,12 @@ export const App: React.FC = () => {
                       <circle
                         cx={v.x}
                         cy={v.y}
-                        r={24}
+                        r={isCampus ? 34 : 24}
                         fill="none"
                         stroke={isSrc ? '#10b981' : isDst ? '#38bdf8' : isSelected ? 'var(--cyan)' : 'var(--border-medium)'}
-                        strokeWidth={isSelected ? 2 : 1.5}
-                        strokeDasharray={isHovered ? '2,2' : undefined}
-                        opacity={0.85}
+                        strokeWidth={isSelected ? (isCampus ? 3 : 2) : isCampus ? 2 : 1.5}
+                        strokeDasharray={isHovered ? '3,3' : undefined}
+                        opacity={0.9}
                       />
                     )}
 
@@ -824,7 +849,7 @@ export const App: React.FC = () => {
                     <circle
                       cx={v.x}
                       cy={v.y}
-                      r={18}
+                      r={isCampus ? 24 : 18}
                       fill={fillColor}
                       stroke={strokeColor}
                       strokeWidth={strokeWidth}
@@ -834,9 +859,9 @@ export const App: React.FC = () => {
                     {/* Vertex ID text */}
                     <text
                       x={v.x}
-                      y={v.y + 4.5}
+                      y={v.y + (isCampus ? 5.5 : 4.5)}
                       fill="var(--node-text)"
-                      fontSize={12}
+                      fontSize={isCampus ? 14 : 12}
                       fontWeight="bold"
                       textAnchor="middle"
                       fontFamily="var(--font-mono)"
@@ -845,22 +870,22 @@ export const App: React.FC = () => {
                     </text>
 
                     {/* Label Badge below vertex */}
-                    <g transform={`translate(${v.x}, ${v.y + 24})`}>
+                    <g transform={`translate(${v.x}, ${v.y + (isCampus ? 30 : 24)})`}>
                       <rect
                         x={-badgeHalfWidth}
                         y={0}
                         width={badgeHalfWidth * 2}
-                        height={18}
-                        rx={4}
+                        height={isCampus ? 22 : 18}
+                        rx={isCampus ? 5 : 4}
                         fill="var(--bg-surface)"
                         stroke="var(--border-medium)"
                         opacity={0.95}
                       />
                       <text
                         x={0}
-                        y={12.5}
+                        y={isCampus ? 15 : 12.5}
                         fill="var(--text-main)"
-                        fontSize={10.5}
+                        fontSize={isCampus ? 12.5 : 10.5}
                         fontWeight="600"
                         textAnchor="middle"
                         fontFamily="var(--font-sans)"
@@ -871,27 +896,27 @@ export const App: React.FC = () => {
 
                     {/* Source / Destination / Unreached Badges */}
                     {isSrc && (
-                      <g transform={`translate(${v.x}, ${v.y - 25})`}>
-                        <rect x={-16} y={0} width={32} height={14} rx={3} fill="#10b981" />
-                        <text x={0} y={10.5} fill="#040914" fontSize={9} fontWeight="800" textAnchor="middle">
+                      <g transform={`translate(${v.x}, ${v.y - (isCampus ? 33 : 25)})`}>
+                        <rect x={isCampus ? -20 : -16} y={0} width={isCampus ? 40 : 32} height={isCampus ? 18 : 14} rx={3} fill="#10b981" />
+                        <text x={0} y={isCampus ? 13 : 10.5} fill="#040914" fontSize={isCampus ? 11 : 9} fontWeight="800" textAnchor="middle">
                           SRC
                         </text>
                       </g>
                     )}
 
                     {isDst && (
-                      <g transform={`translate(${v.x}, ${v.y - 25})`}>
-                        <rect x={-16} y={0} width={32} height={14} rx={3} fill="#38bdf8" />
-                        <text x={0} y={10.5} fill="#040914" fontSize={9} fontWeight="800" textAnchor="middle">
+                      <g transform={`translate(${v.x}, ${v.y - (isCampus ? 33 : 25)})`}>
+                        <rect x={isCampus ? -20 : -16} y={0} width={isCampus ? 40 : 32} height={isCampus ? 18 : 14} rx={3} fill="#38bdf8" />
+                        <text x={0} y={isCampus ? 13 : 10.5} fill="#040914" fontSize={isCampus ? 11 : 9} fontWeight="800" textAnchor="middle">
                           DST
                         </text>
                       </g>
                     )}
 
                     {!isReached && !isSrc && (
-                      <g transform={`translate(${v.x}, ${v.y - 25})`}>
-                        <rect x={-34} y={0} width={68} height={14} rx={3} fill="var(--rose)" />
-                        <text x={0} y={10.5} fill="#ffffff" fontSize={8} fontWeight="800" textAnchor="middle">
+                      <g transform={`translate(${v.x}, ${v.y - (isCampus ? 33 : 25)})`}>
+                        <rect x={isCampus ? -42 : -34} y={0} width={isCampus ? 84 : 68} height={isCampus ? 18 : 14} rx={3} fill="var(--rose)" />
+                        <text x={0} y={isCampus ? 13 : 10.5} fill="#ffffff" fontSize={isCampus ? 10 : 8} fontWeight="800" textAnchor="middle">
                           UNREACHED
                         </text>
                       </g>
@@ -907,6 +932,107 @@ export const App: React.FC = () => {
             <span>Click any walkway to toggle closed/active state.</span>
             <span>Click venue to view details &amp; set Destination; Right-click to set Source.</span>
           </div>
+
+          {/* Supplemental Gallery Modal */}
+          {showGallery && (
+            <div className="gallery-modal-backdrop" onClick={() => setShowGallery(false)}>
+              <div className="gallery-modal-card" onClick={(e) => e.stopPropagation()}>
+                <div className="gallery-modal-header">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>🏛️</span>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                      MUJ Campus Context &amp; Architectural References
+                    </h3>
+                  </div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setShowGallery(false)}
+                    id="btn-close-gallery"
+                  >
+                    ✕ Close
+                  </button>
+                </div>
+
+                <div className="gallery-tabs">
+                  <button
+                    className={`gallery-tab-btn ${galleryTab === 'masterplan' ? 'active' : ''}`}
+                    onClick={() => setGalleryTab('masterplan')}
+                  >
+                    Site Master Plan (Hafeez Contractor)
+                  </button>
+                  <button
+                    className={`gallery-tab-btn ${galleryTab === 'ab1_mess' ? 'active' : ''}`}
+                    onClick={() => setGalleryTab('ab1_mess')}
+                  >
+                    AB1 &amp; Old Mess Satellite
+                  </button>
+                  <button
+                    className={`gallery-tab-btn ${galleryTab === 'lhc_aic' ? 'active' : ''}`}
+                    onClick={() => setGalleryTab('lhc_aic')}
+                  >
+                    LHC &amp; AIC-MUJ Satellite
+                  </button>
+                  <button
+                    className={`gallery-tab-btn ${galleryTab === 'sports' ? 'active' : ''}`}
+                    onClick={() => setGalleryTab('sports')}
+                  >
+                    Football &amp; Sports Satellite
+                  </button>
+                </div>
+
+                <div className="gallery-image-viewport">
+                  {galleryTab === 'masterplan' && (
+                    <div className="gallery-item">
+                      <img
+                        src="/maps/muj-campus-masterplan.png"
+                        alt="MUJ Campus Master Site Plan by Architect Hafeez Contractor"
+                        className="gallery-img"
+                      />
+                      <p className="gallery-caption">
+                        <strong>Official Site Master Plan (Hafeez Contractor, AHC)</strong> — Division of Academic Zone (central axis along HT line) and Residential Zone, with numbered legend (1–9 Campus, 10–17 Hostel). Used as supplementary architectural context.
+                      </p>
+                    </div>
+                  )}
+                  {galleryTab === 'ab1_mess' && (
+                    <div className="gallery-item">
+                      <img
+                        src="/maps/muj-academic-block-old-mess-satellite.png"
+                        alt="Academic Block 1, Old Mess, Knowledge Centre Satellite"
+                        className="gallery-img"
+                      />
+                      <p className="gallery-caption">
+                        <strong>Academic Block 1 &amp; Old Mess Satellite View</strong> — Depicts Academic Block 1 (courtyard structure), Old Mess / Food Court, and Knowledge Centre. Map imagery &copy; Google Maps.
+                      </p>
+                    </div>
+                  )}
+                  {galleryTab === 'lhc_aic' && (
+                    <div className="gallery-item">
+                      <img
+                        src="/maps/muj-lecture-hall-aic-satellite.png"
+                        alt="Lecture Hall Complex, AIC-MUJ Satellite"
+                        className="gallery-img"
+                      />
+                      <p className="gallery-caption">
+                        <strong>Lecture Hall Complex &amp; AIC-MUJ Satellite View</strong> — Depicts large teaching halls (LHC), AIC-MUJ innovation center, and surrounding road corridors. Map imagery &copy; Google Maps.
+                      </p>
+                    </div>
+                  )}
+                  {galleryTab === 'sports' && (
+                    <div className="gallery-item">
+                      <img
+                        src="/maps/muj-football-ground-satellite.png"
+                        alt="MUJ Football Ground Satellite"
+                        className="gallery-img"
+                      />
+                      <p className="gallery-caption">
+                        <strong>MUJ Football Ground &amp; Sports Zone Satellite View</strong> — Depicts the football ground, cricket perimeter, and nearby Lecture Hall Complex. Map imagery &copy; Google Maps.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Panel C: Right Results / Analysis Panel */}
