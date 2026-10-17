@@ -1,4 +1,4 @@
-﻿export interface RouteGuardModule {
+export interface RouteGuardModule {
     _rg_wasm_init(): number;
     _rg_wasm_init_fixture(fixture_id: number): number;
     _rg_wasm_get_active_fixture(): number;

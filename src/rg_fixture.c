@@ -163,20 +163,21 @@ RgStatus rg_fixture_campus_muj(RgGraph **out_graph) {
         return s;
     }
 
-    /* Set 13 vertices: concise display label + spatial coordinates */
-    rg_set_vertex(g, 0, "VIP Gate", 120, 620);
-    rg_set_vertex(g, 1, "Indian National Flag", 240, 560);
-    rg_set_vertex(g, 2, "Seminar Hall (1C)", 360, 680);
-    rg_set_vertex(g, 3, "Old Library (1C)", 360, 560);
-    rg_set_vertex(g, 4, "GHS Gate", 240, 300);
-    rg_set_vertex(g, 5, "Academic Block 1 (1AB)", 480, 460);
-    rg_set_vertex(g, 6, "Food Court - Old Mess", 480, 300);
-    rg_set_vertex(g, 7, "Academic Block 2 (2AB)", 650, 420);
-    rg_set_vertex(g, 8, "Registration Desk (3AB)", 820, 420);
-    rg_set_vertex(g, 9, "Smt. V. Pai Auditorium", 940, 520);
-    rg_set_vertex(g, 10, "Conference Hall (3AB)", 940, 340);
-    rg_set_vertex(g, 11, "Food Court - LHC", 980, 220);
-    rg_set_vertex(g, 12, "Knowledge Centre", 1100, 140);
+    /* Set 13 vertices: concise display label + balanced landscape coordinates */
+    rg_set_vertex(g, 0, "VIP Gate", 80, 340);
+    rg_set_vertex(g, 1, "Indian National Flag", 170, 270);
+    rg_set_vertex(g, 2, "Seminar Hall (1C)", 270, 370);
+    rg_set_vertex(g, 3, "Old Library (1C)", 270, 260);
+    rg_set_vertex(g, 4, "GHS Gate", 170, 110);
+    rg_set_vertex(g, 5, "Academic Block 1 (1AB)", 390, 240);
+    rg_set_vertex(g, 6, "Food Court - Old Mess", 390, 110);
+    rg_set_vertex(g, 7, "Academic Block 2 (2AB)", 580, 230);
+    rg_set_vertex(g, 8, "Registration Desk (3AB)", 770, 230);
+    rg_set_vertex(g, 9, "Smt. V. Pai Auditorium", 920, 330);
+    rg_set_vertex(g, 10, "Conference Hall (3AB)", 920, 130);
+    rg_set_vertex(g, 11, "Food Court - LHC", 1030, 230);
+    rg_set_vertex(g, 12, "Knowledge Centre", 1140, 130);
+
 
     /* Canonical edge insertion: IDs e0 through e14 */
     rg_add_edge(g, 0, 1, NULL);   /* e0: VIP Gate <-> Indian National Flag */

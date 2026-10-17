@@ -706,3 +706,150 @@ body {
 .data-table tr.critical-cut {
   background-color: rgba(239, 68, 68, 0.08);
 }
+
+/* Mode Selector Switch */
+.mode-selector-container {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mode-selector-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.mode-switch-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background-color: var(--bg-surface);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border-medium);
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  text-align: center;
+}
+
+.mode-btn:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-main);
+}
+
+.mode-btn.active {
+  background-color: var(--cyan-dim);
+  border-color: var(--cyan);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .mode-btn.active {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+
+[data-theme="high-contrast"] .mode-btn.active {
+  background-color: #ffff00;
+  color: #000000;
+  border: 2px solid #ffffff;
+}
+
+/* Campus Presentation Disclaimer */
+.campus-model-disclaimer {
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--amber);
+  color: var(--text-main);
+  font-size: 11.5px;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Venue Detail Card */
+.venue-detail-card {
+  margin-top: 14px;
+  padding: 12px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.venue-detail-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.venue-detail-desc {
+  font-size: 12px;
+  color: var(--text-main);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.venue-detail-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.venue-detail-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* SVG Interactive Accessibility */
+.svg-canvas g[role="button"]:focus {
+  outline: none;
+}
+
+.svg-canvas g[role="button"]:focus circle {
+  stroke: var(--cyan) !important;
+  stroke-width: 3.5px !important;
+}
+
+.svg-canvas g[role="button"]:focus line {
+  stroke-width: 4px !important;
+}
+
+/* Missing Map Asset Banner */
+.map-asset-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+

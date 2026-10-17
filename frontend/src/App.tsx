@@ -16,9 +16,13 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Graph Mode: 'campus' (MUJ Campus Demo) | 'f1' (F1 Reference Graph)
+  const [graphMode, setGraphMode] = useState<'campus' | 'f1'>('campus');
+
   // Controls
   const [srcVertex, setSrcVertex] = useState<number>(0);
-  const [dstVertex, setDstVertex] = useState<number>(10);
+  const [dstVertex, setDstVertex] = useState<number>(8); // Registration Desk in campus mode
+  const [selectedVertexId, setSelectedVertexId] = useState<number | null>(0);
   const [useMatrix, setUseMatrix] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'routing' | 'metrics' | 'failureTable'>('routing');
 
@@ -40,39 +44,7 @@ export const App: React.FC = () => {
   const [hoveredVertex, setHoveredVertex] = useState<number | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<number | null>(null);
 
-  // 1. Initialize WASM Bridge
-  useEffect(() => {
-    async function loadWasm() {
-      try {
-        setLoading(true);
-        const b = await getRouteGuardBridge();
-        setBridge(b);
-        const g = b.getGraph();
-        setGraph(g);
-
-        // Run baseline route & state
-        const r = b.findRoute(0, 10, false);
-        setRouteResult(r);
-        const bfs = b.runBFS(0, 10, false);
-        setTraversalResult(bfs);
-        const comp = b.getComponents(false);
-        setComponentsResult(comp);
-        const state = b.getNetworkState(0, 10, false);
-        setNetworkState(state);
-        const failTbl = b.getFailureTable(0, 10);
-        setFailureTable(failTbl);
-
-        setLoading(false);
-      } catch (err: unknown) {
-        console.error('Failed to initialize RouteGuard WASM module:', err);
-        setErrorMsg('Failed to instantiate WebAssembly engine. Please check your browser WebAssembly support.');
-        setLoading(false);
-      }
-    }
-    loadWasm();
-  }, []);
-
-  // Refresh active computations from C engine
+  // Refresh active computations strictly from C engine
   const recomputeAll = useCallback(
     (b: RouteGuardBridge, src: number, dst: number, matrixMode: boolean) => {
       const g = b.getGraph();
@@ -96,6 +68,43 @@ export const App: React.FC = () => {
     []
   );
 
+  // 1. Initialize WASM Bridge with MUJ Campus Demo by default (fixture 1)
+  useEffect(() => {
+    async function loadWasm() {
+      try {
+        setLoading(true);
+        const b = await getRouteGuardBridge(1);
+        setBridge(b);
+        setGraphMode('campus');
+        setSrcVertex(0);
+        setDstVertex(8);
+        setSelectedVertexId(0);
+        recomputeAll(b, 0, 8, false);
+        setLoading(false);
+      } catch (err: unknown) {
+        console.error('Failed to initialize RouteGuard WASM module:', err);
+        setErrorMsg('Failed to instantiate WebAssembly engine. Please check your browser WebAssembly support.');
+        setLoading(false);
+      }
+    }
+    loadWasm();
+  }, [recomputeAll]);
+
+  // Mode Switch Handler (C-driven fixture selection)
+  const handleSwitchMode = (mode: 'campus' | 'f1') => {
+    if (!bridge) return;
+    const fixtureId = mode === 'campus' ? 1 : 0;
+    bridge.initFixture(fixtureId);
+    setGraphMode(mode);
+
+    const newSrc = 0;
+    const newDst = mode === 'campus' ? 8 : 10;
+    setSrcVertex(newSrc);
+    setDstVertex(newDst);
+    setSelectedVertexId(newSrc);
+    recomputeAll(bridge, newSrc, newDst, useMatrix);
+  };
+
   // Handlers
   const handleToggleEdge = (edgeId: number) => {
     if (!bridge || !graph) return;
@@ -109,9 +118,11 @@ export const App: React.FC = () => {
   const handleReset = () => {
     if (!bridge) return;
     bridge.reset();
+    const defaultDst = graphMode === 'campus' ? 8 : 10;
     setSrcVertex(0);
-    setDstVertex(10);
-    recomputeAll(bridge, 0, 10, useMatrix);
+    setDstVertex(defaultDst);
+    setSelectedVertexId(0);
+    recomputeAll(bridge, 0, defaultDst, useMatrix);
   };
 
   const handleRunBFS = () => {
@@ -158,7 +169,7 @@ export const App: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `routeguard_campus_src${srcVertex}_dst${dstVertex}.svg`;
+    a.download = `routeguard_${graphMode}_src${srcVertex}_dst${dstVertex}.svg`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -187,13 +198,23 @@ export const App: React.FC = () => {
     if (traversalResult && traversalResult.order) {
       traversalResult.order.forEach((v) => set.add(v));
     } else {
-      // Default all if no traversal
       if (graph) {
         for (let i = 0; i < graph.n_vertices; i++) set.add(i);
       }
     }
     return set;
   }, [traversalResult, graph]);
+
+  // Selected vertex metadata
+  const selectedVertex = useMemo(() => {
+    if (selectedVertexId === null || !graph) return null;
+    return graph.vertices.find((v) => v.id === selectedVertexId) ?? null;
+  }, [selectedVertexId, graph]);
+
+  const selectedVertexIncidentEdges = useMemo(() => {
+    if (selectedVertexId === null || !graph) return [];
+    return graph.edges.filter((e) => e.u === selectedVertexId || e.v === selectedVertexId);
+  }, [selectedVertexId, graph]);
 
   if (loading) {
     return (
@@ -238,7 +259,7 @@ export const App: React.FC = () => {
         <div className="disclaimer-banner">
           <span style={{ fontSize: '16px' }}>⚠️</span>
           <span>
-            <strong>SYNTHETIC EDUCATIONAL NETWORK:</strong> Pedagogical campus model for CSC2101/CSC2130. Route length = hops.
+            <strong>SYNTHETIC EDUCATIONAL NETWORK:</strong> Pedagogical model for CSC2101/CSC2130. Route length = hops.
             Not for real-world navigation or municipal transit.
           </span>
         </div>
@@ -293,6 +314,29 @@ export const App: React.FC = () => {
             </span>
           </div>
 
+          {/* Mode Selector Switch */}
+          <div className="mode-selector-container">
+            <label className="mode-selector-label" htmlFor="mode-campus-btn">Graph Environment Mode</label>
+            <div className="mode-switch-group" role="group" aria-label="Graph Environment Mode">
+              <button
+                type="button"
+                className={`mode-btn ${graphMode === 'campus' ? 'active' : ''}`}
+                onClick={() => handleSwitchMode('campus')}
+                id="mode-campus-btn"
+              >
+                🏛️ MUJ Campus Demo
+              </button>
+              <button
+                type="button"
+                className={`mode-btn ${graphMode === 'f1' ? 'active' : ''}`}
+                onClick={() => handleSwitchMode('f1')}
+                id="mode-f1-btn"
+              >
+                📐 F1 Reference Graph
+              </button>
+            </div>
+          </div>
+
           {/* Source / Destination Selectors */}
           <div className="control-group">
             <label className="control-label" htmlFor="src-select">
@@ -306,6 +350,7 @@ export const App: React.FC = () => {
               onChange={(e) => {
                 const val = Number(e.target.value);
                 setSrcVertex(val);
+                setSelectedVertexId(val);
                 if (bridge) recomputeAll(bridge, val, dstVertex, useMatrix);
               }}
             >
@@ -329,6 +374,7 @@ export const App: React.FC = () => {
               onChange={(e) => {
                 const val = Number(e.target.value);
                 setDstVertex(val);
+                setSelectedVertexId(val);
                 if (bridge) recomputeAll(bridge, srcVertex, val, useMatrix);
               }}
             >
@@ -339,6 +385,48 @@ export const App: React.FC = () => {
               ))}
             </select>
           </div>
+
+          {/* Selected Location / Venue Details */}
+          {selectedVertex && (
+            <div className="venue-detail-card" id="venue-detail-card">
+              <div className="venue-detail-title">
+                <span>Node #{selectedVertex.id}: {selectedVertex.label}</span>
+                {selectedVertex.id === srcVertex && <span className="status-pill success">SRC</span>}
+                {selectedVertex.id === dstVertex && <span className="status-pill info">DST</span>}
+              </div>
+              <div className="venue-detail-desc">
+                {selectedVertex.full_name || selectedVertex.label}
+              </div>
+              <div className="venue-detail-meta">
+                <span>Coords: ({selectedVertex.x}, {selectedVertex.y})</span>
+                <span>Degree: {selectedVertexIncidentEdges.length}</span>
+              </div>
+              <div className="venue-detail-actions">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => {
+                    setSrcVertex(selectedVertex.id);
+                    if (bridge) recomputeAll(bridge, selectedVertex.id, dstVertex, useMatrix);
+                  }}
+                  id="btn-set-src"
+                >
+                  Set as SRC
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => {
+                    setDstVertex(selectedVertex.id);
+                    if (bridge) recomputeAll(bridge, srcVertex, selectedVertex.id, useMatrix);
+                  }}
+                  id="btn-set-dst"
+                >
+                  Set as DST
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Representation Switch */}
           <div className="control-group">
@@ -382,26 +470,51 @@ export const App: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick Scenario Buttons */}
+          {/* Quick Scenario Buttons - Tailored per mode */}
           <div className="control-group">
             <label className="control-label">
-              <span>Failure Scenarios</span>
+              <span>Failure Scenarios ({graphMode === 'campus' ? 'Campus Demo' : 'F1 Reference'})</span>
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <button
-                className={`btn btn-sm ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                onClick={() => handleToggleEdge(9)}
-                id="btn-scenario-e9"
-              >
-                {graph?.edges[9]?.active ? 'Sever e9 (Cut Connecting Link)' : 'Restore e9 (Reconnect Walkway)'}
-              </button>
-              <button
-                className={`btn btn-sm ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-secondary'}`}
-                onClick={() => handleToggleEdge(5)}
-                id="btn-scenario-e5"
-              >
-                {graph?.edges[5]?.active ? 'Sever e5 (Simulate Block A Cut)' : 'Restore e5 (Direct Route)'}
-              </button>
+              {graphMode === 'campus' ? (
+                <>
+                  <button
+                    className={`btn btn-sm ${graph?.edges[7]?.active ? 'btn-danger' : 'btn-secondary'}`}
+                    onClick={() => handleToggleEdge(7)}
+                    id="btn-scenario-campus-e7"
+                  >
+                    {graph?.edges[7]?.active
+                      ? 'Sever e7 (Simulate 1AB↔2AB Cut → Reroute)'
+                      : 'Restore e7 (Reconnect 1AB↔2AB)'}
+                  </button>
+                  <button
+                    className={`btn btn-sm ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-secondary'}`}
+                    onClick={() => handleToggleEdge(9)}
+                    id="btn-scenario-campus-e9"
+                  >
+                    {graph?.edges[9]?.active
+                      ? 'Sever e9 (Cut Zone 1↔2 Concourse → Disconnect)'
+                      : 'Restore e9 (Reconnect Concourse)'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className={`btn btn-sm ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-secondary'}`}
+                    onClick={() => handleToggleEdge(9)}
+                    id="btn-scenario-f1-e9"
+                  >
+                    {graph?.edges[9]?.active ? 'Sever e9 (Cut Critical Link 6↔7)' : 'Restore e9 (Reconnect 6↔7)'}
+                  </button>
+                  <button
+                    className={`btn btn-sm ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-secondary'}`}
+                    onClick={() => handleToggleEdge(5)}
+                    id="btn-scenario-f1-e5"
+                  >
+                    {graph?.edges[5]?.active ? 'Sever e5 (Simulate Block A Cut)' : 'Restore e5 (Direct Route)'}
+                  </button>
+                </>
+              )}
               <button className="btn btn-secondary btn-sm" onClick={handleReset} id="btn-restore-all">
                 Restore All Walkways (Reset)
               </button>
@@ -410,7 +523,7 @@ export const App: React.FC = () => {
 
           {/* Quick Edge Mutation Dropdown */}
           <div className="control-group">
-            <label className="control-label">
+            <label className="control-label" htmlFor="select-toggle-edge">
               <span>Toggle Specific Walkway</span>
             </label>
             <select
@@ -423,7 +536,7 @@ export const App: React.FC = () => {
               id="select-toggle-edge"
             >
               <option value="" disabled>
-                Select an edge to toggle...
+                Select a walkway to toggle...
               </option>
               {graph?.edges.map((e) => (
                 <option key={e.id} value={e.id}>
@@ -439,9 +552,11 @@ export const App: React.FC = () => {
           <div className="canvas-toolbar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Campus Walkway Topology
+                {graphMode === 'campus' ? 'MUJ Campus Walkway Topology' : 'F1 Benchmark Graph Topology'}
               </span>
-              <span className="status-pill success">F1 Synthetic Fixture</span>
+              <span className="status-pill success">
+                {graphMode === 'campus' ? 'MUJ Campus (13 Venues)' : 'F1 Fixture (12 Nodes)'}
+              </span>
             </div>
 
             <div className="legend-bar">
@@ -468,13 +583,25 @@ export const App: React.FC = () => {
             </div>
           </div>
 
+          {/* Mandatory Presentation Disclaimer in Campus Mode */}
+          {graphMode === 'campus' && (
+            <div className="campus-model-disclaimer" id="campus-disclaimer">
+              <span style={{ fontSize: '14px' }}>📌</span>
+              <span>
+                <strong>Illustrative graph model — connections are simplified for DSA demonstration and are not verified pedestrian directions.</strong>
+              </span>
+            </div>
+          )}
+
           {/* Interactive SVG Network Map */}
           <div className="svg-canvas-wrapper">
             <svg
               className="svg-canvas"
-              viewBox="0 0 1180 430"
+              viewBox={graphMode === 'campus' ? '0 0 1220 460' : '0 0 1180 430'}
               preserveAspectRatio="xMidYMid meet"
               xmlns="http://www.w3.org/2000/svg"
+              role="region"
+              aria-label="Campus Graph Canvas"
             >
               <defs>
                 <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
@@ -486,6 +613,23 @@ export const App: React.FC = () => {
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
+
+              {/* Contextual Campus Poster Layer (when present in public/maps/) */}
+              {graphMode === 'campus' && (
+                <image
+                  href="/maps/muj-campus-map.png"
+                  x="0"
+                  y="0"
+                  width="1220"
+                  height="460"
+                  preserveAspectRatio="xMidYMid meet"
+                  opacity={0.3}
+                  onError={(e) => {
+                    (e.target as SVGImageElement).style.display = 'none';
+                  }}
+                />
+              )}
+
 
               {/* Edge Connections */}
               {graph?.edges.map((e) => {
@@ -503,7 +647,16 @@ export const App: React.FC = () => {
                 return (
                   <g
                     key={`edge-${e.id}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Walkway e${e.id} between ${uNode.label} and ${vNode.label}, ${e.active ? 'Active' : 'Closed'}`}
                     onClick={() => handleToggleEdge(e.id)}
+                    onKeyDown={(evt) => {
+                      if (evt.key === 'Enter' || evt.key === ' ') {
+                        evt.preventDefault();
+                        handleToggleEdge(e.id);
+                      }
+                    }}
                     onMouseEnter={() => setHoveredEdge(e.id)}
                     onMouseLeave={() => setHoveredEdge(null)}
                     style={{ cursor: 'pointer' }}
@@ -515,7 +668,7 @@ export const App: React.FC = () => {
                       x2={vNode.x}
                       y2={vNode.y}
                       stroke="transparent"
-                      strokeWidth={16}
+                      strokeWidth={18}
                     />
 
                     {/* Visible line */}
@@ -599,6 +752,7 @@ export const App: React.FC = () => {
               {graph?.vertices.map((v) => {
                 const isSrc = v.id === srcVertex;
                 const isDst = v.id === dstVertex;
+                const isSelected = v.id === selectedVertexId;
                 const isReached = reachedSet.has(v.id);
                 const isHovered = hoveredVertex === v.id;
 
@@ -619,10 +773,16 @@ export const App: React.FC = () => {
                   strokeColor = 'var(--rose)';
                 }
 
+                const badgeHalfWidth = Math.max(50, v.label.length * 4.2);
+
                 return (
                   <g
                     key={`vertex-${v.id}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Vertex ${v.id}: ${v.full_name || v.label}. ${isSrc ? 'Source' : isDst ? 'Destination' : isReached ? 'Reached' : 'Unreached'}`}
                     onClick={() => {
+                      setSelectedVertexId(v.id);
                       if (v.id !== srcVertex) {
                         setDstVertex(v.id);
                         if (bridge) recomputeAll(bridge, srcVertex, v.id, useMatrix);
@@ -630,24 +790,33 @@ export const App: React.FC = () => {
                     }}
                     onContextMenu={(e) => {
                       e.preventDefault();
+                      setSelectedVertexId(v.id);
                       setSrcVertex(v.id);
                       if (bridge) recomputeAll(bridge, v.id, dstVertex, useMatrix);
+                    }}
+                    onKeyDown={(evt) => {
+                      if (evt.key === 'Enter' || evt.key === ' ') {
+                        evt.preventDefault();
+                        setSelectedVertexId(v.id);
+                        setDstVertex(v.id);
+                        if (bridge) recomputeAll(bridge, srcVertex, v.id, useMatrix);
+                      }
                     }}
                     onMouseEnter={() => setHoveredVertex(v.id)}
                     onMouseLeave={() => setHoveredVertex(null)}
                     style={{ cursor: 'pointer' }}
                   >
                     {/* Selection halo */}
-                    {(isSrc || isDst || isHovered) && (
+                    {(isSrc || isDst || isSelected || isHovered) && (
                       <circle
                         cx={v.x}
                         cy={v.y}
                         r={24}
                         fill="none"
-                        stroke={isSrc ? '#10b981' : isDst ? '#38bdf8' : 'var(--border-medium)'}
-                        strokeWidth={1.5}
+                        stroke={isSrc ? '#10b981' : isDst ? '#38bdf8' : isSelected ? 'var(--cyan)' : 'var(--border-medium)'}
+                        strokeWidth={isSelected ? 2 : 1.5}
                         strokeDasharray={isHovered ? '2,2' : undefined}
-                        opacity={0.8}
+                        opacity={0.85}
                       />
                     )}
 
@@ -678,19 +847,20 @@ export const App: React.FC = () => {
                     {/* Label Badge below vertex */}
                     <g transform={`translate(${v.x}, ${v.y + 24})`}>
                       <rect
-                        x={-50}
+                        x={-badgeHalfWidth}
                         y={0}
-                        width={100}
-                        height={16}
-                        rx={3}
+                        width={badgeHalfWidth * 2}
+                        height={18}
+                        rx={4}
                         fill="var(--bg-surface)"
                         stroke="var(--border-medium)"
+                        opacity={0.95}
                       />
                       <text
                         x={0}
-                        y={12}
+                        y={12.5}
                         fill="var(--text-main)"
-                        fontSize={10}
+                        fontSize={10.5}
                         fontWeight="600"
                         textAnchor="middle"
                         fontFamily="var(--font-sans)"
@@ -734,8 +904,8 @@ export const App: React.FC = () => {
 
           {/* Quick instructions underneath canvas */}
           <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-            <span>Click any walkway/edge to toggle closed/active state.</span>
-            <span>Click vertex to set Destination; Right-click to set Source.</span>
+            <span>Click any walkway to toggle closed/active state.</span>
+            <span>Click venue to view details &amp; set Destination; Right-click to set Source.</span>
           </div>
         </section>
 
@@ -806,7 +976,7 @@ export const App: React.FC = () => {
                   </div>
                 ) : (
                   <div style={{ marginTop: '8px', fontSize: '12px', color: '#fca5a5' }}>
-                    Critical connecting walkway severed. No path exists from vertex {srcVertex} ({graph?.vertices[srcVertex]?.label}) to vertex {dstVertex} ({graph?.vertices[dstVertex]?.label}).
+                    Critical connecting walkway severed. No active path exists from vertex {srcVertex} ({graph?.vertices[srcVertex]?.label}) to vertex {dstVertex} ({graph?.vertices[dstVertex]?.label}).
                   </div>
                 )}
               </div>
@@ -848,7 +1018,7 @@ export const App: React.FC = () => {
                   </div>
                   <div className="metric-box">
                     <div className="metric-label">Reachable from SRC</div>
-                    <div className="metric-value">{networkState?.reachable_src_count ?? 12} / {graph?.n_vertices ?? 12}</div>
+                    <div className="metric-value">{networkState?.reachable_src_count ?? 0} / {graph?.n_vertices ?? 0}</div>
                     <div className="metric-sub">Nodes in SRC partition</div>
                   </div>
                 </div>
@@ -878,7 +1048,9 @@ export const App: React.FC = () => {
                     {traversalResult?.metrics.neighbor_slots_examined ?? 0}
                   </div>
                   <div className="metric-sub">
-                    {useMatrix ? 'V² = 144 columns scanned' : '2E = 26 list nodes inspected'}
+                    {useMatrix
+                      ? `Matrix: V² = ${(graph?.n_vertices ?? 0) * (graph?.n_vertices ?? 0)} potential cells`
+                      : `List: 2E = ${(graph?.n_edges ?? 0) * 2} stored nodes`}
                   </div>
                 </div>
 
@@ -936,15 +1108,14 @@ export const App: React.FC = () => {
                 </strong>
                 {useMatrix ? (
                   <span>
-                    <strong>Adjacency Matrix (Active):</strong> Storage is <span style={{ fontFamily: 'var(--font-mono)' }}>O(V²)</span> (144 ints).
-                    Every vertex explores all <span style={{ fontFamily: 'var(--font-mono)' }}>V=12</span> columns in the matrix regardless of degree,
-                    producing exactly 144 slot examinations on baseline F1.
+                    <strong>Adjacency Matrix (Active):</strong> Storage is <span style={{ fontFamily: 'var(--font-mono)' }}>O(V²)</span> ({((graph?.n_vertices ?? 0) * (graph?.n_vertices ?? 0))} cells).
+                    Every vertex checks all <span style={{ fontFamily: 'var(--font-mono)' }}>V={graph?.n_vertices ?? 0}</span> columns regardless of degree,
+                    producing {traversalResult?.metrics.neighbor_slots_examined ?? 0} slot examinations in the active traversal.
                   </span>
                 ) : (
                   <span>
-                    <strong>Adjacency List (Active):</strong> Storage is <span style={{ fontFamily: 'var(--font-mono)' }}>O(V + E)</span> (12 heads + 26 nodes).
-                    Traversal examines only existing incident neighbors (<span style={{ fontFamily: 'var(--font-mono)' }}>2E=26</span> nodes total),
-                    achieving asymptotic optimality on sparse networks.
+                    <strong>Adjacency List (Active):</strong> Storage is <span style={{ fontFamily: 'var(--font-mono)' }}>O(V + E)</span> ({graph?.n_vertices ?? 0} heads + {((graph?.n_edges ?? 0) * 2)} nodes).
+                    Traversal examines only existing incident neighbors, achieving asymptotic optimality on sparse networks.
                   </span>
                 )}
               </div>
@@ -1024,7 +1195,7 @@ export const App: React.FC = () => {
               color: 'var(--text-muted)',
             }}
           >
-            <span>Active Walkways: {activeEdgeCount} / {graph?.n_edges ?? 13}</span>
+            <span>Active Walkways: {activeEdgeCount} / {graph?.n_edges ?? 0}</span>
             <span>Closed: {closedEdgeCount}</span>
             <span>Components: {networkState?.component_count ?? 1}</span>
           </div>
