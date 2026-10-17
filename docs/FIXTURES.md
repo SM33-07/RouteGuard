@@ -188,3 +188,90 @@ This document provides complete, independently derived step tables and reference
 ## 3. Reference Discrepancies
 - **Conflicting Values**: None.
 - **Evaluation**: All independently calculated metrics, visit orders, stack traces, and failure rows strictly agree with the prompt reference values and SRS requirements.
+
+---
+
+## 4. Fixture MUJ Campus Demo Benchmark
+
+### Synthetic Educational Disclaimer
+> **“Illustrative graph model — connections are simplified for DSA demonstration and are not verified pedestrian directions.”**
+> No real-world walking times, GPS navigation, municipal transit, or emergency routing suitability is claimed.
+
+### Graph Topology
+- **Vertices (13)**:
+  - `0`: `VIP Gate` (Full: `VIP Gate`) `(120, 620)`
+  - `1`: `Indian National Flag` (Full: `Indian National Flag`) `(240, 560)`
+  - `2`: `Seminar Hall (1C)` (Full: `Seminar Hall — 2nd Floor, Admin Block (1C)`) `(360, 680)`
+  - `3`: `Old Library (1C)` (Full: `Old Library — Ground Floor, Admin Block (1C)`) `(360, 560)`
+  - `4`: `GHS Gate` (Full: `GHS Gate`) `(240, 300)`
+  - `5`: `Academic Block 1 (1AB)` (Full: `Academic Block 1 (1AB)`) `(480, 460)`
+  - `6`: `Food Court - Old Mess` (Full: `Food Court — Old Mess`) `(480, 300)`
+  - `7`: `Academic Block 2 (2AB)` (Full: `Academic Block 2 (2AB)`) `(650, 420)`
+  - `8`: `Registration Desk (3AB)` (Full: `Registration Desk — Ground Floor, opposite Smt. V. Pai Auditorium, 3AB`) `(820, 420)`
+  - `9`: `Smt. V. Pai Auditorium` (Full: `Smt. Vasanti Pai Auditorium — Ground Floor, 3AB`) `(940, 520)`
+  - `10`: `Conference Hall (3AB)` (Full: `Conference Hall — 2nd Floor, 3AB`) `(940, 340)`
+  - `11`: `Food Court - LHC` (Full: `Food Court — LHC`) `(980, 220)`
+  - `12`: `Knowledge Centre` (Full: `Knowledge Centre`) `(1100, 140)`
+
+- **Edges (15)**:
+  - `e0: (0, 1)` — VIP Gate <-> Indian National Flag
+  - `e1: (1, 3)` — Indian National Flag <-> Old Library (1C)
+  - `e2: (2, 3)` — Seminar Hall (1C) <-> Old Library (1C) [Admin Block internal link]
+  - `e3: (3, 5)` — Old Library (1C) <-> Academic Block 1 (1AB) [Admin to 1AB walkway]
+  - `e4: (4, 5)` — GHS Gate <-> Academic Block 1 (1AB) [Hostel gate to 1AB walkway]
+  - `e5: (4, 6)` — GHS Gate <-> Food Court — Old Mess [Hostel gate to Mess walkway]
+  - `e6: (5, 6)` — Academic Block 1 (1AB) <-> Food Court — Old Mess [1AB to Mess courtyard]
+  - `e7: (5, 7)` — Academic Block 1 (1AB) <-> Academic Block 2 (2AB) [1AB to 2AB walkway]
+  - `e8: (6, 7)` — Food Court — Old Mess <-> Academic Block 2 (2AB) [Mess to 2AB walkway]
+  - `e9: (7, 8)` — Academic Block 2 (2AB) <-> Registration Desk (3AB) [Zone 1 to Zone 2 critical connecting corridor]
+  - `e10: (8, 9)` — Registration Desk (3AB) <-> Smt. Vasanti Pai Auditorium (3AB) [Auditorium ground foyer]
+  - `e11: (8, 10)` — Registration Desk (3AB) <-> Conference Hall (3AB) [3AB central stairs to 2nd Floor]
+  - `e12: (9, 10)` — Smt. Vasanti Pai Auditorium (3AB) <-> Conference Hall (3AB) [3AB internal hall stairs]
+  - `e13: (8, 11)` — Registration Desk (3AB) <-> Food Court — LHC [3AB to LHC walkway]
+  - `e14: (11, 12)` — Food Court — LHC <-> Knowledge Centre [LHC to Knowledge Centre walkway]
+
+- **Ascending Adjacency List Structure**:
+  - `0`: `[1]`
+  - `1`: `[0, 3]`
+  - `2`: `[3]`
+  - `3`: `[1, 2, 5]`
+  - `4`: `[5, 6]`
+  - `5`: `[3, 4, 6, 7]`
+  - `6`: `[4, 5, 7]`
+  - `7`: `[5, 6, 8]`
+  - `8`: `[7, 9, 10, 11]`
+  - `9`: `[8, 10]`
+  - `10`: `[8, 9]`
+  - `11`: `[8, 12]`
+  - `12`: `[11]`
+
+---
+
+### Campus BFS Hand Trace (Source: 0)
+- **Policy**: Mark visited on **enqueue**. Neighbor discovery tie-breaking: **strictly ascending neighbor ID**.
+- **Visit Order**: `0, 1, 3, 2, 5, 4, 6, 7, 8, 9, 10, 11, 12`
+- **Derived Counters**:
+  - Vertices Processed: `13`
+  - Queue Enqueues: `13`
+  - Queue Dequeues: `13`
+  - Adjacency List Neighbor Slots Examined: `30` ($2 \times 15 = 30$)
+  - Adjacency Matrix Neighbor Slots Examined: `169` ($13 \times 13 = 169$)
+  - Route from 0 (VIP Gate) to 8 (Registration Desk):
+    `0 -> 1 -> 3 -> 5 -> 7 -> 8` (5 hops).
+  - Route from 0 (VIP Gate) to 12 (Knowledge Centre):
+    `0 -> 1 -> 3 -> 5 -> 7 -> 8 -> 11 -> 12` (7 hops).
+
+---
+
+### Campus Failure & Rerouting Scenarios
+1. **Redundant Path Rerouting (Disable e7: 5 <-> 7)**:
+   - Baseline route from 4 (GHS Gate) to 7 (2AB): `4 -> 5 -> 7` (2 hops via e4, e7).
+   - With `e7` disabled: BFS discovers alternate path via Old Mess: `4 -> 6 -> 7` (2 hops via e5, e8).
+   - Graph remains connected (`component_count = 1`, 13 reachable vertices).
+2. **Critical Corridor Disconnection (Disable e9: 7 <-> 8)**:
+   - Walkway between 2AB and Registration Desk (3AB) closed.
+   - Route from 0 to 8: `UNREACHABLE` (`found = false`, `hop_count = -1`).
+   - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7}` of size 8; Component 2: `{8, 9, 10, 11, 12}` of size 5).
+   - List BFS from 0: 8 vertices processed, 19 list slots examined, 1 inactive edge skipped (`e9`).
+   - Matrix BFS from 0: 8 vertices processed, 104 matrix slots examined ($8 \times 13$).
+
