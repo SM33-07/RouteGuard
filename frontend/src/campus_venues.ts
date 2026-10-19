@@ -23,19 +23,19 @@ export interface CampusVenueGeo {
   notes: string;
 }
 
-export const MUJ_CAMPUS_CENTER: [number, number] = [75.56555, 26.84325]; // [lng, lat]
-export const MUJ_DEFAULT_ZOOM = 16.2;
+export const MUJ_CAMPUS_CENTER: [number, number] = [75.56545, 26.84360]; // [lng, lat]
+export const MUJ_DEFAULT_ZOOM = 16.3;
 
 export const CAMPUS_VENUES: CampusVenueGeo[] = [
   {
     id: 0,
     label: 'Main Gate',
     fullName: 'Main Gate — Primary campus arrival & visitor entry',
-    coordinates: [75.56425, 26.84080],
+    coordinates: [75.56386, 26.84158],
     category: 'arrival',
     landmarkIndex: null,
-    confidence: 'approximate',
-    notes: 'South-west campus entrance where the vehicular access road from outside meets the campus boundary.',
+    confidence: 'verified_poi',
+    notes: 'Primary western campus entrance where the access road meets the campus boundary (OSM University Entrance). Distinct from the separate southern VIP/Faculty Gate near the parking area.',
   },
   {
     id: 1,

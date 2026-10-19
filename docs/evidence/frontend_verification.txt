@@ -266,7 +266,7 @@ Target Display Profile: 1366x768 (Standard Laptop)
 Video Recording: campus_geo_verify_1792430292837.webp
 
 Calibrated Geographic Coordinates (WGS 84 / GeoJSON):
-- Venue 0 (Main Gate): [75.56425, 26.84080] (South-west vehicular access road entry at campus boundary)
+- Venue 0 (Main Gate): [75.56386, 26.84158] (Western campus entrance where access road meets campus boundary; OSM University Entrance node. Distinct from southern VIP Gate)
 - Venue 1 (Dome Building): [75.56565, 26.84165] (Aligned directly with OSM "Administrative Block" building footprint)
 - Venue 2 (Grand Stairs): [75.56550, 26.84252] (Immediately north/above Dome Building / Administrative Block)
 - Venue 3 (Academic Block 1): [75.56435, 26.84275] (Left/west of Grand Stairs and below AB3)
@@ -281,17 +281,18 @@ Calibrated Geographic Coordinates (WGS 84 / GeoJSON):
 - Venue 12 (Knowledge Centre): [75.56660, 26.84230] (Digital library to the right/east of Dome Building)
 
 Center & Zoom:
-- MUJ_CAMPUS_CENTER: [75.56555, 26.84325]
-- MUJ_DEFAULT_ZOOM: 16.2
+- MUJ_CAMPUS_CENTER: [75.56545, 26.84360]
+- MUJ_DEFAULT_ZOOM: 16.3
 
 Test Gate Status:
 - Strict build (`.\build.ps1 -Target strict`): Exit code 0 (zero warnings, zero errors).
 - Test suite (`.\build.ps1 -Target test`): 28 Total | 28 Passed | 0 Failed.
 - Deterministic demo check (`.\build.ps1 -Target demo-check`): byte-identical (3702 bytes).
 - Isolated bridge contract test (`.\bin\rg_bridge_test.exe`): 1 Total | 1 Passed | 0 Failed.
-- Production build (`npm run build`): Exit code 0 (built in 487ms).
+- Production build (`npm run build`): Exit code 0 (built in 434ms).
 - Live browser verification: Pins solidly anchored during pan/zoom/resize; 4-hop baseline route and 5-hop failure reroute verified.
 
 Captured Screenshots:
 - campus_corrected_venues_1792430310558.png
 - campus_reroute_verified_1792430394123.png
+- campus_main_gate_corrected_1792433190264.png
