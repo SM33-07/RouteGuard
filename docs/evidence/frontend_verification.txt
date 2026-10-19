@@ -138,3 +138,25 @@ Verified items:
 - All 3 Themes Verified: Dark, Light, High-Contrast.
 - Zero "Getting DOM..." Text: Fully confirmed absent from app code.
 - Browser Console: 0 errors, 0 warnings, 0 failed network requests.
+
+
+--- 7. Final Map-First UI/UX Polish Verification (2026-10-18) ---
+Branch: ui-polish
+Target Display Profiles: 1366x768 (Standard Laptop), 1920x1080 (Full HD Presentation)
+Video Recording: routeguard_final_ui_polish_verification_1792271832668.webp
+
+Key Verification Findings:
+1. Single Map Legend: Anchored in bottom-right of map workspace with stroke and color distinction (active, severed, minimum-hop route, source/dest). All duplicate legend instances removed.
+2. Compact Route Summary: Inline bottom card displaying hop count and wrapping route chips. Zero horizontal scrollbar at all resolutions.
+3. Label Collision Elimination: Source, destination, and highlighted route vertices show persistent labels. Non-route pins reveal full names on hover/focus/selection.
+4. Left Sidebar Layout: Scenario buttons shortened to "Sever e6", "Sever e12", "Restore All" with native title tooltips; zero text clipping.
+5. Right Inspector Tabs: Venue, Route, Network, Index tabs fit container cleanly.
+6. Unified Floating Map Controls: Basemap toggle, Fit Network, and Reset View grouped in top-left pill toolbar.
+7. Interactive Failure Simulation: Severing e6 updates route to 5 hops via LHC with zero errors.
+8. Academic Integrity: 28/28 native unit tests pass. 100% C-authoritative traversals and operations counters.
+
+Captured Screenshots:
+- polish_1366x768_baseline_1792271847661.png
+- polish_1366x768_failure_1792271870653.png
+- polish_1920x1080_presentation_1792271926675.png
+
