@@ -134,3 +134,29 @@ Every verified item was directly tested, observed, and recorded during live brow
 | **TC-TOAST-10** | **Fixture Switching Feedback** | `[x] VERIFIED` | Live browser test | Switching to F1 mode clears stale messages and announces: *"F1 Reference Graph Activated. Loaded 12 vertices and 13 edges. Baseline route: 8 hops."* |
 | **TC-TOAST-11** | **SVG Export Feedback** | `[x] VERIFIED` | Live browser test | Clicking "↓ Export SVG" validates C-generated SVG and triggers download, reporting: *"Prepared authoritative C engine diagram (CAMPUS, 4 hops) for download."* |
 | **TC-TOAST-12** | **Theme Consistency & Accessibility** | `[x] VERIFIED` | `toast_light_mode_visible_1792425340823.png`, `toast_hc_mode_visible_1792425359455.png` | Toasts render with crisp contrast across Dark, Light (pure white card, subtle shadow, dark text), and High Contrast (pure black card, neon border `#00ff66`, pure white text). Single-toast policy prevents popup stacks. Dismiss button accessible via click and Escape key. |
+
+---
+
+## 6. Critical Campus Geolocation Correction Verification (Branch: `campus-geolocation-fix`)
+
+- **Date**: 2026-10-19
+- **Branch**: `campus-geolocation-fix`
+- **Browser**: Headless Chromium (Agentic browser subagent)
+- **Target Resolution**: 1366×768 (Standard Laptop)
+- **Session Video**: `campus_geo_verify_1792430292837.webp`
+- **Screenshots Captured**:
+  - `campus_corrected_venues_1792430310558.png` (Live MapLibre view showing Dome Building seated directly on the Administrative Block footprint and Main Gate at the campus entrance road)
+  - `campus_reroute_verified_1792430394123.png` (Edge failure rerouting test confirming e6 severance, 5-hop alternate route via LHC, and pin stability)
+
+| Check ID | Verification Item | Status | Screenshot Artifact | Observed Evidence |
+| :--- | :--- | :---: | :--- | :--- |
+| **TC-GEO-FIX-01** | **Dome Building (#1) Footprint Placement** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | Vertex 1 moved to `[75.56565, 26.84165]`. Marker anchor is aligned directly with the large horizontal building footprint labelled "Administrative Block" on the OpenFreeMap/OSM basemap, matching the user's annotated reference. Retains venue identity "Dome Building". |
+| **TC-GEO-FIX-02** | **Main Gate (#0) Campus Entrance Placement** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | Vertex 0 moved to `[75.56425, 26.84080]`. Marker anchor is placed at the actual road-to-campus entrance where the access road meets the campus boundary from the outside road, visible on the basemap. |
+| **TC-GEO-FIX-03** | **Grand Stairs (#2) Placement** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | Vertex 2 placed at `[75.56550, 26.84252]`, immediately north/above the Dome Building along the central pedestrian axis. |
+| **TC-GEO-FIX-04** | **Academic Block 1 (#3) & Academic Block 3 (#6)** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | AB1 placed at `[75.56435, 26.84275]` (left of Grand Stairs and below AB3). AB3 placed at `[75.56425, 26.84370]` (upper-left academic building indicated in the annotated reference). Walkway `e6` connects them along the western corridor. |
+| **TC-GEO-FIX-05** | **Academic Block 2 (#4) & Old Mess (#5)** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | AB2 placed at `[75.56620, 26.84295]` (east quad, near former Dome Building position). Old Mess / Food Court placed at `[75.56530, 26.84296]` (immediately above Grand Stairs). |
+| **TC-GEO-FIX-06** | **Lecture Hall Complex (#7) & Full Naming** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | LHC placed at `[75.56470, 26.84432]`. Displays full name "Lecture Hall Complex" across map pins, inspector, index, and route strip. |
+| **TC-GEO-FIX-07** | **Workshops / Labs (#8) & Knowledge Centre (#12)** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | Workshops / Labs placed at `[75.56696, 26.84365]` (eastern workshop facility). Knowledge Centre placed at `[75.56660, 26.84230]` (triangular building to the right/east of Dome Building). |
+| **TC-GEO-FIX-08** | **Sports Zone (#9 Football, #10 Cricket, #11 Courts)** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | Football Ground placed at `[75.56580, 26.84445]` (exact point indicated by reference arrow). Cricket Ground placed at `[75.56416, 26.84554]` (interior of circular cricket turf). Outdoor Courts placed at `[75.56545, 26.84570]` (courts east of Cricket Ground). |
+| **TC-GEO-FIX-09** | **Route Overlay & Topological Walkway Consistency** | `[x] VERIFIED` | `campus_reroute_verified_1792430394123.png` | Baseline route 0 → 6 is 4 hops (`0 → 1 → 2 → 3 → 6`). Severing `e6` dynamically reroutes in C engine to 5 hops via LHC (`0 → 1 → 2 → 5 → 7 → 6`). All 17 walkways connect cleanly to venue markers with zero crossed or tangled edges. |
+| **TC-GEO-FIX-10** | **Map Panning, Zooming & Fit Network Stability** | `[x] VERIFIED` | Live browser test | Clicking "Fit Network" frames all 13 venues from Main Gate (`26.84080`) to Courts (`26.84570`). Markers remain anchored to exact building footprints across zoom and pitch changes. |
