@@ -11,6 +11,8 @@ import {
 } from './wasm/bridge';
 import { CampusMap } from './components/CampusMap';
 import { CAMPUS_VENUES } from './campus_venues';
+import { Toast, type ToastNotification, type ToastVariant } from './components/Toast';
+import { ResetConfirmModal } from './components/ResetConfirmModal';
 
 export const App: React.FC = () => {
   const [bridge, setBridge] = useState<RouteGuardBridge | null>(null);
@@ -44,6 +46,9 @@ export const App: React.FC = () => {
   const [showGallery, setShowGallery] = useState<boolean>(false);
   const [galleryTab, setGalleryTab] = useState<'schematic' | 'masterplan' | 'ab1_mess' | 'lhc_aic' | 'sports'>('schematic');
 
+  // Brand / Project Info Modal
+  const [showAboutModal, setShowAboutModal] = useState<boolean>(false);
+
   // Operation Results strictly from C engine
   const [traversalResult, setTraversalResult] = useState<TraversalResult | null>(null);
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
@@ -53,6 +58,72 @@ export const App: React.FC = () => {
 
   // Theme state: dark | light | high-contrast
   const [theme, setTheme] = useState<'dark' | 'light' | 'high-contrast'>('dark');
+
+  // Notification Toast State
+  const [toast, setToast] = useState<ToastNotification | null>(null);
+
+  // In-flight Action Loading State (tracks which action is currently computing in C/WASM)
+  const [isOperating, setIsOperating] = useState<string | null>(null);
+
+  // In-App Reset Confirmation Dialog
+  const [showResetModal, setShowResetModal] = useState<boolean>(false);
+
+  const showToast = useCallback(
+    (variant: ToastVariant, title: string, description: string, duration?: number) => {
+      setToast({
+        id: `${Date.now()}-${Math.random()}`,
+        variant,
+        title,
+        description,
+        duration: duration ?? (variant === 'error' ? 8000 : 4500),
+      });
+    },
+    []
+  );
+
+  const getVertexName = useCallback(
+    (id: number): string => {
+      if (!graph) return `Node ${id}`;
+      const v = graph.vertices.find((vert) => vert.id === id);
+      if (!v) return `Node ${id}`;
+      return v.full_name || v.label || `Node ${id}`;
+    },
+    [graph]
+  );
+
+  const notifyRouteResult = useCallback(
+    (r: RouteResult, src: number, dst: number) => {
+      const srcName = getVertexName(src);
+      const dstName = getVertexName(dst);
+      if (src === dst) {
+        showToast(
+          'info',
+          'Zero-Hop Route',
+          `Source and destination are identical (${srcName}). 0 hops.`
+        );
+      } else if (r.found) {
+        showToast(
+          'success',
+          'Minimum-Hop Route Found',
+          `${r.hop_count} hops from ${srcName} to ${dstName} (${r.path.map((id) => graph?.vertices[id]?.label ?? id).join(' → ')}).`
+        );
+      } else {
+        showToast(
+          'warning',
+          'Destination Unreachable',
+          `${dstName} cannot be reached from ${srcName} under current walkway closures.`
+        );
+      }
+    },
+    [getVertexName, graph, showToast]
+  );
+
+  const isAtBaseline = useMemo(() => {
+    if (!graph) return true;
+    const allActive = graph.edges.every((e) => e.active);
+    const defaultDst = graphMode === 'campus' ? 6 : 10;
+    return allActive && srcVertex === 0 && dstVertex === defaultDst;
+  }, [graph, graphMode, srcVertex, dstVertex]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -109,92 +180,315 @@ export const App: React.FC = () => {
   }, [recomputeAll]);
 
   // Mode Switch Handler (C-driven fixture selection)
-  const handleSwitchMode = (mode: 'campus' | 'f1') => {
-    if (!bridge) return;
-    const fixtureId = mode === 'campus' ? 1 : 0;
-    bridge.initFixture(fixtureId);
-    setGraphMode(mode);
+  const handleSwitchMode = async (mode: 'campus' | 'f1') => {
+    if (!bridge || isOperating || mode === graphMode) return;
+    setIsOperating('switch-mode');
+    setToast(null);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const fixtureId = mode === 'campus' ? 1 : 0;
+      const ok = bridge.initFixture(fixtureId);
+      if (!ok) {
+        showToast('error', 'Fixture Switch Failed', `C engine could not load fixture ${fixtureId}.`);
+        return;
+      }
+      setGraphMode(mode);
 
-    const newSrc = 0;
-    const newDst = mode === 'campus' ? 6 : 10;
-    setSrcVertex(newSrc);
-    setDstVertex(newDst);
-    setSelectedVertexId(newSrc);
-    recomputeAll(bridge, newSrc, newDst, useMatrix);
+      const newSrc = 0;
+      const newDst = mode === 'campus' ? 6 : 10;
+      setSrcVertex(newSrc);
+      setDstVertex(newDst);
+      setSelectedVertexId(newSrc);
+      recomputeAll(bridge, newSrc, newDst, useMatrix);
+
+      const g = bridge.getGraph();
+      const r = bridge.findRoute(newSrc, newDst, useMatrix);
+      const fixtureName = mode === 'campus' ? 'MUJ Campus Demo' : 'F1 Reference Graph';
+      showToast(
+        'info',
+        `${fixtureName} Activated`,
+        `Loaded ${g.n_vertices} vertices and ${g.n_edges} edges. Baseline route: ${r.hop_count} hops from ${g.vertices[newSrc]?.label} to ${g.vertices[newDst]?.label}.`
+      );
+    } catch (err: unknown) {
+      showToast('error', 'Fixture Switch Error', `Unexpected error loading fixture: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
   };
 
   // Walkway Edge Toggle Handler
-  const handleToggleEdge = (edgeId: number) => {
-    if (!bridge || !graph) return;
+  const handleToggleEdge = async (edgeId: number, targetDstAfterToggle?: number) => {
+    if (!bridge || !graph || isOperating) return;
     const currentEdge = graph.edges.find((e) => e.id === edgeId);
     if (!currentEdge) return;
 
-    bridge.setEdgeActive(edgeId, !currentEdge.active);
-    recomputeAll(bridge, srcVertex, dstVertex, useMatrix);
+    const willBeActive = !currentEdge.active;
+    const uName = getVertexName(currentEdge.u);
+    const vName = getVertexName(currentEdge.v);
+    const effectiveDst = targetDstAfterToggle !== undefined ? targetDstAfterToggle : dstVertex;
+
+    setIsOperating(`edge-${edgeId}`);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const ok = bridge.setEdgeActive(edgeId, willBeActive);
+      if (!ok) {
+        showToast('error', 'Walkway Mutation Failed', `C engine rejected toggling e${edgeId}.`);
+        return;
+      }
+
+      if (targetDstAfterToggle !== undefined) {
+        setDstVertex(targetDstAfterToggle);
+      }
+
+      // Recompute all state from C engine
+      const g = bridge.getGraph();
+      setGraph(g);
+      const r = bridge.findRoute(srcVertex, effectiveDst, useMatrix);
+      setRouteResult(r);
+      const bfs = bridge.runBFS(srcVertex, effectiveDst, useMatrix);
+      setTraversalResult(bfs);
+      const comp = bridge.getComponents(useMatrix);
+      setComponentsResult(comp);
+      const state = bridge.getNetworkState(srcVertex, effectiveDst, useMatrix);
+      setNetworkState(state);
+      const failTbl = bridge.getFailureTable(srcVertex, effectiveDst);
+      setFailureTable(failTbl);
+
+      const srcName = getVertexName(srcVertex);
+      const dstName = getVertexName(effectiveDst);
+
+      if (!willBeActive) {
+        // Disabled
+        if (r.found) {
+          showToast(
+            'warning',
+            `Walkway Severed: e${edgeId}`,
+            `Disabled e${edgeId} (${uName} ↔ ${vName}). Route to ${dstName} remains open (${r.hop_count} hops). Components: ${comp.component_count}, reachable: ${state.reachable_src_count}/${g.n_vertices}.`
+          );
+        } else {
+          showToast(
+            'warning',
+            `Walkway Severed: e${edgeId}`,
+            `Disabled e${edgeId} (${uName} ↔ ${vName}). Destination ${dstName} is now UNREACHABLE from ${srcName}. Components: ${comp.component_count}, reachable: ${state.reachable_src_count}/${g.n_vertices}.`
+          );
+        }
+      } else {
+        // Restored
+        if (r.found) {
+          showToast(
+            'success',
+            `Walkway Restored: e${edgeId}`,
+            `Reconnected e${edgeId} (${uName} ↔ ${vName}). Route to ${dstName}: ${r.hop_count} hops. Components: ${comp.component_count}.`
+          );
+        } else {
+          showToast(
+            'info',
+            `Walkway Restored: e${edgeId}`,
+            `Reconnected e${edgeId} (${uName} ↔ ${vName}). Destination ${dstName} remains unreachable.`
+          );
+        }
+      }
+    } catch (err: unknown) {
+      showToast('error', `Failed to Toggle Walkway e${edgeId}`, `C engine mutation error: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
   };
 
   // Reset Graph to default authoritative state
+  const executeReset = async () => {
+    if (!bridge || isOperating) return;
+    setIsOperating('reset');
+    setShowResetModal(false);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const ok = bridge.reset();
+      if (!ok) {
+        showToast('error', 'Reset Failed', 'C engine rg_wasm_reset returned failure code.');
+        return;
+      }
+      const defaultDst = graphMode === 'campus' ? 6 : 10;
+      setSrcVertex(0);
+      setDstVertex(defaultDst);
+      setSelectedVertexId(0);
+      recomputeAll(bridge, 0, defaultDst, useMatrix);
+
+      const freshG = bridge.getGraph();
+      const freshR = bridge.findRoute(0, defaultDst, useMatrix);
+      const fixtureLabel = graphMode === 'campus' ? 'MUJ Campus' : 'F1 Reference';
+      showToast(
+        'success',
+        'Graph Reset to Baseline',
+        `Restored all ${freshG.n_edges} walkways in ${fixtureLabel}. Active route: ${freshR.hop_count} hops from ${freshG.vertices[0]?.label} to ${freshG.vertices[defaultDst]?.label}.`
+      );
+    } catch (err: unknown) {
+      showToast('error', 'Reset Error', `Failed to reset graph: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
+  };
+
   const handleReset = () => {
-    if (!bridge) return;
-    bridge.reset();
-    const defaultDst = graphMode === 'campus' ? 6 : 10;
-    setSrcVertex(0);
-    setDstVertex(defaultDst);
-    setSelectedVertexId(0);
-    recomputeAll(bridge, 0, defaultDst, useMatrix);
+    if (isAtBaseline) {
+      executeReset();
+    } else {
+      setShowResetModal(true);
+    }
+  };
+
+  // Source / Destination Handlers
+  const handleSourceChange = (newSrc: number) => {
+    if (!bridge || isOperating) return;
+    setSrcVertex(newSrc);
+    setSelectedVertexId(newSrc);
+    recomputeAll(bridge, newSrc, dstVertex, useMatrix);
+    const r = bridge.findRoute(newSrc, dstVertex, useMatrix);
+    notifyRouteResult(r, newSrc, dstVertex);
+  };
+
+  const handleDestinationChange = (newDst: number) => {
+    if (!bridge || isOperating) return;
+    setDstVertex(newDst);
+    setSelectedVertexId(newDst);
+    recomputeAll(bridge, srcVertex, newDst, useMatrix);
+    const r = bridge.findRoute(srcVertex, newDst, useMatrix);
+    notifyRouteResult(r, srcVertex, newDst);
   };
 
   // Traversal & Algorithm Handlers
-  const handleRunBFS = () => {
-    if (!bridge) return;
-    const res = bridge.runBFS(srcVertex, dstVertex, useMatrix);
-    setTraversalResult(res);
-    const r = bridge.findRoute(srcVertex, dstVertex, useMatrix);
-    setRouteResult(r);
-    setInspectorTab('route');
+  const handleRunBFS = async () => {
+    if (!bridge || isOperating) return;
+    setIsOperating('bfs');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const res = bridge.runBFS(srcVertex, dstVertex, useMatrix);
+      setTraversalResult(res);
+      const r = bridge.findRoute(srcVertex, dstVertex, useMatrix);
+      setRouteResult(r);
+      setInspectorTab('route');
+      const srcName = getVertexName(srcVertex);
+      showToast(
+        'info',
+        'BFS Traversal Completed',
+        `Visited ${res.order_len} vertices starting from ${srcName} (Node ${srcVertex}) in ${res.representation} mode.`
+      );
+    } catch (err: unknown) {
+      showToast('error', 'BFS Traversal Failed', `Error executing C engine BFS: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
   };
 
-  const handleRunDFS = () => {
-    if (!bridge) return;
-    const res = bridge.runDFS(srcVertex, dstVertex, useMatrix);
-    setTraversalResult(res);
-    setInspectorTab('route');
+  const handleRunDFS = async () => {
+    if (!bridge || isOperating) return;
+    setIsOperating('dfs');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const res = bridge.runDFS(srcVertex, dstVertex, useMatrix);
+      setTraversalResult(res);
+      setInspectorTab('route');
+      const srcName = getVertexName(srcVertex);
+      showToast(
+        'info',
+        'DFS Traversal Completed',
+        `Explored ${res.order_len} vertices from ${srcName} (Node ${srcVertex}) using LIFO stack.`
+      );
+    } catch (err: unknown) {
+      showToast('error', 'DFS Traversal Failed', `Error executing C engine DFS: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
   };
 
-  const handleFindRoute = () => {
-    if (!bridge) return;
-    const r = bridge.findRoute(srcVertex, dstVertex, useMatrix);
-    setRouteResult(r);
-    setInspectorTab('route');
+  const handleFindRoute = async () => {
+    if (!bridge || isOperating) return;
+    setIsOperating('find-route');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const r = bridge.findRoute(srcVertex, dstVertex, useMatrix);
+      setRouteResult(r);
+      setInspectorTab('route');
+      notifyRouteResult(r, srcVertex, dstVertex);
+    } catch (err: unknown) {
+      showToast('error', 'Route Computation Failed', `Error executing C route query: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
   };
 
-  const handleShowComponents = () => {
-    if (!bridge) return;
-    const comp = bridge.getComponents(useMatrix);
-    setComponentsResult(comp);
-    setInspectorTab('network');
+  const handleShowComponents = async () => {
+    if (!bridge || isOperating) return;
+    setIsOperating('components');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const comp = bridge.getComponents(useMatrix);
+      setComponentsResult(comp);
+      setInspectorTab('network');
+      showToast(
+        'info',
+        'Connected Components Analyzed',
+        `Identified ${comp.component_count} connected component${comp.component_count > 1 ? 's' : ''} in ${graphMode === 'campus' ? 'MUJ Campus' : 'F1'} network.`
+      );
+    } catch (err: unknown) {
+      showToast('error', 'Components Analysis Failed', `Error analyzing components: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
   };
 
-  const handleRepresentationChange = (matrix: boolean) => {
+  const handleRepresentationChange = async (matrix: boolean) => {
+    if (!bridge || isOperating || matrix === useMatrix) return;
+    setIsOperating('representation');
     setUseMatrix(matrix);
-    if (bridge) {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
       recomputeAll(bridge, srcVertex, dstVertex, matrix);
+      const bfs = bridge.runBFS(srcVertex, dstVertex, matrix);
+      const repName = matrix ? 'Adjacency Matrix' : 'Adjacency List';
+      const complexity = matrix ? 'O(V²)' : 'O(V + E)';
+      showToast(
+        'info',
+        'Representation Changed',
+        `Switched to ${repName} (${complexity}). BFS examined ${bfs.metrics.neighbor_slots_examined} neighbor slot operations.`
+      );
+    } catch (err: unknown) {
+      showToast('error', 'Representation Switch Failed', `C engine error: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
     }
   };
 
   // Export SVG directly from authoritative C engine
-  const handleExportSVG = () => {
-    if (!bridge) return;
-    const svgStr = bridge.exportSVG(srcVertex, dstVertex, useMatrix);
-    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `routeguard_${graphMode}_src${srcVertex}_dst${dstVertex}.svg`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleExportSVG = async () => {
+    if (!bridge || isOperating) return;
+    setIsOperating('export-svg');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      const svgStr = bridge.exportSVG(srcVertex, dstVertex, useMatrix);
+      if (!svgStr || !svgStr.startsWith('<svg')) {
+        throw new Error('C engine returned empty or invalid SVG payload.');
+      }
+      const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = `routeguard_${graphMode}_src${srcVertex}_dst${dstVertex}.svg`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(
+        'success',
+        'SVG Export Initiated',
+        `Prepared authoritative C engine diagram (${graphMode.toUpperCase()}, ${routeResult?.hop_count ?? 0} hops) for download.`
+      );
+    } catch (err: unknown) {
+      showToast('error', 'Export Failed', `Could not export SVG from C engine: ${String(err)}`);
+    } finally {
+      setIsOperating(null);
+    }
   };
 
   // Route Edge Map for Highlighting
@@ -250,6 +544,7 @@ export const App: React.FC = () => {
         v.label.toLowerCase().includes(q) ||
         (v.full_name && v.full_name.toLowerCase().includes(q)) ||
         (geo && geo.category.toLowerCase().includes(q)) ||
+        (geo && geo.notes.toLowerCase().includes(q)) ||
         `node ${v.id}`.includes(q)
       );
     });
@@ -301,7 +596,13 @@ export const App: React.FC = () => {
           </button>
 
           <div className="brand-section">
-            <div className="brand-icon">RG</div>
+            <img
+              src="/brand/routeguard-icon.png"
+              alt=""
+              className="brand-icon-img"
+              width="32"
+              height="32"
+            />
             <div className="brand-text">
               <div className="brand-title">
                 RouteGuard
@@ -322,6 +623,7 @@ export const App: React.FC = () => {
               className={`mode-btn ${graphMode === 'campus' ? 'active' : ''}`}
               onClick={() => handleSwitchMode('campus')}
               id="mode-campus-btn"
+              disabled={!!isOperating}
             >
               🏛️ MUJ Campus Demo
             </button>
@@ -330,6 +632,7 @@ export const App: React.FC = () => {
               className={`mode-btn ${graphMode === 'f1' ? 'active' : ''}`}
               onClick={() => handleSwitchMode('f1')}
               id="mode-f1-btn"
+              disabled={!!isOperating}
             >
               📐 F1 Reference Graph
             </button>
@@ -392,20 +695,46 @@ export const App: React.FC = () => {
           <button
             type="button"
             className="btn btn-secondary btn-sm"
+            onClick={() => setShowAboutModal(true)}
+            id="btn-header-about"
+            title="About RouteGuard, branding & technical architecture"
+          >
+            ℹ️ About
+          </button>
+
+          <button
+            type="button"
+            className={`btn btn-secondary btn-sm ${isOperating === 'reset' ? 'btn-is-operating' : ''}`}
             onClick={handleReset}
             id="btn-header-reset"
+            disabled={!!isOperating}
             title="Reset network to initial default state"
           >
-            ↺ Reset
+            {isOperating === 'reset' ? (
+              <>
+                <span className="btn-spinner" />
+                Resetting...
+              </>
+            ) : (
+              '↺ Reset'
+            )}
           </button>
           <button
             type="button"
-            className="btn btn-primary btn-sm"
+            className={`btn btn-primary btn-sm ${isOperating === 'export-svg' ? 'btn-is-operating' : ''}`}
             onClick={handleExportSVG}
             id="btn-export-svg"
+            disabled={!!isOperating}
             title="Export authoritative SVG graphic from C engine"
           >
-            ↓ Export SVG
+            {isOperating === 'export-svg' ? (
+              <>
+                <span className="btn-spinner" />
+                Exporting...
+              </>
+            ) : (
+              '↓ Export SVG'
+            )}
           </button>
 
           {/* Right panel collapse toggle */}
@@ -449,12 +778,8 @@ export const App: React.FC = () => {
                   id="src-select"
                   className="form-select"
                   value={srcVertex}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    setSrcVertex(val);
-                    setSelectedVertexId(val);
-                    if (bridge) recomputeAll(bridge, val, dstVertex, useMatrix);
-                  }}
+                  disabled={!!isOperating}
+                  onChange={(e) => handleSourceChange(Number(e.target.value))}
                 >
                   {graph?.vertices.map((v) => (
                     <option key={v.id} value={v.id}>
@@ -473,12 +798,8 @@ export const App: React.FC = () => {
                   id="dst-select"
                   className="form-select"
                   value={dstVertex}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    setDstVertex(val);
-                    setSelectedVertexId(val);
-                    if (bridge) recomputeAll(bridge, srcVertex, val, useMatrix);
-                  }}
+                  disabled={!!isOperating}
+                  onChange={(e) => handleDestinationChange(Number(e.target.value))}
                 >
                   {graph?.vertices.map((v) => (
                     <option key={v.id} value={v.id}>
@@ -490,11 +811,19 @@ export const App: React.FC = () => {
 
               <button
                 type="button"
-                className="btn btn-primary btn-block"
+                className={`btn btn-primary btn-block ${isOperating === 'find-route' ? 'btn-is-operating' : ''}`}
                 onClick={handleFindRoute}
                 id="btn-find-route"
+                disabled={!!isOperating}
               >
-                🔍 Find Minimum-Hop Route
+                {isOperating === 'find-route' ? (
+                  <>
+                    <span className="btn-spinner" />
+                    Computing Route...
+                  </>
+                ) : (
+                  '🔍 Find Minimum-Hop Route'
+                )}
               </button>
             </div>
 
@@ -506,27 +835,51 @@ export const App: React.FC = () => {
               <div className="button-stack">
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  className={`btn btn-secondary btn-sm ${isOperating === 'bfs' ? 'btn-is-operating' : ''}`}
                   onClick={handleRunBFS}
                   id="btn-run-bfs"
+                  disabled={!!isOperating}
                 >
-                  Run BFS Traversal
+                  {isOperating === 'bfs' ? (
+                    <>
+                      <span className="btn-spinner" />
+                      Running BFS...
+                    </>
+                  ) : (
+                    'Run BFS Traversal'
+                  )}
                 </button>
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  className={`btn btn-secondary btn-sm ${isOperating === 'dfs' ? 'btn-is-operating' : ''}`}
                   onClick={handleRunDFS}
                   id="btn-run-dfs"
+                  disabled={!!isOperating}
                 >
-                  Run DFS Traversal
+                  {isOperating === 'dfs' ? (
+                    <>
+                      <span className="btn-spinner" />
+                      Running DFS...
+                    </>
+                  ) : (
+                    'Run DFS Traversal'
+                  )}
                 </button>
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  className={`btn btn-secondary btn-sm ${isOperating === 'components' ? 'btn-is-operating' : ''}`}
                   onClick={handleShowComponents}
                   id="btn-show-components"
+                  disabled={!!isOperating}
                 >
-                  Analyze Connected Components
+                  {isOperating === 'components' ? (
+                    <>
+                      <span className="btn-spinner" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Analyze Connected Components'
+                  )}
                 </button>
               </div>
             </div>
@@ -548,6 +901,7 @@ export const App: React.FC = () => {
                 <select
                   className="form-select"
                   value=""
+                  disabled={!!isOperating}
                   onChange={(e) => {
                     const id = Number(e.target.value);
                     if (!isNaN(id)) handleToggleEdge(id);
@@ -574,25 +928,25 @@ export const App: React.FC = () => {
                       className={`btn btn-sm btn-scenario ${graph?.edges[6]?.active ? 'btn-danger' : 'btn-success'}`}
                       onClick={() => handleToggleEdge(6)}
                       id="btn-scenario-campus-e6"
+                      disabled={!!isOperating}
                       title={graph?.edges[6]?.active
                         ? 'Sever e6: AB1 ↔ AB3 cut — BFS will reroute via LHC'
                         : 'Restore e6: Reconnect Academic Block 1 ↔ Block 3'}
                     >
+                      {isOperating === 'edge-6' && <span className="btn-spinner" />}
                       {graph?.edges[6]?.active ? '✂ e6 — Sever AB1↔AB3' : '✓ e6 — Restore AB1↔AB3'}
                     </button>
                     <button
                       type="button"
                       className={`btn btn-sm btn-scenario ${graph?.edges[12]?.active ? 'btn-danger' : 'btn-success'}`}
-                      onClick={() => {
-                        handleToggleEdge(12);
-                        setDstVertex(9);
-                        if (bridge) recomputeAll(bridge, srcVertex, 9, useMatrix);
-                      }}
+                      onClick={() => handleToggleEdge(12, 9)}
                       id="btn-scenario-campus-e12"
+                      disabled={!!isOperating}
                       title={graph?.edges[12]?.active
                         ? 'Sever e12: LHC ↔ Football Ground cut — Sports zone disconnects'
                         : 'Restore e12: Reconnect Sports zone via LHC'}
                     >
+                      {isOperating === 'edge-12' && <span className="btn-spinner" />}
                       {graph?.edges[12]?.active ? '✂ e12 — Sever LHC↔Sports' : '✓ e12 — Restore Sports Zone'}
                     </button>
                   </>
@@ -603,8 +957,10 @@ export const App: React.FC = () => {
                       className={`btn btn-sm btn-scenario ${graph?.edges[9]?.active ? 'btn-danger' : 'btn-success'}`}
                       onClick={() => handleToggleEdge(9)}
                       id="btn-scenario-f1-e9"
+                      disabled={!!isOperating}
                       title={graph?.edges[9]?.active ? 'Sever e9: cuts critical link 6↔7' : 'Restore e9: reconnect 6↔7'}
                     >
+                      {isOperating === 'edge-9' && <span className="btn-spinner" />}
                       {graph?.edges[9]?.active ? '✂ e9 — Sever 6↔7' : '✓ e9 — Restore 6↔7'}
                     </button>
                     <button
@@ -612,20 +968,30 @@ export const App: React.FC = () => {
                       className={`btn btn-sm btn-scenario ${graph?.edges[5]?.active ? 'btn-danger' : 'btn-success'}`}
                       onClick={() => handleToggleEdge(5)}
                       id="btn-scenario-f1-e5"
+                      disabled={!!isOperating}
                       title={graph?.edges[5]?.active ? 'Sever e5: Block A cut' : 'Restore e5: direct route'}
                     >
+                      {isOperating === 'edge-5' && <span className="btn-spinner" />}
                       {graph?.edges[5]?.active ? '✂ e5 — Block A Cut' : '✓ e5 — Restore Direct'}
                     </button>
                   </>
                 )}
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  className={`btn btn-secondary btn-sm ${isOperating === 'reset' ? 'btn-is-operating' : ''}`}
                   onClick={handleReset}
                   id="btn-restore-all"
+                  disabled={!!isOperating}
                   title="Reset all edges to active state and default src/dst"
                 >
-                  ↺ Restore All
+                  {isOperating === 'reset' ? (
+                    <>
+                      <span className="btn-spinner" />
+                      Restoring...
+                    </>
+                  ) : (
+                    '↺ Restore All'
+                  )}
                 </button>
               </div>
             </div>
@@ -641,6 +1007,7 @@ export const App: React.FC = () => {
                   className={`seg-btn ${!useMatrix ? 'active' : ''}`}
                   onClick={() => handleRepresentationChange(false)}
                   id="btn-rep-list"
+                  disabled={!!isOperating}
                 >
                   Adjacency List
                 </button>
@@ -649,6 +1016,7 @@ export const App: React.FC = () => {
                   className={`seg-btn ${useMatrix ? 'active' : ''}`}
                   onClick={() => handleRepresentationChange(true)}
                   id="btn-rep-matrix"
+                  disabled={!!isOperating}
                 >
                   Adjacency Matrix
                 </button>
@@ -687,14 +1055,8 @@ export const App: React.FC = () => {
                   setSelectedVertexId(vId);
                   setInspectorTab('venue');
                 }}
-                onSetSource={(vId) => {
-                  setSrcVertex(vId);
-                  if (bridge) recomputeAll(bridge, vId, dstVertex, useMatrix);
-                }}
-                onSetDestination={(vId) => {
-                  setDstVertex(vId);
-                  if (bridge) recomputeAll(bridge, srcVertex, vId, useMatrix);
-                }}
+                onSetSource={handleSourceChange}
+                onSetDestination={handleDestinationChange}
                 onToggleEdge={handleToggleEdge}
               />
             ) : (
@@ -1113,22 +1475,18 @@ export const App: React.FC = () => {
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          onClick={() => {
-                            setSrcVertex(selectedVertex.id);
-                            if (bridge) recomputeAll(bridge, selectedVertex.id, dstVertex, useMatrix);
-                          }}
+                          onClick={() => handleSourceChange(selectedVertex.id)}
                           id="btn-set-src"
+                          disabled={!!isOperating}
                         >
                           🟢 Set as Source
                         </button>
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          onClick={() => {
-                            setDstVertex(selectedVertex.id);
-                            if (bridge) recomputeAll(bridge, srcVertex, selectedVertex.id, useMatrix);
-                          }}
+                          onClick={() => handleDestinationChange(selectedVertex.id)}
                           id="btn-set-dst"
+                          disabled={!!isOperating}
                         >
                           🔵 Set as Destination
                         </button>
@@ -1604,6 +1962,72 @@ export const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* About & Brand Info Modal */}
+      {showAboutModal && (
+        <div className="edge-action-modal-backdrop" onClick={() => setShowAboutModal(false)}>
+          <div className="about-modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="about-modal-title">
+            <div className="about-modal-header">
+              <span id="about-modal-title" style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '16px' }}>
+                About RouteGuard
+              </span>
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary"
+                onClick={() => setShowAboutModal(false)}
+                aria-label="Close About Dialog"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="about-modal-body">
+              <div className="about-wordmark-container">
+                <img
+                  src="/brand/routeguard-wordmark.png"
+                  alt="RouteGuard — Campus Network Resilience Simulator"
+                  className="about-wordmark-img"
+                />
+              </div>
+              <div className="about-spec-grid">
+                <div className="spec-item">
+                  <span className="spec-label">Core Engine:</span>
+                  <span className="spec-val">Pure ISO C11 Standard Library (compiled via Emscripten to WebAssembly)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Academic Scope:</span>
+                  <span className="spec-val">Strictly bounded to CSC2101 Lecture 37 (Fixed arrays, linked lists, queues, stacks, adjacency matrix &amp; list, BFS, DFS, reachability, connected components)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Graph Topology:</span>
+                  <span className="spec-val">Strictly undirected &amp; unweighted (Hop count metric)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Geographic Basemap:</span>
+                  <span className="spec-val">MapLibre GL JS + OpenFreeMap Liberty Vector Tiles (&copy; OpenStreetMap contributors)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Topology Benchmark:</span>
+                  <span className="spec-val">MUJ Educational Campus (13 Venues, 17 Walkways, Knowledge Centre #12) &amp; F1 Reference Graph (12 Nodes, 13 Edges)</span>
+                </div>
+              </div>
+              <div className="about-disclaimer">
+                <strong>Educational Simulation Disclaimer:</strong> All campus venue coordinates, pathway models, and simulation results are synthetic educational constructs developed for computer science coursework. Modeled walkways are simplified graph connections and do not represent surveyed pedestrian routes, municipal pathways, or emergency dispatch systems.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Global Action Feedback Notification System */}
+      <Toast notification={toast} onDismiss={() => setToast(null)} />
+
+      {/* In-App Reset Confirmation Dialog */}
+      <ResetConfirmModal
+        isOpen={showResetModal}
+        onConfirm={executeReset}
+        onCancel={() => setShowResetModal(false)}
+        closedEdgeCount={closedEdgeCount}
+        graphMode={graphMode}
+      />
     </div>
   );
 };

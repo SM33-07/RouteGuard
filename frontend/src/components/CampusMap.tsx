@@ -391,6 +391,17 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     map.flyTo({ center: MUJ_CAMPUS_CENTER, zoom: MUJ_DEFAULT_ZOOM, pitch: 20, bearing: -10, duration: 700 });
   };
 
+  const handleRetryMap = () => {
+    if (!mapRef.current) return;
+    setMapError(null);
+    setMapLoaded(false);
+    try {
+      mapRef.current.setStyle('https://tiles.openfreemap.org/styles/liberty');
+    } catch {
+      setMapError('Basemap connection failed on retry.');
+    }
+  };
+
   // Compact route path display
   const routePathDisplay = React.useMemo(() => {
     if (!routeResult || !routeResult.found || !graph) return null;
@@ -434,10 +445,26 @@ export const CampusMap: React.FC<CampusMapProps> = ({
         </div>
       </div>
 
+      {/* Lightweight non-blocking loading state */}
+      {!mapLoaded && !mapError && (
+        <div className="map-loading-overlay" role="status" aria-live="polite">
+          <div className="map-loading-spinner" aria-hidden="true" />
+          <span className="map-loading-text">Loading campus map…</span>
+        </div>
+      )}
+
       {/* Network / Tile Error Fallback */}
       {mapError && (
         <div className="map-error-banner" role="alert">
-          <span>⚠️ {mapError} — Graph overlay remains available.</span>
+          <span>⚠️ {mapError} — Graph overlay remains operational.</span>
+          <button
+            type="button"
+            className="btn btn-sm btn-retry-map"
+            onClick={handleRetryMap}
+            title="Retry connecting to basemap tiles"
+          >
+            ⟳ Retry
+          </button>
         </div>
       )}
 

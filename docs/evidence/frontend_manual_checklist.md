@@ -71,3 +71,66 @@ Every verified item was directly tested, observed, and recorded during live brow
 | **TC-POLISH-08** | **Full HD Presentation View** | `[x] VERIFIED` | `polish_1920x1080_presentation_1792271926675.png` | Clean presentation layout at 1920×1080 with comfortable contrast, balanced spacing, and zero layout breakage. |
 | **TC-POLISH-09** | **Academic & C11 Engine Parity** | `[x] VERIFIED` | `bin/rg_tests.exe`, `bin/rg_bridge_test.exe` | 28/28 native unit tests passed; isolated bridge contract passed. Zero algorithmic code written in TypeScript; all traversals, routes, reachability, and counters are 100% C-authoritative. |
 
+---
+
+## 4. Campus Location Correction, Logo Integration & Loading-State Verification (Branch: `campus-location-branding`)
+
+- **Date**: 2026-10-19
+- **Branch**: `campus-location-branding`
+- **Browser**: Headless Chromium (Agentic browser subagent)
+- **Target Resolutions**: 1366×768 (Standard Laptop), 1920×1080 (Full HD Presentation)
+- **Session Video**: `campus_brand_verify_1792423319521.webp`
+- **Screenshots Captured**:
+  - `brand_about_modal_1792423442151.png` (Overview showing updated pin placement, header icon, 4-hop route, and open Project Info modal with 3:2 wordmark)
+  - `brand_failure_reroute_1792423665129.png` (Dynamic failure resilience check after severing `e6`)
+
+| Check ID | Verification Item | Status | Screenshot Artifact | Observed Evidence |
+| :--- | :--- | :---: | :--- | :--- |
+| **TC-GEO-01** | **Calibrated Venue Coordinates (13 Venues)** | `[x] VERIFIED` | `brand_about_modal_1792423442151.png` | All 13 campus venue pins positioned accurately to user-annotated reference maps:<br>• #0 Main Gate: `[75.56535, 26.84160]` (southern campus entrance)<br>• #1 Dome Building: `[75.56550, 26.84220]` (placed on OSM "Administrative Block" footprint)<br>• #2 Grand Stairs: `[75.56535, 26.84275]` (plaza directly north of Dome Building)<br>• #3 Academic Block 1: `[75.56450, 26.84310]` (west quad, south of AB3)<br>• #4 Academic Block 2: `[75.56610, 26.84290]` (east quad, south of Auditorium)<br>• #5 Old Mess / Food Court: `[75.56530, 26.84360]` (central dining north of Grand Stairs)<br>• #6 Academic Block 3: `[75.56430, 26.84400]` (north-west academic quad, above AB1)<br>• #7 Lecture Hall Complex: `[75.56500, 26.84435]` (central complex north of Old Mess)<br>• #8 Workshops / Labs: `[75.56660, 26.84370]` (eastern engineering facility)<br>• #9 Football Ground: `[75.56590, 26.84460]` (sports field marked by red arrow)<br>• #10 Cricket Ground: `[75.56420, 26.84550]` (interior of circular cricket turf)<br>• #11 Outdoor Courts: `[75.56520, 26.84580]` (outdoor court area)<br>• #12 Knowledge Centre: `[75.56640, 26.84230]` (east of Dome Building). |
+| **TC-BRAND-01** | **Header Logo Icon Integration** | `[x] VERIFIED` | `brand_about_modal_1792423442151.png` | Replaced decorative text "RG" monogram with `/brand/routeguard-icon.png` (32×32px, `object-fit: contain`). Product title "RouteGuard" and "WASM / C11" technical badge preserved. Accessible `alt="RouteGuard Logo"`. |
+| **TC-BRAND-02** | **App Favicon & Metadata** | `[x] VERIFIED` | `frontend/index.html` | Updated `<link rel="icon" type="image/png" href="/brand/routeguard-icon.png" />`. Verified resolves in both dev and production build (`npm run build`). |
+| **TC-BRAND-03** | **Full 3:2 Wordmark in About Modal** | `[x] VERIFIED` | `brand_about_modal_1792423442151.png` | Full 1536×1024 wordmark rendered inside responsive Project Information dialog (`frontend/public/brand/routeguard-wordmark.png`). Displays system architecture, ISO C11 engine invariants, CSC2101 academic scope boundary, unweighted undirected graph disclaimer, and OSM attribution. Accessible via `ℹ️ About` header button. |
+| **TC-LOAD-01** | **Non-Blocking Map Loader** | `[x] VERIFIED` | Live browser test | Map viewport displays a lightweight `.map-loading-overlay` with accessible CSS spinner and "Loading campus map…" status (`role="status"`, `aria-live="polite"`). Application header, sidebar controls, venue indices, and graph solver render immediately without blocking. Overlay smoothly hides once MapLibre fires `load`. |
+| **TC-LOAD-02** | **Honest Map Error & Retry State** | `[x] VERIFIED` | Live browser test | If style/tiles fail to load, an honest error banner displays "Basemap unavailable — verify internet connection" with a functional `🔄 Retry Map` button. Graph controls and fallback visualization remain operable. |
+| **TC-NAME-01** | **Full Venue Naming & Search Aliasing** | `[x] VERIFIED` | `brand_about_modal_1792423442151.png` | Venue #7 explicitly labeled "Lecture Hall Complex" in all UI elements (map pin, index, route card, inspector). Search index supports alias query "LHC" via note indexing. Venue #5 labeled "Old Mess / Food Court". |
+| **TC-RESP-01** | **Responsive Layout & Pin Stability** | `[x] VERIFIED` | Live browser test | Tested at 1366×768 and 1920×1080. Pins remain anchored to geographic coordinates across panning, zooming, and container resizing. Single compact legend, unified toolbar, and zero horizontal scrollbar on route strip. |
+| **TC-OPS-01** | **C Engine Invariants & Reroute Verification** | `[x] VERIFIED` | `brand_failure_reroute_1792423665129.png` | Baseline route (Main Gate → AB3) is 4 hops (`0 → 1 → 2 → 3 → 6`). Severing `e6` instantly recomputes to 5-hop alternative (`0 → 1 → 2 → 5 → 7 → 6`). Severing `e12` isolates Football & Cricket Ground ({9, 10}) into 2 components. Reset restores all 17 walkways. Switching to F1 mode preserves 8-hop reference route and 26/144 operation counters. |
+
+---
+
+## 5. Global Action Feedback & Notification System Verification (Branch: `action-feedback-notifications`)
+
+- **Date**: 2026-10-19
+- **Branch**: `action-feedback-notifications`
+- **Browser**: Headless Chromium (Agentic browser subagent)
+- **Target Resolution**: 1366×768 (Standard Laptop)
+- **Session Video Recordings**:
+  - `toast_feedback_verify_1792424773822.webp`
+  - `modal_theme_verify_1792425145789.webp`
+  - `toast_theme_capture_1792425324209.webp`
+- **Screenshots Captured**:
+  - `toast_bfs_traversal_1792424801639.png` (Shows BFS Traversal Completed toast with C visited count)
+  - `toast_dfs_traversal_1792424811035.png` (Shows DFS Traversal Completed toast with LIFO stack count)
+  - `toast_find_route_1792424820862.png` (Shows Minimum-Hop Route Found toast with 4 hops)
+  - `toast_zero_hop_1792424842730.png` (Shows Zero-Hop Route toast when src == dst)
+  - `toast_sever_e6_reroute_1792424902229.png` (Shows Walkway Severed e6 rerouting to 5 hops via LHC)
+  - `toast_sever_e12_disconnected_1792424920140.png` (Shows Walkway Severed e12 partition and Destination Unreachable warning)
+  - `modal_reset_centered_1792425167013.png` (Shows centered in-app Reset Graph to Baseline confirmation modal)
+  - `toast_reset_baseline_1792425204623.png` (Shows baseline restored graph state after modal confirmation)
+  - `toast_light_mode_visible_1792425340823.png` (Shows toast notification in Light Mode)
+  - `toast_hc_mode_visible_1792425359455.png` (Shows toast notification in High Contrast Mode)
+
+| Check ID | Verification Item | Status | Screenshot Artifact | Observed Evidence |
+| :--- | :--- | :---: | :--- | :--- |
+| **TC-TOAST-01** | **BFS Traversal Feedback** | `[x] VERIFIED` | `toast_bfs_traversal_1792424801639.png` | Clicking "Run BFS Traversal" provides immediate button feedback and displays an info toast: *"Visited 13 vertices starting from Main Gate — Primary campus arrival & visitor entry (Node 0) in Adjacency List mode."* Traversal sequence visible in inspector. |
+| **TC-TOAST-02** | **DFS Traversal Feedback** | `[x] VERIFIED` | `toast_dfs_traversal_1792424811035.png` | Clicking "Run DFS Traversal" confirms completion: *"Explored 13 vertices from Main Gate (Node 0) using LIFO stack."* |
+| **TC-TOAST-03** | **Minimum-Hop Route & Zero-Hop** | `[x] VERIFIED` | `toast_find_route_1792424820862.png`, `toast_zero_hop_1792424842730.png` | Standard query confirms: *"4 hops from Main Gate to Academic Block 3 (Main Gate → Dome Building → Grand Stairs → Academic Block 1 → Academic Block 3)."* When src == dst (0 == 0), confirms: *"Source and destination are identical (Main Gate). 0 hops."* |
+| **TC-TOAST-04** | **Walkway Severance & Reroute** | `[x] VERIFIED` | `toast_sever_e6_reroute_1792424902229.png` | Severing `e6` (AB1 ↔ AB3) displays a warning toast: *"Disabled e6 (Academic Block 1 ↔ Academic Block 3). Route to Academic Block 3 remains open (5 hops). Components: 1, reachable: 13/13."* |
+| **TC-TOAST-05** | **Walkway Disconnection (Critical Cut)** | `[x] VERIFIED` | `toast_sever_e12_disconnected_1792424920140.png` | Severing `e12` (LHC ↔ Football Ground) displays a warning toast: *"Disabled e12 (Lecture Hall Complex ↔ Football Ground). Destination Football Ground is now UNREACHABLE from Main Gate. Components: 2, reachable: 11/13."* Route chip strip updates to `No active path from Main Gate to Football Ground`. |
+| **TC-TOAST-06** | **Walkway Restoration** | `[x] VERIFIED` | `toast_restore_e6_1792424936840.png` | Re-opening a severed edge displays a success toast: *"Reconnected e6 (Academic Block 1 ↔ Academic Block 3). Route to Academic Block 3: 4 hops. Components: 1."* |
+| **TC-TOAST-07** | **In-App Reset Confirmation Dialog** | `[x] VERIFIED` | `modal_reset_centered_1792425167013.png` | When non-baseline modifications exist, clicking Reset triggers a custom in-app confirmation modal (centered, backdrop blurred, keyboard dismissible with Escape). Summarizes severed walkways to be restored. |
+| **TC-TOAST-08** | **Baseline Reset Confirmation** | `[x] VERIFIED` | `toast_reset_baseline_1792425204623.png` | Confirming reset restores all 17 walkways to active, returns src/dst to 0/6, and announces: *"Restored all 17 walkways in MUJ Campus. Active route: 4 hops from Main Gate to Academic Block 3."* When already at baseline, Reset executes immediately without prompt. |
+| **TC-TOAST-09** | **Storage Representation Feedback** | `[x] VERIFIED` | `network_tab_1792425000371.png` | Switching to Matrix announces: *"Switched to Adjacency Matrix (O(V²)). BFS examined 169 neighbor slot operations."* Switching to List announces: *"Switched to Adjacency List (O(V + E)). BFS examined 34 neighbor slot operations."* Operation counters strictly match C engine. |
+| **TC-TOAST-10** | **Fixture Switching Feedback** | `[x] VERIFIED` | Live browser test | Switching to F1 mode clears stale messages and announces: *"F1 Reference Graph Activated. Loaded 12 vertices and 13 edges. Baseline route: 8 hops."* |
+| **TC-TOAST-11** | **SVG Export Feedback** | `[x] VERIFIED` | Live browser test | Clicking "↓ Export SVG" validates C-generated SVG and triggers download, reporting: *"Prepared authoritative C engine diagram (CAMPUS, 4 hops) for download."* |
+| **TC-TOAST-12** | **Theme Consistency & Accessibility** | `[x] VERIFIED` | `toast_light_mode_visible_1792425340823.png`, `toast_hc_mode_visible_1792425359455.png` | Toasts render with crisp contrast across Dark, Light (pure white card, subtle shadow, dark text), and High Contrast (pure black card, neon border `#00ff66`, pure white text). Single-toast policy prevents popup stacks. Dismiss button accessible via click and Escape key. |
