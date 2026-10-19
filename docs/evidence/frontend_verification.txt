@@ -207,3 +207,54 @@ Summary of Verifications:
 Captured Screenshots:
 - brand_about_modal_1792423442151.png
 - brand_failure_reroute_1792423665129.png
+
+--- 9. Global Action Feedback & Notification System Verification (2026-10-19) ---
+Branch: action-feedback-notifications
+Working Commit: Head of branch
+Target Display Profile: 1366x768 (Standard Laptop)
+Video Recordings:
+- toast_feedback_verify_1792424773822.webp
+- modal_theme_verify_1792425145789.webp
+- toast_theme_capture_1792425324209.webp
+
+Summary of Verifications:
+1. Reusable Application-Level Toast Notification Component:
+   - Created frontend/src/components/Toast.tsx without heavy external notification dependencies.
+   - Supports 4 semantic variants: success (emerald), info (cyan), warning (amber), and error (rose).
+   - Positioned in top-right viewport (z-index 1200) below header, avoiding map controls, route summary, or legends.
+   - Accessible ARIA live region behavior (role="status", aria-live="polite" for regular toasts; role="alert", aria-live="assertive" for errors).
+   - Single-toast replacement policy prevents growing stacks of popups; auto-dismissal after 4.5s (pauses on hover/focus); manual dismiss button with Escape key support.
+2. In-App Reset Confirmation Dialog:
+   - Created frontend/src/components/ResetConfirmModal.tsx.
+   - When graph has severed walkways or non-default endpoints, clicking Reset prompts a centered dialog summarizing what will be restored.
+   - Escape key and Cancel button dismiss modal without resetting. Confirming executes C reset, restores all 17 walkways, and fires a success toast.
+   - When graph is already at baseline, Reset executes immediately without confirmation prompt.
+3. Operation Feedback Across Actions:
+   - BFS Traversal: Confirms visited vertices and source from C engine.
+   - DFS Traversal: Confirms explored vertices using C LIFO stack.
+   - Route Query: Reports minimum hops and node path chip sequence. When source equals destination, announces zero-hop route.
+   - Walkway Severance: Confirms disabled edge endpoints, reports alternative route (e.g. 5 hops via LHC for e6), and provides warning on partition (e.g. Football Ground disconnected for e12).
+   - Walkway Restoration: Confirms reconnected walkway and updated C connectivity.
+   - Representation Switch: Confirms Adjacency Matrix (O(V²), 169 operations) vs Adjacency List (O(V+E), 34 operations) from C engine.
+   - Fixture Switch: Clears stale messages and confirms active fixture (Campus vs F1) with node/edge counts.
+   - SVG Export: Confirms C SVG generation and initiated download.
+4. Test Gate Status:
+   - git diff --check: Exit code 0 (clean).
+   - Strict build (.\build.ps1 -Target strict): Exit code 0.
+   - Test suite (.\build.ps1 -Target test): 28 Total | 28 Passed | 0 Failed.
+   - Deterministic demo check (.\build.ps1 -Target demo-check): byte-identical (3702 bytes).
+   - Isolated bridge contract test (.\bin\rg_bridge_test.exe): 1 Total | 1 Passed | 0 Failed.
+   - Production build (npm run build): Exit code 0.
+   - Browser subagent tests: All toasts and modal dialogs verified across Dark, Light, and High Contrast modes.
+
+Captured Screenshots:
+- toast_bfs_traversal_1792424801639.png
+- toast_dfs_traversal_1792424811035.png
+- toast_find_route_1792424820862.png
+- toast_zero_hop_1792424842730.png
+- toast_sever_e6_reroute_1792424902229.png
+- toast_sever_e12_disconnected_1792424920140.png
+- modal_reset_centered_1792425167013.png
+- toast_reset_baseline_1792425204623.png
+- toast_light_mode_visible_1792425340823.png
+- toast_hc_mode_visible_1792425359455.png
