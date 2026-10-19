@@ -296,3 +296,57 @@ Captured Screenshots:
 - campus_corrected_venues_1792430310558.png
 - campus_reroute_verified_1792430394123.png
 - campus_main_gate_corrected_1792433190264.png
+
+--- 11. Campus Entry Topology Update: Direct Main Gate Route + VIP Gate (2026-10-19) ---
+Branch: campus-entry-topology
+Working Commit: Head of branch
+Target Display Profile: 1366x768 (Standard Laptop)
+Video Recordings:
+- campus_vip_gate_verification_1792434515545.webp
+- vip_gate_and_f1_verification_1792434771146.webp
+
+Fixture Counts:
+- Campus Vertices: 14 (0 through 13)
+- Campus Edges: 19 (e0 through e18)
+- Added Vertices:
+  * Venue 13: "VIP Gate" (Full: "VIP Gate — Southeastern campus arrival & executive entry")
+    Schematic: (1100, 1320)
+    Geographic: [75.56610, 26.84085] (WGS 84, southeastern campus boundary beside external road)
+- Added Edges:
+  * e17: (0, 3) — Main Gate <-> Academic Block 1 (Direct western arrival route)
+  * e18: (13, 12) — VIP Gate <-> Knowledge Centre (Southeastern campus entry link)
+
+Route & Hop Count Derivations from C Engine:
+- Route 0 (Main Gate) -> 3 (Academic Block 1): 1 hop via direct edge e17 [0 -> 3]
+- Baseline Route 0 (Main Gate) -> 6 (Academic Block 3): 2 hops via e17 and e6 [0 -> 3 -> 6]
+- Detour when e6 is severed: 4 hops via Old Mess and LHC [0 -> 3 -> 5 -> 7 -> 6]
+- Route 0 (Main Gate) -> 9 (Football Ground): 4 hops via [0 -> 3 -> 5 -> 7 -> 9]
+- Severing e12 (LHC <-> Football Ground): Sports zone ({9, 10}) isolated, 2 components, route 0 -> 9 unreachable (hop_count: -1)
+- Route 13 (VIP Gate) -> 12 (Knowledge Centre): 1 hop via e18 [13 -> 12]
+- Route 13 (VIP Gate) -> 1 (Dome Building): 2 hops via [13 -> 12 -> 1]
+- Route 13 (VIP Gate) -> 0 (Main Gate): 3 hops via [13 -> 12 -> 1 -> 0]
+- Route 13 (VIP Gate) -> 6 (Academic Block 3): 5 hops via [13 -> 12 -> 1 -> 0 -> 3 -> 6]
+
+Test Gate Results:
+- Strict build (`.\build.ps1 -Target strict`): Exit code 0 (zero warnings, zero errors with -Werror).
+- Test suite (`.\build.ps1 -Target test`): 28 Total | 28 Passed | 0 Failed.
+- Deterministic demo check (`.\build.ps1 -Target demo-check`): byte-identical (3702 bytes).
+- Isolated bridge contract test (`.\bin\rg_bridge_test.exe`): 1 Total | 1 Passed | 0 Failed.
+- Frontend production build (`npm run build`): Exit code 0 (built in 441ms).
+- Live browser verification:
+  * 14 venues and 19 edges loaded cleanly.
+  * Direct Main Gate -> AB1 connection verified (1 hop).
+  * Main Gate -> AB3 baseline verified (2 hops: 0 -> 3 -> 6).
+  * e6 severance reroute verified (4 hops: 0 -> 3 -> 5 -> 7 -> 6).
+  * VIP Gate quick source selection verified.
+  * VIP Gate -> Knowledge Centre verified (1 hop: 13 -> 12).
+  * VIP Gate -> AB3 verified (5 hops).
+  * SVG export verified.
+  * F1 Reference Graph verified unchanged (12 nodes, 13 edges, 8 hops).
+
+Captured Screenshots:
+- main_gate_to_ab3_2hops_1792434530106.png
+- rerouted_4hops_e6_severed_1792434681759.png
+- vip_gate_route_ab3_1792434827276.png
+- f1_mode_verified_1792434861794.png
+

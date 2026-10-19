@@ -198,22 +198,23 @@ This document provides complete, independently derived step tables and reference
 > No real-world walking times, GPS navigation, municipal transit, or emergency routing suitability is claimed.
 
 ### Graph Topology
-- **Vertices (13)**:
-  - `0`: `Main Gate` (Full: `Main Gate — Primary campus arrival & visitor entry`) `(750, 1260)`
-  - `1`: `Dome Building` (Full: `Dome Building — Library, administration, services (Landmark 1)`) `(750, 1090)`
-  - `2`: `Grand Stairs` (Full: `Grand Stairs / Central Plaza — Central arrival and circulation hub`) `(750, 980)`
-  - `3`: `Academic Block 1` (Full: `Academic Block 1 — Left side of the central stairs (Landmark 2)`) `(470, 910)`
-  - `4`: `Academic Block 2` (Full: `Academic Block 2 — Right side of the central stairs (Landmark 3)`) `(980, 910)`
-  - `5`: `Old Mess / Food Court` (Full: `Old Mess / Food Court — Dining and student seating (Landmark 4)`) `(740, 740)`
-  - `6`: `Academic Block 3` (Full: `Academic Block 3 — Arts, media and specialist spaces (Landmark 6)`) `(440, 580)`
-  - `7`: `Lecture Hall Complex` (Full: `Lecture Hall Complex — Large teaching halls (Landmark 5)`) `(800, 580)`
-  - `8`: `Workshops / Labs` (Full: `Workshops / Labs — Workshop-side teaching facilities (Landmark 8)`) `(1200, 750)`
-  - `9`: `Football Ground` (Full: `Football Ground — Sports grounds (Landmark 7)`) `(1190, 560)`
-  - `10`: `Cricket Ground` (Full: `Cricket Ground — Sports grounds (Landmark 7)`) `(1170, 360)`
-  - `11`: `Outdoor Courts` (Full: `Outdoor Courts / Turfs — Sports grounds (Landmark 7)`) `(1250, 970)`
-  - `12`: `Knowledge Centre` (Full: `Knowledge Centre — Digital library & resource centre (approx. placement)`) `(1080, 1080)`
+- **Vertices (14)**:
+  - `0`: `Main Gate` (Full: `Main Gate — Primary campus arrival & visitor entry`) `(750, 1260)` | Geo: `[75.56386, 26.84158]`
+  - `1`: `Dome Building` (Full: `Dome Building — University administrative focal point & central dome`) `(750, 1090)` | Geo: `[75.56565, 26.84165]`
+  - `2`: `Grand Stairs` (Full: `Grand Stairs / Central Plaza — Central arrival and circulation hub`) `(750, 980)` | Geo: `[75.56550, 26.84252]`
+  - `3`: `Academic Block 1` (Full: `Academic Block 1 — West quadrangle complex (below AB3)`) `(470, 910)` | Geo: `[75.56435, 26.84275]`
+  - `4`: `Academic Block 2` (Full: `Academic Block 2 — East teaching and engineering quadrangle`) `(980, 910)` | Geo: `[75.56620, 26.84295]`
+  - `5`: `Old Mess / Food Court` (Full: `Old Mess / Food Court — Central dining and student commons`) `(740, 740)` | Geo: `[75.56530, 26.84296]`
+  - `6`: `Academic Block 3` (Full: `Academic Block 3 — North-west academic building (above AB1)`) `(440, 580)` | Geo: `[75.56425, 26.84370]`
+  - `7`: `Lecture Hall Complex` (Full: `Lecture Hall Complex — Tiered auditorium-style lecture halls (LHC)`) `(800, 580)` | Geo: `[75.56470, 26.84432]`
+  - `8`: `Workshops / Labs` (Full: `Workshops / Labs — Eastern engineering and research workshops`) `(1200, 750)` | Geo: `[75.56696, 26.84365]`
+  - `9`: `Football Ground` (Full: `Football Ground — Campus sports turf and athletic field`) `(1190, 560)` | Geo: `[75.56580, 26.84445]`
+  - `10`: `Cricket Ground` (Full: `Cricket Ground — Northern circular cricket field`) `(1170, 360)` | Geo: `[75.56416, 26.84554]`
+  - `11`: `Outdoor Courts` (Full: `Outdoor Courts — Basketball, tennis & volleyball courts`) `(1250, 970)` | Geo: `[75.56545, 26.84570]`
+  - `12`: `Knowledge Centre` (Full: `Knowledge Centre — Digital library & resource centre`) `(1080, 1080)` | Geo: `[75.56660, 26.84230]`
+  - `13`: `VIP Gate` (Full: `VIP Gate — Southeastern campus arrival & executive entry`) `(1100, 1320)` | Geo: `[75.56610, 26.84085]`
 
-- **Edges (17)**:
+- **Edges (19)**:
   - `e0: (0, 1)` — Main Gate <-> Dome Building
   - `e1: (1, 2)` — Dome Building <-> Grand Stairs
   - `e2: (2, 3)` — Grand Stairs <-> Academic Block 1
@@ -231,12 +232,14 @@ This document provides complete, independently derived step tables and reference
   - `e14: (9, 10)` — Football Ground <-> Cricket Ground
   - `e15: (1, 12)` — Dome Building <-> Knowledge Centre (Plaza connection)
   - `e16: (4, 12)` — Academic Block 2 <-> Knowledge Centre (Courtyard connection)
+  - `e17: (0, 3)` — Main Gate <-> Academic Block 1 (Direct west link)
+  - `e18: (13, 12)` — VIP Gate <-> Knowledge Centre (Southeastern arrival link)
 
 - **Ascending Adjacency List Structure**:
-  - `0`: `[1]`
+  - `0`: `[1, 3]`
   - `1`: `[0, 2, 12]`
   - `2`: `[1, 3, 4, 5]`
-  - `3`: `[2, 5, 6]`
+  - `3`: `[0, 2, 5, 6]`
   - `4`: `[2, 5, 8, 12]`
   - `5`: `[2, 3, 4, 7, 8]`
   - `6`: `[3, 7]`
@@ -245,37 +248,48 @@ This document provides complete, independently derived step tables and reference
   - `9`: `[7, 10]`
   - `10`: `[9]`
   - `11`: `[8]`
-  - `12`: `[1, 4]`
+  - `12`: `[1, 4, 13]`
+  - `13`: `[12]`
 
 ---
 
 ### Campus BFS Hand Trace (Source: 0)
 - **Policy**: Mark visited on **enqueue**. Neighbor discovery tie-breaking: **strictly ascending neighbor ID**.
-- **Visit Order**: `0, 1, 2, 12, 3, 4, 5, 6, 8, 7, 11, 9, 10`
+- **Visit Order**: `0, 1, 3, 2, 12, 5, 6, 4, 13, 7, 8, 9, 11, 10`
 - **Derived Counters**:
-  - Vertices Processed: `13`
-  - Queue Enqueues: `13`
-  - Queue Dequeues: `13`
-  - Adjacency List Neighbor Slots Examined: `34` ($2 \times 17 = 34$)
-  - Adjacency Matrix Neighbor Slots Examined: `169` ($13 \times 13 = 169$)
+  - Vertices Processed: `14`
+  - Queue Enqueues: `14`
+  - Queue Dequeues: `14`
+  - Adjacency List Neighbor Slots Examined: `38` ($2 \times 19 = 38$)
+  - Adjacency Matrix Neighbor Slots Examined: `196` ($14 \times 14 = 196$)
+  - Route from 0 (Main Gate) to 3 (Academic Block 1):
+    `0 -> 3` (1 hop via direct edge `e17`).
   - Route from 0 (Main Gate) to 6 (Academic Block 3):
-    `0 -> 1 -> 2 -> 3 -> 6` (4 hops).
+    `0 -> 3 -> 6` (2 hops via direct link `e17` and `e6`).
   - Route from 0 (Main Gate) to 9 (Football Ground):
-    `0 -> 1 -> 2 -> 5 -> 7 -> 9` (5 hops).
+    `0 -> 3 -> 5 -> 7 -> 9` (4 hops via `e17`, `e5`, `e9`, `e12`).
   - Route from 0 (Main Gate) to 12 (Knowledge Centre):
-    `0 -> 1 -> 12` (2 hops).
+    `0 -> 1 -> 12` (2 hops via `e0`, `e15`).
+  - Route from 13 (VIP Gate) to 12 (Knowledge Centre):
+    `13 -> 12` (1 hop via `e18`).
+  - Route from 13 (VIP Gate) to 1 (Dome Building):
+    `13 -> 12 -> 1` (2 hops).
+  - Route from 13 (VIP Gate) to 0 (Main Gate):
+    `13 -> 12 -> 1 -> 0` (3 hops).
+  - Route from 13 (VIP Gate) to 6 (Academic Block 3):
+    `13 -> 12 -> 1 -> 0 -> 3 -> 6` (5 hops).
 
 ---
 
 ### Campus Failure & Rerouting Scenarios
 1. **Redundant Path Rerouting (Disable e6: 3 <-> 6)**:
-   - Baseline route from 0 (Main Gate) to 6 (Academic Block 3): `0 -> 1 -> 2 -> 3 -> 6` (4 hops via e0, e1, e2, e6).
-   - With `e6` disabled: BFS discovers alternate path via Old Mess and LHC: `0 -> 1 -> 2 -> 5 -> 7 -> 6` (5 hops via e0, e1, e4, e9, e11).
-   - Graph remains connected (`component_count = 1`, 13 reachable vertices).
+   - Baseline route from 0 (Main Gate) to 6 (Academic Block 3): `0 -> 3 -> 6` (2 hops via e17, e6).
+   - With `e6` disabled: BFS discovers alternate path via Old Mess and LHC: `0 -> 3 -> 5 -> 7 -> 6` (4 hops via e17, e5, e9, e11).
+   - Graph remains connected (`component_count = 1`, 14 reachable vertices).
 2. **Critical Corridor Disconnection (Disable e12: 7 <-> 9)**:
    - Walkway between Lecture Hall Complex and Football Ground closed.
    - Route from 0 to 9: `UNREACHABLE` (`found = false`, `hop_count = -1`).
-   - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12}` of size 11; Component 2: `{9, 10}` of size 2).
-   - List BFS from 0: 11 vertices processed, 31 list slots examined, 1 inactive edge skipped (`e12`).
-   - Matrix BFS from 0: 11 vertices processed, 143 matrix slots examined ($11 \times 13$).
+   - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13}` of size 12; Component 2: `{9, 10}` of size 2).
+   - List BFS from 0: 12 vertices processed, 35 list slots examined, 1 inactive edge skipped (`e12`).
+   - Matrix BFS from 0: 12 vertices processed, 168 matrix slots examined ($12 \times 14$).
 

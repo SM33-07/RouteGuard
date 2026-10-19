@@ -42,7 +42,8 @@ This test plan defines the formal test-ID contract strictly aligned with **SRS v
 | `RG-X-08` | `test_rg_x_08` | `tests/test_traverse.c` | Iterative DFS preorder vs Recursive DFS preorder | F1, F2, F4, F5 | Exact preorder agreement across all benchmark topologies |
 | `RG-X-09` | `test_rg_x_09` | `tests/test_traverse.c` | Slot-count complexity check (matrix vs list) | F1 | Matrix scans 144 slots ($V^2$) vs List scans 26 slots ($2E$) |
 | `RG-X-10` | `test_rg_x_10_differential_oracle` | `tests/test_random.c` | Independent differential testing oracle (300 random graphs) | Random G(V,p) | 67,574 assertions; 0 mismatches against relaxation and label propagation oracles |
-| `RG-X-11` | `test_rg_x_11_wasm_bridge` | `wasm/test_bridge.c` (`make test-bridge`) | WebAssembly C11 bridge contract & JSON serialization | F1 | Full validation of init, reset, BFS/DFS metrics, edge toggles, failure table, and SVG |
+| `RG-X-11` | `test_rg_x_11_wasm_bridge` | `wasm/test_bridge.c` (`make test-bridge`) | WebAssembly C11 bridge contract & JSON serialization | F1 & Campus | Full validation of init, reset, BFS/DFS metrics, edge toggles, failure table, and SVG across F1 and MUJ Campus fixtures |
+| `RG-X-12` | `test_rg_x_12_campus` | `tests/test_fixture_ref.c` | MUJ Campus Demo topology, direct Main Gate link, VIP Gate (13), and e6/e12 failure scenarios | MUJ Campus Demo | 14 vertices, 19 edges, 1-hop 0->3, 2-hop baseline 0->6, 4-hop e6 detour, VIP Gate reachable |
 
 ---
 

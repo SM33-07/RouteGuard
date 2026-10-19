@@ -161,3 +161,35 @@ Every verified item was directly tested, observed, and recorded during live brow
 | **TC-GEO-FIX-08** | **Sports Zone (#9 Football, #10 Cricket, #11 Courts)** | `[x] VERIFIED` | `campus_corrected_venues_1792430310558.png` | Football Ground placed at `[75.56580, 26.84445]` (exact point indicated by reference arrow). Cricket Ground placed at `[75.56416, 26.84554]` (interior of circular cricket turf). Outdoor Courts placed at `[75.56545, 26.84570]` (courts east of Cricket Ground). |
 | **TC-GEO-FIX-09** | **Route Overlay & Topological Walkway Consistency** | `[x] VERIFIED` | `campus_reroute_verified_1792430394123.png` | Baseline route 0 → 6 is 4 hops (`0 → 1 → 2 → 3 → 6`). Severing `e6` dynamically reroutes in C engine to 5 hops via LHC (`0 → 1 → 2 → 5 → 7 → 6`). All 17 walkways connect cleanly to venue markers with zero crossed or tangled edges. |
 | **TC-GEO-FIX-10** | **Map Panning, Zooming & Fit Network Stability** | `[x] VERIFIED` | Live browser test | Clicking "Fit Network" frames all 13 venues from Main Gate (`26.84158`) to Courts (`26.84570`). Markers remain anchored to exact building footprints across zoom and pitch changes. |
+
+---
+
+## 7. Campus Entry Topology Update: Direct Main Gate Route + VIP Gate (Branch: `campus-entry-topology`)
+
+- **Date**: 2026-10-19
+- **Branch**: `campus-entry-topology`
+- **Browser**: Headless Chromium (Agentic browser subagent)
+- **Target Resolution**: 1366×768 (Standard Laptop)
+- **Session Video Recordings**:
+  - `campus_vip_gate_verification_1792434515545.webp`
+  - `vip_gate_and_f1_verification_1792434771146.webp`
+- **Screenshots Captured**:
+  - `main_gate_to_ab3_2hops_1792434530106.png` (Live MapLibre view showing baseline 2-hop route 0 -> 3 -> 6 via new e17 link)
+  - `rerouted_4hops_e6_severed_1792434681759.png` (Edge failure rerouting test confirming e6 severance and 4-hop alternative route via Old Mess & LHC)
+  - `vip_gate_route_ab3_1792434827276.png` (Live MapLibre view with VIP Gate selected as source routing to AB3)
+  - `f1_mode_verified_1792434861794.png` (F1 Reference Graph verification confirming 12 nodes, 13 edges, and 8-hop route)
+
+| Check ID | Verification Item | Status | Screenshot Artifact | Observed Evidence |
+| :--- | :--- | :---: | :--- | :--- |
+| **TC-ENTRY-01** | **Direct Main Gate → AB1 Walkway (e17)** | `[x] VERIFIED` | `main_gate_to_ab3_2hops_1792434530106.png` | Edge `e17: Main Gate (0) ↔ Academic Block 1 (3)` modeled directly in C engine. Minimum-hop route `0 → 3` evaluates to exactly 1 hop in C/WASM. Display polyline visually skirts intervening building footprints via western driveway without altering graph topology. |
+| **TC-ENTRY-02** | **Baseline 2-Hop Route (0 → 3 → 6)** | `[x] VERIFIED` | `main_gate_to_ab3_2hops_1792434530106.png` | While `e6` is active, the baseline route from Main Gate (0) to Academic Block 3 (6) evaluates to 2 hops (`0 → 3 → 6`) in both Adjacency List and Adjacency Matrix modes. Dynamic route bar displays `2 Hops: 0: Main Gate → 3: Academic Block 1 → 6: Academic Block 3`. |
+| **TC-ENTRY-03** | **e6 Severance Rerouting (4 Hops)** | `[x] VERIFIED` | `rerouted_4hops_e6_severed_1792434681759.png` | Severing `e6` (AB1 ↔ AB3) closes the corridor. C engine recomputes alternative path via Old Mess and LHC: `0 → 3 → 5 → 7 → 6` (4 hops). Warning toast announces reroute without isolating AB3. |
+| **TC-ENTRY-04** | **VIP Gate (#13) C Vertex & Geographic Placement** | `[x] VERIFIED` | `vip_gate_route_ab3_1792434827276.png` | Vertex 13 ("VIP Gate") added to C fixture (`1100, 1320`) and geographic catalogue at `[75.56610, 26.84085]`, matching the red dot in the user's annotated reference at the southeastern campus boundary beside the external road. Connected via `e18` to Knowledge Centre (12). |
+| **TC-ENTRY-05** | **One-Click Gate Source Selection** | `[x] VERIFIED` | `vip_gate_route_ab3_1792434827276.png` | Quick-source buttons `🚪 Main Gate (0)` and `⭐ VIP Gate (13)` provide instant 1-click selection in the Route Planner. VIP Gate selectable in Source/Destination dropdowns and venue index directory. |
+| **TC-ENTRY-06** | **VIP Gate Route Discovery** | `[x] VERIFIED` | `vip_gate_route_ab3_1792434827276.png` | VIP Gate (13) to Knowledge Centre (12) returns 1 hop (`13 → 12`). VIP Gate (13) to Dome Building (1) returns 2 hops (`13 → 12 → 1`). VIP Gate (13) to Main Gate (0) returns 3 hops (`13 → 12 → 1 → 0`). VIP Gate (13) to AB3 (6) returns 5 hops (`13 → 12 → 1 → 0 → 3 → 6`). |
+| **TC-ENTRY-07** | **Critical Link e12 Cut (Sports Partition)** | `[x] VERIFIED` | Live browser test | Severing `e12` (LHC ↔ Football Ground) partitions the graph into 2 components. Football Ground (9) is unreachable from 0 (`hop_count: -1`). Reachability from 0 is 12 vertices. |
+| **TC-ENTRY-08** | **In-App Reset to Baseline** | `[x] VERIFIED` | Live browser test | Reset confirms restoration of all 19 walkways in MUJ Campus. Restores baseline 2-hop route `0 → 3 → 6` and 1 component. |
+| **TC-ENTRY-09** | **Storage Representation Parity** | `[x] VERIFIED` | Live browser test | Adjacency Matrix (196 slots) and Adjacency List (38 slots) return byte-for-byte identical reachability, hop counts, and paths across all 14 vertices. |
+| **TC-ENTRY-10** | **F1 Reference Graph Invariant** | `[x] VERIFIED` | `f1_mode_verified_1792434861794.png` | F1 Reference Graph remains completely frozen: 12 vertices, 13 edges, 8-hop route `0 → 1 → 3 → 4 → 6 → 7 → 8 → 9 → 10`, 26 list slots, 144 matrix slots, 14 DFS pushes, 14 pops, 2 stale pops. |
+| **TC-ENTRY-11** | **SVG Diagram Export** | `[x] VERIFIED` | Live browser test | Clicking "↓ Export SVG" exports authoritative C-generated SVG containing all 14 vertices, 19 edges, and active/severed styling. |
+

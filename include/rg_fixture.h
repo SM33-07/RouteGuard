@@ -35,12 +35,12 @@ RgStatus rg_fixture_f4_chain(RgGraph **out_graph);
 RgStatus rg_fixture_f5_cycle4(RgGraph **out_graph);
 
 /**
- * @brief Fixture MUJ Campus Demo: 13 vertices, 15 edges, baseline component = 1.
+ * @brief Fixture MUJ Campus Demo: 14 vertices, 19 edges, baseline component = 1.
  */
 RgStatus rg_fixture_campus_muj(RgGraph **out_graph);
 
 /**
- * @brief Retrieves full descriptive name/floor information for a campus vertex (0..12).
+ * @brief Retrieves full descriptive name/floor information for a campus vertex (0..13).
  */
 const char *rg_fixture_campus_venue_description(int vertex_id);
 

@@ -151,6 +151,22 @@ export const CampusMap: React.FC<CampusMapProps> = ({
       coordMap.set(v.id, v.coordinates);
     });
 
+    // Display-only visual polylines for edges where a straight line would cut through building footprints.
+    // Purely display geometry: does NOT alter C graph topology, hops, or algorithm results.
+    const DISPLAY_EDGE_GEOMETRIES: Record<string, [number, number][]> = {
+      // e17 (0 <-> 3): Follows the western campus entrance corridor around building footprints
+      '0-3': [
+        [75.56386, 26.84158],
+        [75.56402, 26.84218],
+        [75.56435, 26.84275],
+      ],
+      '3-0': [
+        [75.56435, 26.84275],
+        [75.56402, 26.84218],
+        [75.56386, 26.84158],
+      ],
+    };
+
     const edgeFeatures: Feature<LineString>[] = [];
     const routeFeatures: Feature<LineString>[] = [];
 
@@ -160,6 +176,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({
       if (!uCoords || !vCoords) return;
 
       const isRoute = routeEdgePairs.has(`${edge.u}-${edge.v}`);
+      const customCoords = DISPLAY_EDGE_GEOMETRIES[`${edge.u}-${edge.v}`];
 
       const feature: Feature<LineString> = {
         type: 'Feature',
@@ -173,7 +190,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({
         },
         geometry: {
           type: 'LineString',
-          coordinates: [uCoords, vCoords],
+          coordinates: customCoords || [uCoords, vCoords],
         },
       };
 
@@ -421,7 +438,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({
             type="button"
             className="btn btn-sm btn-toolbar"
             onClick={handleFitNetwork}
-            title="Fit all 13 campus venues in view"
+            title="Fit all 14 campus venues in view"
             id="btn-fit-network"
           >
             ⤢ Fit Network

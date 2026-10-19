@@ -760,7 +760,7 @@ export const App: React.FC = () => {
           <div className="sidebar-inner">
             <div className="sidebar-header">
               <span className="sidebar-title">Network Controls</span>
-              <span className="sidebar-tag">{graphMode === 'campus' ? '13 Venues' : '12 Nodes'}</span>
+              <span className="sidebar-tag">{graphMode === 'campus' ? `${graph?.n_vertices ?? 14} Venues` : '12 Nodes'}</span>
             </div>
 
             {/* Section 1: Route Planner */}
@@ -787,6 +787,30 @@ export const App: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                {graphMode === 'campus' && (
+                  <div className="quick-source-buttons" style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                    <button
+                      type="button"
+                      className={`btn btn-xs ${srcVertex === 0 ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => handleSourceChange(0)}
+                      title="Set Main Gate (0) as Route Source"
+                      id="btn-quick-src-main-gate"
+                      disabled={!!isOperating}
+                    >
+                      🚪 Main Gate (0)
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-xs ${srcVertex === 13 ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => handleSourceChange(13)}
+                      title="Set VIP Gate (13) as Route Source"
+                      id="btn-quick-src-vip-gate"
+                      disabled={!!isOperating}
+                    >
+                      ⭐ VIP Gate (13)
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="control-group">
@@ -2007,7 +2031,7 @@ export const App: React.FC = () => {
                 </div>
                 <div className="spec-item">
                   <span className="spec-label">Topology Benchmark:</span>
-                  <span className="spec-val">MUJ Educational Campus (13 Venues, 17 Walkways, Knowledge Centre #12) &amp; F1 Reference Graph (12 Nodes, 13 Edges)</span>
+                  <span className="spec-val">MUJ Educational Campus (14 Venues, 19 Walkways, VIP Gate #13) &amp; F1 Reference Graph (12 Nodes, 13 Edges)</span>
                 </div>
               </div>
               <div className="about-disclaimer">

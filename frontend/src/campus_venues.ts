@@ -157,6 +157,16 @@ export const CAMPUS_VENUES: CampusVenueGeo[] = [
     confidence: 'verified_poi',
     notes: 'Dedicated digital library and resource center situated to the right/east of Dome Building / Administrative Block.',
   },
+  {
+    id: 13,
+    label: 'VIP Gate',
+    fullName: 'VIP Gate — Southeastern campus arrival & executive entry',
+    coordinates: [75.56610, 26.84085],
+    category: 'arrival',
+    landmarkIndex: null,
+    confidence: 'verified_poi',
+    notes: 'Southeastern university gate beside external road, calibrated from user annotated reference at the southeastern campus entry point.',
+  },
 ];
 
 /**
