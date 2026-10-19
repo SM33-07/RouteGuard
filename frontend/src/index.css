@@ -2281,3 +2281,181 @@ button, input, select, textarea {
     box-shadow: var(--shadow-lg);
   }
 }
+
+/* ==========================================================================
+   Brand Icon & Wordmark Modal Styles
+   ========================================================================== */
+.brand-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.about-modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  max-width: 660px;
+  width: 90%;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.about-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about-wordmark-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(4, 9, 20, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+[data-theme="light"] .about-wordmark-container {
+  background: rgba(241, 245, 249, 0.9);
+}
+
+[data-theme="high-contrast"] .about-wordmark-container {
+  background: #000000;
+  border-color: #ffffff;
+}
+
+.about-wordmark-img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
+.about-spec-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.spec-label {
+  font-weight: 700;
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.spec-val {
+  color: var(--text-main);
+}
+
+.about-disclaimer {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--amber);
+  padding: 8px 12px;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 0 6px 6px 0;
+}
+
+/* ==========================================================================
+   Map Loading & Fallback Styles
+   ========================================================================== */
+.map-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(8, 12, 20, 0.76);
+  backdrop-filter: blur(4px);
+  z-index: 25;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+[data-theme="light"] .map-loading-overlay {
+  background: rgba(241, 245, 249, 0.82);
+}
+
+[data-theme="high-contrast"] .map-loading-overlay {
+  background: rgba(0, 0, 0, 0.92);
+}
+
+.map-loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(56, 189, 248, 0.2);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: rg-spin 0.8s linear infinite;
+}
+
+.map-loading-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.2px;
+}
+
+@keyframes rg-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-loading-spinner {
+    animation: none;
+    border-top-color: var(--cyan);
+    opacity: 0.8;
+  }
+}
+
+.btn-retry-map {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid var(--rose);
+  color: #fca5a5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.15s ease;
+}
+
+.btn-retry-map:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #ffffff;
+}

@@ -160,3 +160,50 @@ Captured Screenshots:
 - polish_1366x768_failure_1792271870653.png
 - polish_1920x1080_presentation_1792271926675.png
 
+
+--- 8. Campus Location Correction, Logo Integration & Loading-State Verification (2026-10-19) ---
+Branch: campus-location-branding
+Working Commit: Head of branch
+Target Display Profiles: 1366x768 (Standard Laptop), 1920x1080 (Presentation Display)
+Video Recording: campus_brand_verify_1792423319521.webp
+
+Summary of Verifications:
+1. Calibrated Geographic Coordinates (13 Venues):
+   - All 13 campus venue markers accurately aligned to user-annotated reference map screenshots:
+     * Node 0 (Main Gate): [75.56535, 26.84160] (southern campus entrance)
+     * Node 1 (Dome Building): [75.56550, 26.84220] (placed on OSM "Administrative Block" footprint)
+     * Node 2 (Grand Stairs): [75.56535, 26.84275] (north of Dome Building)
+     * Node 3 (Academic Block 1): [75.56450, 26.84310] (west quad, south of AB3)
+     * Node 4 (Academic Block 2): [75.56610, 26.84290] (east quad, south of Auditorium)
+     * Node 5 (Old Mess / Food Court): [75.56530, 26.84360] (central dining north of Grand Stairs)
+     * Node 6 (Academic Block 3): [75.56430, 26.84400] (north-west quad, above AB1)
+     * Node 7 (Lecture Hall Complex): [75.56500, 26.84435] (road complex north of Old Mess, searchable via alias "LHC")
+     * Node 8 (Workshops / Labs): [75.56660, 26.84370] (eastern engineering facility)
+     * Node 9 (Football Ground): [75.56590, 26.84460] (sports field indicated by red arrow)
+     * Node 10 (Cricket Ground): [75.56420, 26.84550] (inside circular cricket turf)
+     * Node 11 (Outdoor Courts): [75.56520, 26.84580] (outdoor sports court area)
+     * Node 12 (Knowledge Centre): [75.56640, 26.84230] (east of Dome Building)
+   - Coordinates documented as approximate placements inferred from user annotations; C graph engine model remains unweighted and undirected.
+2. RouteGuard Branding Assets Integrated:
+   - Header Monogram: Replaced plain text "RG" with `frontend/public/brand/routeguard-icon.png` (32x32px, `object-fit: contain`).
+   - Favicon: Updated `frontend/index.html` to point to `/brand/routeguard-icon.png`.
+   - Project Info Modal: Responsive dialog featuring full 1536x1024 `routeguard-wordmark.png` in 3:2 composition, detailing ISO C11 engine architecture, CSC2101 Lecture 37 scope boundaries, and OSM attribution. Accessible via `ℹ️ About` button in header.
+3. Map Loading & Honest Retry State:
+   - Non-blocking `.map-loading-overlay` with CSS spinner and accessible `role="status"` "Loading campus map…".
+   - Controls and C engine results render immediately; overlay smoothly hides once map fires `load`.
+   - Honest error banner with `🔄 Retry Map` action on tile/style failure.
+4. Venue Naming Standards:
+   - Full venue name "Lecture Hall Complex" used in index, selectors, route cards, and inspector; "LHC" accepted as search alias.
+   - Venue #5 labeled "Old Mess / Food Court".
+5. Test Gate Status:
+   - `git diff --check`: Exit code 0 (clean).
+   - Strict build (`.\build.ps1 -Target strict`): Exit code 0.
+   - Test suite (`.\build.ps1 -Target test`): 28 Total | 28 Passed | 0 Failed.
+   - Deterministic demo check (`.\build.ps1 -Target demo-check`): byte-identical (3702 bytes).
+   - Isolated bridge contract test (`.\bin\rg_bridge_test.exe`): 1 Total | 1 Passed | 0 Failed.
+   - Production build (`npm run build`): Exit code 0.
+   - Live browser verification: 0 errors, 0 broken layouts, pins securely anchored during pan/zoom/resize.
+
+Captured Screenshots:
+- brand_about_modal_1792423442151.png
+- brand_failure_reroute_1792423665129.png

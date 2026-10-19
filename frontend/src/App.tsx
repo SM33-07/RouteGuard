@@ -44,6 +44,9 @@ export const App: React.FC = () => {
   const [showGallery, setShowGallery] = useState<boolean>(false);
   const [galleryTab, setGalleryTab] = useState<'schematic' | 'masterplan' | 'ab1_mess' | 'lhc_aic' | 'sports'>('schematic');
 
+  // Brand / Project Info Modal
+  const [showAboutModal, setShowAboutModal] = useState<boolean>(false);
+
   // Operation Results strictly from C engine
   const [traversalResult, setTraversalResult] = useState<TraversalResult | null>(null);
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
@@ -250,6 +253,7 @@ export const App: React.FC = () => {
         v.label.toLowerCase().includes(q) ||
         (v.full_name && v.full_name.toLowerCase().includes(q)) ||
         (geo && geo.category.toLowerCase().includes(q)) ||
+        (geo && geo.notes.toLowerCase().includes(q)) ||
         `node ${v.id}`.includes(q)
       );
     });
@@ -301,7 +305,13 @@ export const App: React.FC = () => {
           </button>
 
           <div className="brand-section">
-            <div className="brand-icon">RG</div>
+            <img
+              src="/brand/routeguard-icon.png"
+              alt=""
+              className="brand-icon-img"
+              width="32"
+              height="32"
+            />
             <div className="brand-text">
               <div className="brand-title">
                 RouteGuard
@@ -388,6 +398,16 @@ export const App: React.FC = () => {
               👁️
             </button>
           </div>
+
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => setShowAboutModal(true)}
+            id="btn-header-about"
+            title="About RouteGuard, branding & technical architecture"
+          >
+            ℹ️ About
+          </button>
 
           <button
             type="button"
@@ -1600,6 +1620,61 @@ export const App: React.FC = () => {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* About & Brand Info Modal */}
+      {showAboutModal && (
+        <div className="edge-action-modal-backdrop" onClick={() => setShowAboutModal(false)}>
+          <div className="about-modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="about-modal-title">
+            <div className="about-modal-header">
+              <span id="about-modal-title" style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '16px' }}>
+                About RouteGuard
+              </span>
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary"
+                onClick={() => setShowAboutModal(false)}
+                aria-label="Close About Dialog"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="about-modal-body">
+              <div className="about-wordmark-container">
+                <img
+                  src="/brand/routeguard-wordmark.png"
+                  alt="RouteGuard — Campus Network Resilience Simulator"
+                  className="about-wordmark-img"
+                />
+              </div>
+              <div className="about-spec-grid">
+                <div className="spec-item">
+                  <span className="spec-label">Core Engine:</span>
+                  <span className="spec-val">Pure ISO C11 Standard Library (compiled via Emscripten to WebAssembly)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Academic Scope:</span>
+                  <span className="spec-val">Strictly bounded to CSC2101 Lecture 37 (Fixed arrays, linked lists, queues, stacks, adjacency matrix &amp; list, BFS, DFS, reachability, connected components)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Graph Topology:</span>
+                  <span className="spec-val">Strictly undirected &amp; unweighted (Hop count metric)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Geographic Basemap:</span>
+                  <span className="spec-val">MapLibre GL JS + OpenFreeMap Liberty Vector Tiles (&copy; OpenStreetMap contributors)</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Topology Benchmark:</span>
+                  <span className="spec-val">MUJ Educational Campus (13 Venues, 17 Walkways, Knowledge Centre #12) &amp; F1 Reference Graph (12 Nodes, 13 Edges)</span>
+                </div>
+              </div>
+              <div className="about-disclaimer">
+                <strong>Educational Simulation Disclaimer:</strong> All campus venue coordinates, pathway models, and simulation results are synthetic educational constructs developed for computer science coursework. Modeled walkways are simplified graph connections and do not represent surveyed pedestrian routes, municipal pathways, or emergency dispatch systems.
+              </div>
             </div>
           </div>
         </div>
