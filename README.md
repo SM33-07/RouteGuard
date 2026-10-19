@@ -264,19 +264,10 @@ RouteGuard/
     ├── TEST_PLAN.md           # SRS Section 10 test contract mapping
     ├── TRACEABILITY.md        # Requirements traceability matrix
     ├── VIVA_NOTES.md          # 25 examiner viva preparation questions & answers
-    └── evidence/              # Raw verification logs & browser checklists
-    ├── VIVA_NOTES.md          # 25 examiner viva preparation questions & answers
-    └── evidence/              # Raw verification logs
-        ├── env.txt            # Host toolchain and probe logs
-        ├── build.txt          # Clean compilation log
-        ├── test.txt           # Test suite output
-        ├── test_O0.txt        # Test suite output under -O0
-        ├── test_O2.txt        # Test suite output under -O2
-        ├── commit_builds.txt  # Standalone per-commit build and test logs
-        ├── differential_testing.txt # Random graph oracle output
-        ├── mutation.txt       # 10 mutants evaluated and killed
-        ├── cli_malformed_input.txt # Fuzz input under sanitizer in container
-        ├── sanitizer_linux_container.txt # Full ASan+UBSan run
-        ├── frontend_verification.txt # WASM and browser verification log
-        └── SUMMARY.md         # Comprehensive evidence synthesis
+    ├── evidence/              # Verification summaries & browser checklists
+    │   ├── SUMMARY.md         # Comprehensive test & verification evidence synthesis
+    │   └── frontend_manual_checklist.md # Interactive geospatial manual acceptance checklist
+    └── reference/             # Authoritative academic reference specifications
+        ├── RouteGuard_SRS_v0_2.pdf # Formal Software Requirements Specification
+        └── RouteGuard_Submission_Checklist_Report_Outline_v0_2.pdf # Project checklist & outline
 ```

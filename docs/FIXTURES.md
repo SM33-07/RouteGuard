@@ -214,7 +214,7 @@ This document provides complete, independently derived step tables and reference
   - `12`: `Knowledge Centre` (Full: `Knowledge Centre — Digital library & resource centre`) `(1080, 1080)` | Geo: `[75.56660, 26.84230]`
   - `13`: `VIP Gate` (Full: `VIP Gate — Southeastern campus arrival & executive entry`) `(1100, 1320)` | Geo: `[75.56610, 26.84085]`
 
-- **Edges (19)**:
+- **Edges (21)**:
   - `e0: (0, 1)` — Main Gate <-> Dome Building
   - `e1: (1, 2)` — Dome Building <-> Grand Stairs
   - `e2: (2, 3)` — Grand Stairs <-> Academic Block 1
@@ -234,10 +234,12 @@ This document provides complete, independently derived step tables and reference
   - `e16: (4, 12)` — Academic Block 2 <-> Knowledge Centre (Courtyard connection)
   - `e17: (0, 3)` — Main Gate <-> Academic Block 1 (Direct west link)
   - `e18: (13, 12)` — VIP Gate <-> Knowledge Centre (Southeastern arrival link)
+  - `e19: (1, 13)` — Dome Building <-> VIP Gate (Executive central access)
+  - `e20: (0, 13)` — Main Gate <-> VIP Gate (Southern perimeter corridor)
 
 - **Ascending Adjacency List Structure**:
-  - `0`: `[1, 3]`
-  - `1`: `[0, 2, 12]`
+  - `0`: `[1, 3, 13]`
+  - `1`: `[0, 2, 12, 13]`
   - `2`: `[1, 3, 4, 5]`
   - `3`: `[0, 2, 5, 6]`
   - `4`: `[2, 5, 8, 12]`
@@ -249,23 +251,25 @@ This document provides complete, independently derived step tables and reference
   - `10`: `[9]`
   - `11`: `[8]`
   - `12`: `[1, 4, 13]`
-  - `13`: `[12]`
+  - `13`: `[0, 1, 12]`
 
 ---
 
 ### Campus BFS Hand Trace (Source: 0)
 - **Policy**: Mark visited on **enqueue**. Neighbor discovery tie-breaking: **strictly ascending neighbor ID**.
-- **Visit Order**: `0, 1, 3, 2, 12, 5, 6, 4, 13, 7, 8, 9, 11, 10`
+- **Visit Order**: `0, 1, 3, 13, 2, 12, 5, 6, 4, 7, 8, 9, 11, 10`
 - **Derived Counters**:
   - Vertices Processed: `14`
   - Queue Enqueues: `14`
   - Queue Dequeues: `14`
-  - Adjacency List Neighbor Slots Examined: `38` ($2 \times 19 = 38$)
+  - Adjacency List Neighbor Slots Examined: `42` ($2 \times 21 = 42$)
   - Adjacency Matrix Neighbor Slots Examined: `196` ($14 \times 14 = 196$)
   - Route from 0 (Main Gate) to 3 (Academic Block 1):
     `0 -> 3` (1 hop via direct edge `e17`).
   - Route from 0 (Main Gate) to 6 (Academic Block 3):
     `0 -> 3 -> 6` (2 hops via direct link `e17` and `e6`).
+  - Route from 0 (Main Gate) to 13 (VIP Gate):
+    `0 -> 13` (1 hop via direct edge `e20`).
   - Route from 0 (Main Gate) to 9 (Football Ground):
     `0 -> 3 -> 5 -> 7 -> 9` (4 hops via `e17`, `e5`, `e9`, `e12`).
   - Route from 0 (Main Gate) to 12 (Knowledge Centre):
@@ -273,11 +277,11 @@ This document provides complete, independently derived step tables and reference
   - Route from 13 (VIP Gate) to 12 (Knowledge Centre):
     `13 -> 12` (1 hop via `e18`).
   - Route from 13 (VIP Gate) to 1 (Dome Building):
-    `13 -> 12 -> 1` (2 hops).
+    `13 -> 1` (1 hop via direct edge `e19`).
   - Route from 13 (VIP Gate) to 0 (Main Gate):
-    `13 -> 12 -> 1 -> 0` (3 hops).
+    `13 -> 0` (1 hop via direct edge `e20`).
   - Route from 13 (VIP Gate) to 6 (Academic Block 3):
-    `13 -> 12 -> 1 -> 0 -> 3 -> 6` (5 hops).
+    `13 -> 0 -> 3 -> 6` (3 hops).
 
 ---
 
@@ -290,6 +294,6 @@ This document provides complete, independently derived step tables and reference
    - Walkway between Lecture Hall Complex and Football Ground closed.
    - Route from 0 to 9: `UNREACHABLE` (`found = false`, `hop_count = -1`).
    - Connected Components: `2` (Component 1: `{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13}` of size 12; Component 2: `{9, 10}` of size 2).
-   - List BFS from 0: 12 vertices processed, 35 list slots examined, 1 inactive edge skipped (`e12`).
+   - List BFS from 0: 12 vertices processed, 39 list slots examined, 1 inactive edge skipped (`e12`).
    - Matrix BFS from 0: 12 vertices processed, 168 matrix slots examined ($12 \times 14$).
 

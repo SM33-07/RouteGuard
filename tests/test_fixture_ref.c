@@ -93,7 +93,7 @@ void test_rg_x_12_campus(void) {
     RG_ASSERT_INT_EQ(st, RG_OK);
     RG_ASSERT(g != NULL);
     RG_ASSERT_INT_EQ(g->n_vertices, 14);
-    RG_ASSERT_INT_EQ(g->n_edges, 19);
+    RG_ASSERT_INT_EQ(g->n_edges, 21);
 
     /* 1. Labels and descriptions verification */
     RG_ASSERT_STR_EQ(g->labels[0], "Main Gate");
@@ -135,7 +135,7 @@ void test_rg_x_12_campus(void) {
     bfs_matrix(g, 0, bfs_m);
 
     RG_ASSERT_INT_EQ(bfs_l->metrics.vertices_processed, 14);
-    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 38);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 42);
     RG_ASSERT_INT_EQ(bfs_l->metrics.queue_enqueues, 14);
     RG_ASSERT_INT_EQ(bfs_l->metrics.queue_dequeues, 14);
     RG_ASSERT_INT_EQ(bfs_l->metrics.edges_skipped_inactive, 0);
@@ -143,7 +143,7 @@ void test_rg_x_12_campus(void) {
     RG_ASSERT_INT_EQ(bfs_m->metrics.vertices_processed, 14);
     RG_ASSERT_INT_EQ(bfs_m->metrics.neighbor_slots_examined, 196);
 
-    int expected_bfs_order[14] = {0, 1, 3, 2, 12, 5, 6, 4, 13, 7, 8, 9, 11, 10};
+    int expected_bfs_order[14] = {0, 1, 3, 13, 2, 12, 5, 6, 4, 7, 8, 9, 11, 10};
     for (int i = 0; i < 14; i++) {
         RG_ASSERT_INT_EQ(bfs_l->order[i], expected_bfs_order[i]);
         RG_ASSERT_INT_EQ(bfs_m->order[i], expected_bfs_order[i]);
@@ -228,7 +228,7 @@ void test_rg_x_12_campus(void) {
     rg_traverse_result_create(g->n_vertices, &bfs_l);
     bfs_list(g, 0, bfs_l);
     RG_ASSERT_INT_EQ(bfs_l->metrics.vertices_processed, 12);
-    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 35);
+    RG_ASSERT_INT_EQ(bfs_l->metrics.neighbor_slots_examined, 39);
     RG_ASSERT_INT_EQ(bfs_l->metrics.edges_skipped_inactive, 1);
 
     rg_traverse_result_free(bfs_m);
@@ -250,7 +250,7 @@ void test_rg_x_12_campus(void) {
     RG_ASSERT_INT_EQ(route->hop_count, 4);
 
     /* 8. VIP Gate (13) Verification */
-    /* VIP Gate -> Knowledge Centre: 1 hop */
+    /* VIP Gate -> Knowledge Centre: 1 hop (via e18) */
     st = rg_find_route(g, 13, 12, false, route, NULL);
     RG_ASSERT_INT_EQ(st, RG_OK);
     RG_ASSERT(route->found);
@@ -258,31 +258,35 @@ void test_rg_x_12_campus(void) {
     RG_ASSERT_INT_EQ(route->path[0], 13);
     RG_ASSERT_INT_EQ(route->path[1], 12);
 
-    /* VIP Gate -> Dome Building: 2 hops (13 -> 12 -> 1) */
+    /* VIP Gate -> Dome Building: 1 hop (via direct e19) */
     st = rg_find_route(g, 13, 1, false, route, NULL);
     RG_ASSERT_INT_EQ(st, RG_OK);
     RG_ASSERT(route->found);
-    RG_ASSERT_INT_EQ(route->hop_count, 2);
+    RG_ASSERT_INT_EQ(route->hop_count, 1);
     RG_ASSERT_INT_EQ(route->path[0], 13);
-    RG_ASSERT_INT_EQ(route->path[1], 12);
-    RG_ASSERT_INT_EQ(route->path[2], 1);
+    RG_ASSERT_INT_EQ(route->path[1], 1);
 
-    /* VIP Gate -> Main Gate: 3 hops (13 -> 12 -> 1 -> 0) */
+    /* VIP Gate -> Main Gate: 1 hop (via direct e20) */
     st = rg_find_route(g, 13, 0, false, route, NULL);
+    RG_ASSERT_INT_EQ(st, RG_OK);
+    RG_ASSERT(route->found);
+    RG_ASSERT_INT_EQ(route->hop_count, 1);
+    RG_ASSERT_INT_EQ(route->path[0], 13);
+    RG_ASSERT_INT_EQ(route->path[1], 0);
+
+    /* VIP Gate -> Academic Block 3: 3 hops (13 -> 0 -> 3 -> 6) */
+    st = rg_find_route(g, 13, 6, false, route, NULL);
     RG_ASSERT_INT_EQ(st, RG_OK);
     RG_ASSERT(route->found);
     RG_ASSERT_INT_EQ(route->hop_count, 3);
     RG_ASSERT_INT_EQ(route->path[0], 13);
-    RG_ASSERT_INT_EQ(route->path[1], 12);
-    RG_ASSERT_INT_EQ(route->path[2], 1);
-    RG_ASSERT_INT_EQ(route->path[3], 0);
+    RG_ASSERT_INT_EQ(route->path[1], 0);
+    RG_ASSERT_INT_EQ(route->path[2], 3);
+    RG_ASSERT_INT_EQ(route->path[3], 6);
 
-    /* VIP Gate -> Academic Block 3: 4 hops (13 -> 12 -> 4 -> ... or 13 -> 12 -> 1 -> 0 -> 3 -> 6 is 5 hops) */
-    /* Let's verify with matrix mode parity */
+    /* Verify with matrix mode parity */
     RgRoute *route_mat = NULL;
     rg_route_create(g->n_vertices, &route_mat);
-    st = rg_find_route(g, 13, 6, false, route, NULL);
-    RG_ASSERT_INT_EQ(st, RG_OK);
     st = rg_find_route(g, 13, 6, true, route_mat, NULL);
     RG_ASSERT_INT_EQ(st, RG_OK);
     RG_ASSERT_INT_EQ(route->hop_count, route_mat->hop_count);
@@ -297,7 +301,7 @@ void test_rg_x_12_campus(void) {
     RG_ASSERT(fail_tbl != NULL);
     st = rg_compute_failure_table(g, 0, 9, fail_tbl);
     RG_ASSERT_INT_EQ(st, RG_OK);
-    RG_ASSERT_INT_EQ(fail_tbl->n_rows, 19);
+    RG_ASSERT_INT_EQ(fail_tbl->n_rows, 21);
     /* Edge 12 row must show disconnection */
     RG_ASSERT_INT_EQ(fail_tbl->rows[12].edge_id, 12);
     RG_ASSERT(!fail_tbl->rows[12].reachable);

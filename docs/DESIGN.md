@@ -193,4 +193,4 @@ In strict compliance with academic and verification honesty standards:
    - **Status**: **VERIFIED** end-to-end in browser on `http://localhost:5173/`.
    - **Verification Details**: Subagent browser session recorded video artifact `routeguard_frontend_test_1792194315768.webp` and 11 screenshots. Verified baseline F1 8-hop route (`0 -> 1 -> 3 -> 4 -> 6 -> 7 -> 8 -> 9 -> 10`), Adjacency List (26 slots) vs Adjacency Matrix (144 slots), `e9` cut (unreachable, 2 components, 8 reachable vertices, "CLOSED" badge), `e9` recovery (8 hops restored), `e5` cut (alternate 8-hop route via Block B `3 -> 5 -> 6`), graph reset, DFS stale pops count (2), 13-row single-edge failure impact table, SVG export, and zero browser console errors.
 5. **Web Presentation / WebAssembly Requirements (`FR-029` — `FR-033`, `AC-010`)**:
-   - **Status**: **VERIFIED** (100% complete and tested; documented in `docs/evidence/frontend_verification.txt`).
+   - **Status**: **VERIFIED** (100% complete and tested; documented in `docs/evidence/frontend_manual_checklist.md`).

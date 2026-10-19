@@ -159,7 +159,7 @@ RgStatus rg_fixture_campus_muj(RgGraph **out_graph) {
     }
 
     RgGraph *g = NULL;
-    RgStatus s = rg_graph_create(14, 19, &g);
+    RgStatus s = rg_graph_create(14, 21, &g);
     if (s != RG_OK) {
         return s;
     }
@@ -180,7 +180,7 @@ RgStatus rg_fixture_campus_muj(RgGraph **out_graph) {
     rg_set_vertex(g, 12, "Knowledge Centre", 1080, 1080);
     rg_set_vertex(g, 13, "VIP Gate", 1100, 1320);
 
-    /* Canonical edge insertion: IDs e0 through e18 (illustrative modeled walkways) */
+    /* Canonical edge insertion: IDs e0 through e20 (illustrative modeled walkways) */
     rg_add_edge(g, 0, 1, NULL);   /* e0: Main Gate <-> Dome Building */
     rg_add_edge(g, 1, 2, NULL);   /* e1: Dome Building <-> Grand Stairs */
     rg_add_edge(g, 2, 3, NULL);   /* e2: Grand Stairs <-> Academic Block 1 */
@@ -200,6 +200,8 @@ RgStatus rg_fixture_campus_muj(RgGraph **out_graph) {
     rg_add_edge(g, 4, 12, NULL);  /* e16: Academic Block 2 <-> Knowledge Centre */
     rg_add_edge(g, 0, 3, NULL);   /* e17: Main Gate <-> Academic Block 1 (Direct west link) */
     rg_add_edge(g, 13, 12, NULL); /* e18: VIP Gate <-> Knowledge Centre (Southeastern entry) */
+    rg_add_edge(g, 1, 13, NULL);  /* e19: Dome Building <-> VIP Gate (Executive central access) */
+    rg_add_edge(g, 0, 13, NULL);  /* e20: Main Gate <-> VIP Gate (Southern perimeter corridor) */
 
     *out_graph = g;
     return RG_OK;

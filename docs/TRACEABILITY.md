@@ -51,6 +51,6 @@ This matrix traces every functional and non-functional requirement from **SRS v0
 ## 3. Untested Items & Explicit Exclusions
 
 In accordance with strict verification honesty rules:
-1. **ASan & UBSan Dynamic Sanitizers on Native Windows**: **UNTESTED** on native Windows MinGW GCC host due to missing toolchain runtime libraries `libasan`/`libubsan` (linking failure exit code 1). Verified portably inside official Linux container (`gcc:14`, `docs/evidence/sanitizer_linux_container.txt`).
+1. **ASan & UBSan Dynamic Sanitizers on Native Windows**: **UNTESTED** on native Windows MinGW GCC host due to missing toolchain runtime libraries `libasan`/`libubsan` (linking failure exit code 1). Verified portably inside official Linux container (`gcc:14`, documented in `docs/evidence/SUMMARY.md`).
 2. **SVG XML Validation via `xmllint`**: **UNTESTED** due to absence of `xmllint` executable on host system.
-3. **Browser Visual Rendering of Native File-Exported SVGs**: **UNTESTED** programmatically via automated headless tools (RouteGuard native engine is an ISO C11 terminal program). Interactive SVG rendering in the WebAssembly frontend was fully verified in a live browser session (`docs/evidence/frontend_verification.txt`).
+3. **Browser Visual Rendering of Native File-Exported SVGs**: **UNTESTED** programmatically via automated headless tools (RouteGuard native engine is an ISO C11 terminal program). Interactive SVG rendering in the WebAssembly frontend was fully verified in a live browser session (`docs/evidence/frontend_manual_checklist.md`).

@@ -193,3 +193,26 @@ Every verified item was directly tested, observed, and recorded during live brow
 | **TC-ENTRY-10** | **F1 Reference Graph Invariant** | `[x] VERIFIED` | `f1_mode_verified_1792434861794.png` | F1 Reference Graph remains completely frozen: 12 vertices, 13 edges, 8-hop route `0 → 1 → 3 → 4 → 6 → 7 → 8 → 9 → 10`, 26 list slots, 144 matrix slots, 14 DFS pushes, 14 pops, 2 stale pops. |
 | **TC-ENTRY-11** | **SVG Diagram Export** | `[x] VERIFIED` | Live browser test | Clicking "↓ Export SVG" exports authoritative C-generated SVG containing all 14 vertices, 19 edges, and active/severed styling. |
 
+---
+
+## 8. VIP Gate Direct Connections: Dome Building (e19) & Main Gate (e20) (Branch: `main`)
+
+- **Date**: 2026-10-20
+- **Branch**: `main`
+- **Browser**: Headless Chromium (Agentic browser subagent)
+- **Target Resolution**: 1366×768 (Standard Laptop)
+- **Session Video Recording**:
+  - `vip_direct_conn_verify_1792436258565.webp`
+- **Screenshots Captured**:
+  - `vip_to_dome_1hop_1792436354918.png` (Live MapLibre view showing 1-hop route 13 -> 1 via direct edge e19)
+  - `vip_to_main_gate_1hop_1792436382504.png` (Live MapLibre view showing 1-hop route 13 -> 0 via direct edge e20)
+  - `vip_to_ab3_3hops_1792436452108.png` (Live MapLibre view showing 3-hop route 13 -> 0 -> 3 -> 6 via e20, e17, and e6)
+  - `f1_reference_invariant_1792436475166.png` (F1 Reference Graph verification confirming 12 nodes, 13 edges, and 8-hop route unchanged)
+
+| Check ID | Verification Item | Status | Screenshot Artifact | Observed Evidence |
+| :--- | :--- | :---: | :--- | :--- |
+| **TC-VIP-01** | **Direct VIP Gate ↔ Dome Building Walkway (e19)** | `[x] VERIFIED` | `vip_to_dome_1hop_1792436354918.png` | Edge `e19: Dome Building (1) ↔ VIP Gate (13)` added to C fixture. In live MapLibre console, routing from VIP Gate (13) to Dome Building (1) returns exactly 1 hop (`13: VIP Gate → 1: Dome Building`). Straight-line walkway polyline links markers directly across the south-central courtyard. |
+| **TC-VIP-02** | **Direct VIP Gate ↔ Main Gate Walkway (e20)** | `[x] VERIFIED` | `vip_to_main_gate_1hop_1792436382504.png` | Edge `e20: Main Gate (0) ↔ VIP Gate (13)` added to C fixture. In live MapLibre console, routing from VIP Gate (13) to Main Gate (0) returns exactly 1 hop (`13: VIP Gate → 0: Main Gate`). Display polyline follows southern perimeter road skirting south of the library and admin block. |
+| **TC-VIP-03** | **Optimized VIP Gate → AB3 Route (3 Hops)** | `[x] VERIFIED` | `vip_to_ab3_3hops_1792436452108.png` | Combining `e20` (VIP Gate ↔ Main Gate) and `e17` (Main Gate ↔ AB1), the minimum-hop route from VIP Gate (13) to Academic Block 3 (6) reduces from 5 hops to exactly 3 hops (`13: VIP Gate → 0: Main Gate → 3: Academic Block 1 → 6: Academic Block 3`). Active route highlight shines unbroken along the perimeter corridor. |
+| **TC-VIP-04** | **Campus Topology Scale & Operation Counters** | `[x] VERIFIED` | Live browser test | Total campus topology verified at 14 vertices and 21 edges (`e0`–`e20`). Adjacency List neighbor traversal slots = 42 ($2 \times 21$). Adjacency Matrix slots = 196 ($14 \times 14$). Single connected component maintained; sports zone separation on `e12` severance preserves reachability of 12 vertices from 0. |
+| **TC-VIP-05** | **F1 Reference Graph Invariant Preserved** | `[x] VERIFIED` | `f1_reference_invariant_1792436475166.png` | F1 Reference Graph remains completely frozen: 12 vertices, 13 edges, 8-hop route `0 → 1 → 3 → 4 → 6 → 7 → 8 → 9 → 10`, 26 list slots, 144 matrix slots, 14 DFS pushes, 14 pops, 2 stale pops. |

@@ -165,6 +165,19 @@ export const CampusMap: React.FC<CampusMapProps> = ({
         [75.56402, 26.84218],
         [75.56386, 26.84158],
       ],
+      // e20 (0 <-> 13): Follows southern campus perimeter road south of Central Library and parking
+      '0-13': [
+        [75.56386, 26.84158],
+        [75.56440, 26.84110],
+        [75.56530, 26.84100],
+        [75.56610, 26.84085],
+      ],
+      '13-0': [
+        [75.56610, 26.84085],
+        [75.56530, 26.84100],
+        [75.56440, 26.84110],
+        [75.56386, 26.84158],
+      ],
     };
 
     const edgeFeatures: Feature<LineString>[] = [];

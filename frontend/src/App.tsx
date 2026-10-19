@@ -2031,7 +2031,7 @@ export const App: React.FC = () => {
                 </div>
                 <div className="spec-item">
                   <span className="spec-label">Topology Benchmark:</span>
-                  <span className="spec-val">MUJ Educational Campus (14 Venues, 19 Walkways, VIP Gate #13) &amp; F1 Reference Graph (12 Nodes, 13 Edges)</span>
+                  <span className="spec-val">MUJ Educational Campus (14 Venues, 21 Walkways, VIP Gate #13) &amp; F1 Reference Graph (12 Nodes, 13 Edges)</span>
                 </div>
               </div>
               <div className="about-disclaimer">

@@ -98,7 +98,7 @@ void test_rg_x_11_wasm_bridge(void) {
     RG_ASSERT(strstr(camp_json, "\"fixture_id\":1") != NULL);
     RG_ASSERT(strstr(camp_json, "\"fixture_name\":\"MUJ Campus Demo\"") != NULL);
     RG_ASSERT(strstr(camp_json, "\"n_vertices\":14") != NULL);
-    RG_ASSERT(strstr(camp_json, "\"n_edges\":19") != NULL);
+    RG_ASSERT(strstr(camp_json, "\"n_edges\":21") != NULL);
     RG_ASSERT(strstr(camp_json, "\"Main Gate\"") != NULL);
     RG_ASSERT(strstr(camp_json, "\"Academic Block 3\"") != NULL);
     RG_ASSERT(strstr(camp_json, "\"Knowledge Centre\"") != NULL);
@@ -110,7 +110,7 @@ void test_rg_x_11_wasm_bridge(void) {
     RG_ASSERT(camp_bfs_list != NULL);
     RG_ASSERT(strstr(camp_bfs_list, "\"found\":true") != NULL);
     RG_ASSERT(strstr(camp_bfs_list, "\"hop_count\":2") != NULL);
-    RG_ASSERT(strstr(camp_bfs_list, "\"neighbor_slots_examined\":38") != NULL);
+    RG_ASSERT(strstr(camp_bfs_list, "\"neighbor_slots_examined\":42") != NULL);
 
     /* Campus BFS Baseline Matrix: 0 to 6 */
     const char *camp_bfs_mat = rg_wasm_run_bfs(0, 6, 1);
@@ -142,7 +142,7 @@ void test_rg_x_11_wasm_bridge(void) {
     /* Campus failure table */
     const char *camp_fail_tbl = rg_wasm_get_failure_table(0, 9);
     RG_ASSERT(camp_fail_tbl != NULL);
-    RG_ASSERT(strstr(camp_fail_tbl, "\"n_rows\":19") != NULL);
+    RG_ASSERT(strstr(camp_fail_tbl, "\"n_rows\":21") != NULL);
 
     /* 13. Switch back to F1 Reference Graph */
     int f1_reinit = rg_wasm_init_fixture(0);
